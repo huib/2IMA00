@@ -1,5 +1,6 @@
 package Alg;
 
+import Alg.Algorithms.Randomized;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import java.io.File;
@@ -24,7 +25,17 @@ public class Main {
 
         Multigraph<String, DefaultEdge> graph = InputReader.readGraph(scanner);
 
-        GraphDisplayer.display(graph);
+       // GraphDisplayer.display(graph);
+
+        FVSAlgorithmInterface randomized = new Randomized();
+
+        String[] solution = randomized.findFeedbackVertexSet(graph);
+
+
+        for (String s: solution) {
+            System.out.print(s + ", ");
+        }
+
 
     }
 }
