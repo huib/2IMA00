@@ -24,3 +24,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+*.iml
+production/production/2IMA00/Alg/Algorithms/Randomized$ReductionSolution.class
+production/

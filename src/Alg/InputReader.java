@@ -33,10 +33,14 @@ public class InputReader {
             }
 
             String[] vertices = line.split(" ");
-            Arrays.stream(vertices).forEach(s -> {
-                int v = Integer.parseInt(s);
-                if (!graph.containsVertex(v)) {
-                    graph.addVertex(v);
+            int[] intArray = new int[vertices.length];
+            for(int i = 0; i < vertices.length; i++) { // str to int
+                intArray[i] = Integer.parseInt( vertices[i] );
+            }
+
+            Arrays.stream(intArray).forEach(s -> {
+                if (!graph.containsVertex(s)) {
+                    graph.addVertex(s);
                 }
             });
             graph.addEdge(Integer.parseInt(vertices[0]), Integer.parseInt(vertices[1]));

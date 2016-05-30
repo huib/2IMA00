@@ -22,12 +22,12 @@ public class CycleDetector {
      * @param graph
      * @return
      */
-    public static boolean hasCycle(Multigraph graph)
+    public static boolean hasCycle(Multigraph<Integer, DefaultEdge> graph)
     {
-        HashSet<String> foundVertices = new HashSet<>();
-        for (Object vertex: graph.vertexSet()) {
+        HashSet<Integer> foundVertices = new HashSet<>();
+        for (Integer vertex: graph.vertexSet()) {
             if (!foundVertices.contains(vertex)) {
-                boolean isCyclicDisjoint = CycleDetector.hasCycleDisjoint(graph, (String) vertex, (String) vertex, foundVertices);
+                boolean isCyclicDisjoint = CycleDetector.hasCycleDisjoint(graph, vertex, vertex, foundVertices);
                 if (isCyclicDisjoint) {
                     return true;
                 }
@@ -46,7 +46,7 @@ public class CycleDetector {
      * @param foundVertices
      * @return
      */
-    public static boolean hasCycleDisjoint(Multigraph graph, String vertex, String lastVertex,  HashSet<String> foundVertices)
+    public static boolean hasCycleDisjoint(Multigraph<Integer, DefaultEdge> graph, Integer vertex, Integer lastVertex, HashSet<Integer> foundVertices)
     {
         Set<DefaultEdge> edges = graph.edgesOf(vertex);
 
@@ -75,14 +75,14 @@ public class CycleDetector {
      * @param vertex
      * @return
      */
-    public static Stream<String> getNeighbours(Multigraph graph, String vertex)
+    public static Stream<Integer> getNeighbours(Multigraph<Integer, DefaultEdge> graph, Integer vertex)
     {
         Set<DefaultEdge> edges = graph.edgesOf(vertex);
         return edges.stream().map(edge -> {
             // Edges have a source and target node. We must select the vertex that is not
             // the current vertex.
-            String sourceVertex = (String) graph.getEdgeSource(edge);
-            String endVertex = (String) graph.getEdgeTarget(edge);
+            Integer sourceVertex = graph.getEdgeSource(edge);
+            Integer endVertex = graph.getEdgeTarget(edge);
 
             return sourceVertex.equals(vertex) ? endVertex :  sourceVertex;
         });
