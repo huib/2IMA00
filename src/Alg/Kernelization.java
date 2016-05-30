@@ -1,5 +1,6 @@
 package Alg;
 
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -66,54 +67,67 @@ by double edges, and removing the edges between x and the
 components of C. We then reduce to G' and k' := k
 */
 
+    /* return ReductionSolution:
+    boolean stillPossible;
+    ArrayList<Integer> verticesToRemoved;
+    int reducedK;
+    Multigraph reducedGraph;
+    */
+
 public class Kernelization {
 
-    // save vertices v that decrease k in an ArrayList. Length of ArrayList = k
-    public static Multigraph<Integer, DefaultEdge> kernelize( Multigraph<Integer, DefaultEdge> graph, ArrayList<Integer> vertexSet ) {
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, ArrayList<Integer> vertexSet ) {
 
-        for ( int v : vertexSet ) {
-            //System.out.println(graph.get(i));
-            //int v = vertexSet.get(i);
+        ReductionSolution solution = new ReductionSolution();
+        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
+        graph = solution.reducedGraph;
+         boolean changed;
+        do {
+            changed = false;
 
-            //Returns the degree of the specified vertex.
-            int DegreeOfVertex = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
+            for ( int v : vertexSet ) {
+                //Returns the degree of the specified vertex.
+                int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 
-            // Rule 0
-            if (DegreeOfVertex == 0) {
-                //Removes the specified vertex from this graph including all its touching edges if present.
-                graph.removeVertex(v);
+                // Rule 0 & Rule 1
+                if (degree <= 1 ) {
+                    solution.verticesToRemoved.add(v);
+                    //Removes the specified vertex from this graph including all its touching edges if present.
+                    graph.removeVertex(v);
+                    changed = true;
+                }
+
+                // Rule 2
+                if (degree == 2) {
+                    //Returns a list of vertices which are adjacent to a specified vertex.
+                    List<Integer> neighbors = Graphs.neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
+                    int a = neighbors.get(0);
+                    int b = neighbors.get(1);
+                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
+                    graph.addEdge(a, b); // a= sourceVertex, b = targetVertex
+                    solution.verticesToRemoved.add(v);
+                    graph.removeVertex(v);
+                    changed = true;
+                }
+
+                // Rule 3
+                if ( graph.containsEdge(v, v) ) // Returns true if this graph contains an edge between the specified source vertex and target vertex
+                {
+                    solution.verticesToRemoved.add(v);
+                    solution.reducedK += 1;
+                    graph.removeVertex(v);
+                    changed = true;
+                }
+
+                // Rule 4
+
+                // Rule 5
+
+                // Rule 6
             }
-
-            // Rule 1
-            if (DegreeOfVertex == 1) {
-                graph.removeVertex(v);
-            }
-
-            // Rule 2
-            /* if (DegreeOfVertex == 2) {
-                //Returns a list of vertices which are adjacent to a specified vertex.
-                List<Integer> neighbors = neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
-                int a = neighbors.get(0);
-                int b = neighbors.get(1);
-                //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                graph.addEdge(a, b); // a= sourceVertex, b = targetVertex
-                graph.removeVertex(v);
-            } */
-
-            // Rule 3
-            if ( graph.containsEdge(v, v) ) // Returns true if this graph contains an between the specified source vertex and target vertex
-            {
-                // add v to arraylist (solution)
-                graph.removeVertex(v);
-            }
-
-            // Rule 4
-
-            // Rule 5
-
-            // Rule 6
         }
-
-        return graph;
+        while(changed);
+        solution.stillPossible = (solution.reducedK > 0 || graph.edgeSet().size() == 0);
+        return solution;
     }
 }

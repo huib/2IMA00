@@ -7,7 +7,11 @@
 package Alg.Algorithms.IterativeCompression;
 
 import Alg.FVSAlgorithmInterface;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -19,7 +23,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
 {
 
     @Override
-    public Integer[] findFeedbackVertexSet(Multigraph<? extends Integer, ? extends DefaultEdge> graph)
+    public LinkedList<Integer> findFeedbackVertexSet(Multigraph<? extends Integer, ? extends DefaultEdge> graph)
     {
         ActionStack actions = new ActionStack();
         
@@ -46,10 +50,10 @@ public class IterativeCompression implements FVSAlgorithmInterface
             }
         }
         
-        return (Integer[]) solution.toArray();
+        return solution;
     }
     
-    public class FVS<V> extends HashSet<V>
+    public class FVS<V> extends LinkedList<V>
     {
         public void compress(Multigraph<? extends Integer, ? extends DefaultEdge> graph)
         {

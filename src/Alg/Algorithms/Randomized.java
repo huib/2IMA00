@@ -1,6 +1,7 @@
 package Alg.Algorithms;
 
 import Alg.FVSAlgorithmInterface;
+import Alg.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -22,7 +23,7 @@ public class Randomized implements FVSAlgorithmInterface
     protected Random random;
 
     @Override
-    public Integer[] findFeedbackVertexSet(Multigraph graph) {
+    public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
         this.random = new Random();
 
 
@@ -77,9 +78,9 @@ public class Randomized implements FVSAlgorithmInterface
         // Else, we need to set the solution set
         ArrayList<Integer> solutionEdges = new ArrayList<>();
         solutionEdges.add(vertexToRemove);
-        solutionEdges.addAll(Arrays.asList(recursiveSolution.solution));
-        solutionEdges.addAll(Arrays.asList(reductionSolution.verticesToRemoved));
-        recursiveSolution.solution = solutionEdges.toArray(new Integer[solutionEdges.size()]);
+        solutionEdges.addAll(recursiveSolution.solution);
+        solutionEdges.addAll(reductionSolution.verticesToRemoved);
+        recursiveSolution.solution = solutionEdges;
         return recursiveSolution;
     }
 
@@ -95,7 +96,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         ReductionSolution solution =  new ReductionSolution();
         solution.stillPossible = (k != 0) || (CycleDetector.hasCycle(graph));
-        solution.verticesToRemoved = new Integer[]{};
+        solution.verticesToRemoved = new ArrayList<Integer>();
         solution.reducedK = k;
         solution.reducedGraph = (Multigraph) graph.clone();
         return solution;
@@ -113,7 +114,7 @@ public class Randomized implements FVSAlgorithmInterface
          */
         public Solution(boolean hasSolution)
         {
-            this(hasSolution, new Integer[0]);
+            this(hasSolution, new ArrayList<Integer>());
         }
 
         /**
@@ -122,7 +123,7 @@ public class Randomized implements FVSAlgorithmInterface
          * @param hasSolution
          * @param solution
          */
-        public Solution(boolean hasSolution, Integer[] solution)
+        public Solution(boolean hasSolution, ArrayList<Integer> solution)
         {
             this.hasSolution = hasSolution;
             this.solution = solution;
@@ -136,30 +137,6 @@ public class Randomized implements FVSAlgorithmInterface
         /**
          * If a  solution is found -> contains the names of the edges that is the solution
          */
-        public Integer[] solution;
-    }
-
-
-    class ReductionSolution
-    {
-        /**
-         * Boolean indicating whether after reduction there is still a possibility
-         */
-        public boolean stillPossible;
-
-        /**
-         * Set of all the vertices that have to be removed by this solution
-         */
-        public Integer[] verticesToRemoved;
-
-        /**
-         * The k value after the reduction algorithm
-         */
-        public int reducedK;
-
-        /**
-         * Graph after reduction Solution
-         */
-        public Multigraph reducedGraph;
+        public ArrayList<Integer> solution;
     }
 }

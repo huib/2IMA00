@@ -30,12 +30,12 @@ public class Main {
        // GraphDisplayer.display(graph);
 
         ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
-        Multigraph<Integer, DefaultEdge> kernel = Kernelization.kernelize(graph, vertexSet );
+        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
 
 
         FVSAlgorithmInterface randomized = new Randomized();
 
-        Integer[] solution = randomized.findFeedbackVertexSet(graph);
+        ArrayList<Integer> solution = randomized.findFeedbackVertexSet(graph);
 
 
         for (Integer s: solution) {
