@@ -12,5 +12,5 @@ public interface FVSAlgorithmInterface
      *
      * @return
      */
-    String[] findFeedbackVertexSet(Multigraph graph);
+    Integer[] findFeedbackVertexSet(Multigraph graph);
 }

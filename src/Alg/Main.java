@@ -3,8 +3,10 @@ package Alg;
 import Alg.Algorithms.Randomized;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
+import org.jgrapht.alg.NeighborIndex;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -23,9 +25,13 @@ public class Main {
             return;
         }
 
-        Multigraph<String, DefaultEdge> graph = InputReader.readGraph(scanner);
+        Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
 
        // GraphDisplayer.display(graph);
+
+        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
+        Multigraph<Integer, DefaultEdge> kernel = Kernelization.kernelize(graph, vertexSet );
+
 
         FVSAlgorithmInterface randomized = new Randomized();
 
