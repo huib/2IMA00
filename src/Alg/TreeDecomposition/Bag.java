@@ -8,6 +8,14 @@ public class Bag {
     ArrayList<Bag> children;
     ArrayList<String> vert;
     
+    Bag(){
+        children = new ArrayList<>();
+        vert = new ArrayList<>();
+    }
     
-    
+    void add(String s){
+        if(!vert.contains(s)){
+            vert.add(s);
+        }
+    }
 }
