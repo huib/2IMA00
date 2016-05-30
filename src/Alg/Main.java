@@ -1,11 +1,13 @@
 package Alg;
 
 import Alg.Algorithms.Randomized;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.Multigraph;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.Multigraph;
 
 public class Main {
 
@@ -23,16 +25,20 @@ public class Main {
             return;
         }
 
-        Multigraph<String, DefaultEdge> graph = InputReader.readGraph(scanner);
+        Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
 
        // GraphDisplayer.display(graph);
 
+        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
+        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
+
+
         FVSAlgorithmInterface randomized = new Randomized();
 
-        String[] solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
 
 
-        for (String s: solution) {
+        for (Integer s: solution) {
             System.out.print(s + ", ");
         }
 
