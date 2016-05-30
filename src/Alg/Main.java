@@ -1,13 +1,13 @@
 package Alg;
 
 import Alg.Algorithms.Randomized;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.Multigraph;
-import org.jgrapht.alg.NeighborIndex;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.Multigraph;
 
 public class Main {
 
@@ -35,7 +35,7 @@ public class Main {
 
         FVSAlgorithmInterface randomized = new Randomized();
 
-        ArrayList<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
 
 
         for (Integer s: solution) {

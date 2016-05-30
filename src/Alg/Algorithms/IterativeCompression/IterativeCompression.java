@@ -8,10 +8,8 @@ package Alg.Algorithms.IterativeCompression;
 
 import Alg.FVSAlgorithmInterface;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
-
+import java.util.ListIterator;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -57,7 +55,14 @@ public class IterativeCompression implements FVSAlgorithmInterface
     {
         public void compress(Multigraph<? extends Integer, ? extends DefaultEdge> graph)
         {
-            //try every strick subset of the current solution
+            // try every strict subset Z of the current solution C
+            // remove this subset from the graph, G-Z
+            // solve disjoint problem: find FVS in graph G-Z using only vertices in V(G)\C
+            
+            ActionStack action = new ActionStack();
+            
+            ListIterator<V> it = this.listIterator();
+            
         }
     }
 }
