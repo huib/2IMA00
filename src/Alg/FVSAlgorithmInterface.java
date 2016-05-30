@@ -1,5 +1,6 @@
 package Alg;
 
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
 /**
@@ -12,5 +13,5 @@ public interface FVSAlgorithmInterface
      *
      * @return
      */
-    String[] findFeedbackVertexSet(Multigraph graph);
+    Integer[] findFeedbackVertexSet(Multigraph<? extends Integer, ? extends DefaultEdge> graph);
 }

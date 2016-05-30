@@ -18,9 +18,9 @@ public class InputReader {
      * @param scanner
      * @return
      */
-    public static Multigraph<String, DefaultEdge> readGraph(Scanner scanner)
+    public static Multigraph<Integer, DefaultEdge> readGraph(Scanner scanner)
     {
-        Multigraph<String, DefaultEdge> graph = new Multigraph<String, DefaultEdge>(DefaultEdge.class);
+        Multigraph<Integer, DefaultEdge> graph = new Multigraph<>(DefaultEdge.class);
 
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
@@ -34,11 +34,12 @@ public class InputReader {
 
             String[] vertices = line.split(" ");
             Arrays.stream(vertices).forEach(s -> {
-                if (!graph.containsVertex(s)) {
-                    graph.addVertex(s);
+                int v = Integer.parseInt(s);
+                if (!graph.containsVertex(v)) {
+                    graph.addVertex(v);
                 }
             });
-            graph.addEdge(vertices[0], vertices[1]);
+            graph.addEdge(Integer.parseInt(vertices[0]), Integer.parseInt(vertices[1]));
         }
 
         return graph;

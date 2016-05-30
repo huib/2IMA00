@@ -22,7 +22,7 @@ public class Randomized implements FVSAlgorithmInterface
     protected Random random;
 
     @Override
-    public String[] findFeedbackVertexSet(Multigraph graph) {
+    public Integer[] findFeedbackVertexSet(Multigraph graph) {
         this.random = new Random();
 
 
@@ -46,7 +46,7 @@ public class Randomized implements FVSAlgorithmInterface
      * @param k
      * @return
      */
-    public Solution oneSidedMonteCarloFVS(Multigraph graph, int k)
+    public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
         if (reductionSolution.stillPossible == false) {
@@ -58,12 +58,12 @@ public class Randomized implements FVSAlgorithmInterface
         }
 
         // Select one edge at random
-        Set edgeset = graph.edgeSet();
+        Set<DefaultEdge> edgeset = graph.edgeSet();
         int edgeIndexToRemove = this.random.nextInt(edgeset.size());
         DefaultEdge edgeToRemove = (DefaultEdge) edgeset.toArray()[edgeIndexToRemove];
 
         // Select one random vertex from the edge, and remove it from the graph
-        String vertexToRemove = (String) (this.random.nextBoolean() ? graph.getEdgeSource(edgeToRemove) : graph.getEdgeTarget(edgeToRemove));
+        Integer vertexToRemove = (this.random.nextBoolean() ? graph.getEdgeSource(edgeToRemove) : graph.getEdgeTarget(edgeToRemove));
 
         // Call the method recursively
         reductionSolution.reducedGraph.removeVertex(vertexToRemove);
@@ -75,11 +75,11 @@ public class Randomized implements FVSAlgorithmInterface
         }
 
         // Else, we need to set the solution set
-        ArrayList<String> solutionEdges = new ArrayList<>();
+        ArrayList<Integer> solutionEdges = new ArrayList<>();
         solutionEdges.add(vertexToRemove);
         solutionEdges.addAll(Arrays.asList(recursiveSolution.solution));
         solutionEdges.addAll(Arrays.asList(reductionSolution.verticesToRemoved));
-        recursiveSolution.solution = solutionEdges.toArray(new String[solutionEdges.size()]);
+        recursiveSolution.solution = solutionEdges.toArray(new Integer[solutionEdges.size()]);
         return recursiveSolution;
     }
 
@@ -95,7 +95,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         ReductionSolution solution =  new ReductionSolution();
         solution.stillPossible = (k != 0) || (CycleDetector.hasCycle(graph));
-        solution.verticesToRemoved = new String[]{};
+        solution.verticesToRemoved = new Integer[]{};
         solution.reducedK = k;
         solution.reducedGraph = (Multigraph) graph.clone();
         return solution;
@@ -113,7 +113,7 @@ public class Randomized implements FVSAlgorithmInterface
          */
         public Solution(boolean hasSolution)
         {
-            this(hasSolution, new String[0]);
+            this(hasSolution, new Integer[0]);
         }
 
         /**
@@ -122,7 +122,7 @@ public class Randomized implements FVSAlgorithmInterface
          * @param hasSolution
          * @param solution
          */
-        public Solution(boolean hasSolution, String[] solution)
+        public Solution(boolean hasSolution, Integer[] solution)
         {
             this.hasSolution = hasSolution;
             this.solution = solution;
@@ -136,7 +136,7 @@ public class Randomized implements FVSAlgorithmInterface
         /**
          * If a  solution is found -> contains the names of the edges that is the solution
          */
-        public String[] solution;
+        public Integer[] solution;
     }
 
 
@@ -150,7 +150,7 @@ public class Randomized implements FVSAlgorithmInterface
         /**
          * Set of all the vertices that have to be removed by this solution
          */
-        public String[] verticesToRemoved;
+        public Integer[] verticesToRemoved;
 
         /**
          * The k value after the reduction algorithm

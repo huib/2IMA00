@@ -23,16 +23,16 @@ public class Main {
             return;
         }
 
-        Multigraph<String, DefaultEdge> graph = InputReader.readGraph(scanner);
+        Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
 
        // GraphDisplayer.display(graph);
 
         FVSAlgorithmInterface randomized = new Randomized();
 
-        String[] solution = randomized.findFeedbackVertexSet(graph);
+        Integer[] solution = randomized.findFeedbackVertexSet(graph);
 
 
-        for (String s: solution) {
+        for (Integer s: solution) {
             System.out.print(s + ", ");
         }
 
