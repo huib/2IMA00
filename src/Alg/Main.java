@@ -7,6 +7,8 @@ import org.jgrapht.alg.NeighborIndex;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -35,7 +37,7 @@ public class Main {
 
         FVSAlgorithmInterface randomized = new Randomized();
 
-        ArrayList<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
 
 
         for (Integer s: solution) {
