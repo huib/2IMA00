@@ -29,8 +29,8 @@ public class Main {
 
        // GraphDisplayer.display(graph);
 
-        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
-        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
+//        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
+//        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
 
 
         FVSAlgorithmInterface randomized = new Randomized();

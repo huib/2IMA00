@@ -4,8 +4,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created on 5/24/2016.
@@ -76,50 +75,84 @@ components of C. We then reduce to G' and k' := k
 
 public class Kernelization {
 
-    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, ArrayList<Integer> vertexSet ) {
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
 
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
-        graph = solution.reducedGraph;
-         boolean changed;
+        solution.reducedK = k;
+
+        final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
+        boolean changed;
+
         do {
             changed = false;
 
-            for ( int v : vertexSet ) {
+            for ( int v : graph.vertexSet()) {
+                // Check if the vertex is not removed yet
+                if (!reducedGraph.containsVertex(v)) {
+                    continue;
+                }
+
                 //Returns the degree of the specified vertex.
-                int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
+                int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 
                 // Rule 0 & Rule 1
                 if (degree <= 1 ) {
-                    solution.verticesToRemoved.add(v);
-                    //Removes the specified vertex from this graph including all its touching edges if present.
-                    graph.removeVertex(v);
+                    Kernelization.removeVertex(solution, v, false);
                     changed = true;
                 }
 
                 // Rule 2
                 if (degree == 2) {
                     //Returns a list of vertices which are adjacent to a specified vertex.
-                    List<Integer> neighbors = Graphs.neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
+                    List<Integer> neighbors = Graphs.neighborListOf(reducedGraph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
                     int a = neighbors.get(0);
                     int b = neighbors.get(1);
-                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                    graph.addEdge(a, b); // a= sourceVertex, b = targetVertex
-                    solution.verticesToRemoved.add(v);
-                    graph.removeVertex(v);
-                    changed = true;
-                }
 
-                // Rule 3
-                if ( graph.containsEdge(v, v) ) // Returns true if this graph contains an edge between the specified source vertex and target vertex
-                {
-                    solution.verticesToRemoved.add(v);
-                    solution.reducedK += 1;
-                    graph.removeVertex(v);
+                    // If the new edge that needs to be introduced is a self loop, then it can be removed,
+                    if (a == b) {
+                        Kernelization.removeVertex(solution, v, true);
+                    } else {
+                        //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
+                        reducedGraph.addEdge(a, b); // a= sourceVertex, b = targetVertex
+                        Kernelization.removeVertex(solution, v, false);
+                    }
+
                     changed = true;
                 }
 
                 // Rule 4
+                LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
+                Collections.sort(edges, (o1, o2) -> {
+                    int a = graph.getEdgeSource(o1) - graph.getEdgeSource(o2);
+                    if ( a > 0 )
+                    {
+                        return 1;
+                    }
+                    if ( a < 0 )
+                    {
+                        return -1;
+                    }
+
+                    return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
+                });
+                Iterator<DefaultEdge> it = edges.iterator();
+                DefaultEdge current = it.next();
+
+                while (it.hasNext())
+                {
+                    DefaultEdge next = it.next();
+
+                    if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) )
+                    {
+                        if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) )
+                        {
+                            it.remove();
+                            continue;
+                        }
+                    }
+                    current = next;
+                }
 
                 // Rule 5
 
@@ -127,7 +160,24 @@ public class Kernelization {
             }
         }
         while(changed);
-        solution.stillPossible = (solution.reducedK > 0 || graph.edgeSet().size() == 0);
+        solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
         return solution;
+    }
+
+    /**
+     * Helper function to remove a vertex from the graph
+     *
+     * @param solution The solution found thus far
+     * @param vertex Vertex that needs to be removed
+     * @param inSolution IF the vertex needs to be in the solution, or if it can be removed, but is not in the solution
+     */
+    protected static void removeVertex(ReductionSolution solution, int vertex, boolean inSolution) {
+        solution.reducedGraph.removeVertex(vertex);
+
+        if (inSolution) {
+            solution.verticesToRemoved.add(vertex);
+            solution.reducedK -= 1;
+        }
+
     }
 }

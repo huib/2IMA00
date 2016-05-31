@@ -1,0 +1,14 @@
+# A graph in the form of a wheel, with one missing piece K=1, and the solution must be 2
+#
+#   0
+#  /|\
+# 1-2-3
+#  \|
+#   4
+0 1
+0 2
+0 3
+1 4
+1 2
+2 3
+3 4

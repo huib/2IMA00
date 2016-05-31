@@ -1,7 +1,9 @@
 package Alg.Algorithms;
 
 import Alg.FVSAlgorithmInterface;
+import Alg.Kernelization;
 import Alg.ReductionSolution;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -18,6 +20,16 @@ import Alg.Lib.CycleDetector;
 public class Randomized implements FVSAlgorithmInterface
 {
     /**
+     * How many times we have to repeat the 4^k tries.
+     *
+     * The probability of an error must be at most 10^-12. Since one run gets an error of at most 1/e, we can calculate
+     * this value:
+     *
+     * https://www.wolframalpha.com/input/?i=(1%2Fe)%5Ex+%3D+10%5E-12
+     */
+    final int REPEATS = 28;
+
+    /**
      * Random number generator
      */
     protected Random random;
@@ -26,12 +38,13 @@ public class Randomized implements FVSAlgorithmInterface
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
         this.random = new Random();
 
-
         for (int k =1; ;k++) {
-            Solution s = oneSidedMonteCarloFVS(graph, k);
+            for (int j = 0; j < REPEATS*Math.pow(4, k); j++) {
+                Solution s = oneSidedMonteCarloFVS(graph, k);
 
-            if (s.hasSolution) {
-                return s.solution;
+                if (s.hasSolution) {
+                    return s.solution;
+                }
             }
         }
     }
@@ -50,11 +63,20 @@ public class Randomized implements FVSAlgorithmInterface
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
+        System.out.println("depth k:" + k);
+        System.out.println(reductionSolution);
+
+        graph = reductionSolution.reducedGraph;
+        k = reductionSolution.reducedK;
+
+
+
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
         }
 
-        if (reductionSolution.reducedK == 0) {
+        // If the graph is empty, but a solution is still possible, then we have found the solution
+        if (graph.edgeSet().size() == 0) {
             return new Solution(true, reductionSolution.verticesToRemoved);
         }
 
@@ -91,15 +113,9 @@ public class Randomized implements FVSAlgorithmInterface
      * @param k
      * @return what is found in the reduction rules
      */
-    public ReductionSolution runReductionRules(Multigraph graph, int k)
+    public ReductionSolution runReductionRules(Multigraph<Integer, DefaultEdge> graph, int k)
     {
-
-        ReductionSolution solution =  new ReductionSolution();
-        solution.stillPossible = (k != 0) || (CycleDetector.hasCycle(graph));
-        solution.verticesToRemoved = new ArrayList<Integer>();
-        solution.reducedK = k;
-        solution.reducedGraph = (Multigraph) graph.clone();
-        return solution;
+        return Kernelization.kernelize(graph, k);
     }
 
     /**
