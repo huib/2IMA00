@@ -56,5 +56,7 @@ public class Kernelization {
         ReductionSolution solution = Alg.Kernelization.kernelize(graph, 0);
 
         assertSame(0, solution.reducedGraph.vertexSet().size());
+        assertSame(0, solution.reducedK);
+        assertTrue(solution.stillPossible);
     }
 }

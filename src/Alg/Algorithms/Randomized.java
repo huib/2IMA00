@@ -63,8 +63,12 @@ public class Randomized implements FVSAlgorithmInterface
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
+        System.out.println("depth k:" + k);
+        System.out.println(reductionSolution);
+
         graph = reductionSolution.reducedGraph;
         k = reductionSolution.reducedK;
+
 
 
         if (reductionSolution.stillPossible == false) {
