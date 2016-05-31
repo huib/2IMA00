@@ -109,12 +109,12 @@ public class Kernelization {
                     int a = neighbors.get(0);
                     int b = neighbors.get(1);
 
-                    // If the new edge that needs to be introduced is a self loop, then it can be removed,
+                    // If the new edge that is places introduces a self loop, then it can be removed,
                     if (a == b) {
                         Kernelization.removeVertex(solution, v, true);
                     } else {
                         //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                        reducedGraph.addEdge(a, b); // a= sourceVertex, b = targetVertex
+                        reducedGraph.addEdge(a, b); // a = sourceVertex, b = targetVertex
                         Kernelization.removeVertex(solution, v, false);
                     }
 
@@ -148,6 +148,7 @@ public class Kernelization {
                         if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) )
                         {
                             it.remove();
+                            changed = true;
                             continue;
                         }
                     }
@@ -158,8 +159,8 @@ public class Kernelization {
 
                 // Rule 6
             }
-        }
-        while(changed);
+        } while(changed);
+
         solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
         return solution;
     }
@@ -178,6 +179,5 @@ public class Kernelization {
             solution.verticesToRemoved.add(vertex);
             solution.reducedK -= 1;
         }
-
     }
 }
