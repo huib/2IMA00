@@ -137,6 +137,12 @@ public class Kernelization {
                     return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
                 });
                 Iterator<DefaultEdge> it = edges.iterator();
+
+                // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
+                // in the next run
+                if (!it.hasNext()) {
+                    continue;
+                }
                 DefaultEdge current = it.next();
 
                 while (it.hasNext())
