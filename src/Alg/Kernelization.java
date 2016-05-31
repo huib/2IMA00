@@ -78,7 +78,7 @@ public class Kernelization {
     public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
 
         ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
+        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>) graph.clone();
         solution.reducedK = k;
 
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
@@ -123,16 +123,16 @@ public class Kernelization {
             }
 
             // Rule 4
-            LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
+            LinkedList<DefaultEdge> edges = new LinkedList(reducedGraph.edgeSet());
             Collections.sort(edges, (o1, o2) -> {
-                int a = graph.getEdgeSource(o1) - graph.getEdgeSource(o2);
+                int a = reducedGraph.getEdgeSource(o1) - reducedGraph.getEdgeSource(o2);
                 if ( a > 0 ) {
                     return 1;
                 }
                 if ( a < 0 ) {
                     return -1;
                 }
-                return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
+                return reducedGraph.getEdgeTarget(o1) - reducedGraph.getEdgeTarget(o2);
             });
             Iterator<DefaultEdge> it = edges.iterator();
 
@@ -145,9 +145,9 @@ public class Kernelization {
 
             while (it.hasNext()) {
                 DefaultEdge next = it.next();
-                if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) ) {
-                    if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) ) {
-                        graph.removeEdge(current);
+                if ( reducedGraph.getEdgeSource(current) == reducedGraph.getEdgeSource(next) ) {
+                    if ( reducedGraph.getEdgeTarget(current) == reducedGraph.getEdgeTarget(next) ) {
+                        reducedGraph.removeEdge(current);
                         changed = true;
                         continue;
                     }

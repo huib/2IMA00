@@ -63,10 +63,10 @@ public abstract class Benchmark {
         // Instances are added by sorting by filesize ascending
         // Last instance added 028.graph
         Instance[] instances = new Instance[]{
+                new Instance("096.graph", 6),   // Record 568 ms       (RandomizedDensity)
                 new Instance("099.graph", 8),   // Record 1557 ms      (RandomizedDensity)
-                new Instance("096.graph", 6),   // Record 568 ms       (RandomizedDensity )
-                new Instance("062.graph", 7),   // Record 5485 ms      (RandomizedDensity)
                 new Instance("050.graph", 7),   // Record 7716 ms      (RandomizedDensity)
+                new Instance("062.graph", 7),   // Record 5485 ms      (RandomizedDensity)
                 new Instance("083.graph", 7),   // Record 8972 ms      (RandomizedDensity)
                 new Instance("095.graph", 8),   // Record 10272 ms      (RandomizedDensity)
                 new Instance("028.graph", 8)   // Record 12363 ms     (RandomizedDensity)
@@ -104,8 +104,8 @@ public abstract class Benchmark {
                 + (totalTime % 1000) + " ms "
         );
         System.out.println("Total mistakes: " + mistakes);
-
     }
+
 
     /**
      * Verify that the given answer is a correct answer
