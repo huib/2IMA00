@@ -29,6 +29,7 @@ public abstract class Benchmark {
     Moment            Algorithm         Time
     31/5/16 14:16     Randomized        5m 35s 447 ms
     31/5/16 14:34     Randomized        3m 16s 795 ms
+    31/5/16 19:45     RandomizedDensity    46s 933 ms
 
      */
     private FVSAlgorithmInterface alg;
@@ -62,13 +63,13 @@ public abstract class Benchmark {
         // Instances are added by sorting by filesize ascending
         // Last instance added 028.graph
         Instance[] instances = new Instance[]{
-                new Instance("099.graph", 8),   // Record 3203 ms      (Randomized)
-                new Instance("096.graph", 6),   // Record 3331 ms       (Randomized)
-                new Instance("062.graph", 7),   // Record 16949 ms      (Randomized)
-                new Instance("050.graph", 7),   // Record 21548 ms      (Randomized)
-                new Instance("083.graph", 7),   // Record 27560 ms      (Randomized)
-                new Instance("095.graph", 8),   // Record 60038 ms      (Randomized)
-                new Instance("028.graph", 8)   // Record 64166 ms     (Randomized)
+                new Instance("099.graph", 8),   // Record 1557 ms      (RandomizedDensity)
+                new Instance("096.graph", 6),   // Record 568 ms       (RandomizedDensity )
+                new Instance("062.graph", 7),   // Record 5485 ms      (RandomizedDensity)
+                new Instance("050.graph", 7),   // Record 7716 ms      (RandomizedDensity)
+                new Instance("083.graph", 7),   // Record 8972 ms      (RandomizedDensity)
+                new Instance("095.graph", 8),   // Record 10272 ms      (RandomizedDensity)
+                new Instance("028.graph", 8)   // Record 12363 ms     (RandomizedDensity)
         };
 
         long totalTime = 0;
