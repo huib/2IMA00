@@ -89,7 +89,7 @@ public class Kernelization {
 
             for ( int v : graph.vertexSet()) {
                 // Check if the vertex is not removed yet
-                if (!graph.containsVertex(v)) {
+                if (!reducedGraph.containsVertex(v)) {
                     continue;
                 }
 
