@@ -16,5 +16,5 @@ public interface FVSAlgorithmInterface
      *
      * @return
      */
-    List<Integer> findFeedbackVertexSet(Multigraph<? extends Integer, ? extends DefaultEdge> graph);
+    List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph);
 }
