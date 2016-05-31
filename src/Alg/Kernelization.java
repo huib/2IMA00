@@ -160,7 +160,7 @@ public class Kernelization {
             }
         }
         while(changed);
-        solution.stillPossible = (solution.reducedK > 0 || reducedGraph.edgeSet().size() == 0);
+        solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
         return solution;
     }
 

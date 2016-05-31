@@ -29,6 +29,7 @@ public class Randomized implements FVSAlgorithmInterface
 
 
         for (int k =1; ;k++) {
+            System.out.println("k: " + k);
             for (int j = 0; j < Math.pow(4, k); j++) {
                 Solution s = oneSidedMonteCarloFVS(graph, k);
 
@@ -53,11 +54,14 @@ public class Randomized implements FVSAlgorithmInterface
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
+        System.out.println(reductionSolution);
+
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
         }
 
-        if (reductionSolution.reducedK == 0 || graph.edgeSet().size() == 0) {
+        // If the graph is empty, but a solution is still possible, then we have found the solution
+        if (graph.edgeSet().size() == 0) {
             return new Solution(true, reductionSolution.verticesToRemoved);
         }
 
@@ -69,6 +73,7 @@ public class Randomized implements FVSAlgorithmInterface
         // Select one random vertex from the edge, and remove it from the graph
         Integer vertexToRemove = (this.random.nextBoolean() ? graph.getEdgeSource(edgeToRemove) : graph.getEdgeTarget(edgeToRemove));
 
+        System.out.println("Remove vertex " + vertexToRemove);
         // Call the method recursively
         reductionSolution.reducedGraph.removeVertex(vertexToRemove);
         Solution recursiveSolution = this.oneSidedMonteCarloFVS(reductionSolution.reducedGraph, reductionSolution.reducedK - 1);

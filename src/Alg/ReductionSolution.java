@@ -28,4 +28,12 @@ public class ReductionSolution
      * Graph after reduction Solution
      */
     public Multigraph reducedGraph;
+
+    public String toString()
+    {
+        return  "Reduction Solution:\n" +
+                "\t Still possible? " + (stillPossible ? "Yes" : "No") + "\n" +
+                "\t Vertices to be removed: " + verticesToRemoved + "\n" +
+                "\t Reduced k: " + reducedK + "\n";
+    }
 }
