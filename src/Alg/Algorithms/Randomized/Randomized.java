@@ -45,7 +45,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         for (int k =0; ;k++) {
             for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
-                Solution s = oneSidedMonteCarloFVS((Multigraph<Integer, DefaultEdge>) reduced.reducedGraph.clone(), k);
+                Solution s = oneSidedMonteCarloFVS(reduced.reducedGraph, k);
 
                 if (s.hasSolution) {
                     reduced.verticesToRemoved.addAll(s.solution);

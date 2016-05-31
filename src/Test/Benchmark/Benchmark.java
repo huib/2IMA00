@@ -30,6 +30,7 @@ public abstract class Benchmark {
     31/5/16 14:16     Randomized        5m 35s 447 ms
     31/5/16 14:34     Randomized        3m 16s 795 ms
     31/5/16 19:45     RandomizedDensity    46s 933 ms
+    31/5/16 20:45     Randomized        1m 42s 212 ms
 
      */
     private FVSAlgorithmInterface alg;
