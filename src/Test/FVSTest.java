@@ -76,10 +76,7 @@ public abstract class FVSTest {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
         FVSAlgorithmInterface randomized = new Randomized();
         List<Integer> solution = randomized.findFeedbackVertexSet(graph);
-
-        for (int i:solution) {
-            System.out.println(i);
-        }
+        
 
         assertSame(1, solution.size());
         assertTrue(solution.contains(2));
