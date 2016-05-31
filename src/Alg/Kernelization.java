@@ -80,7 +80,7 @@ public class Kernelization {
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
         solution.reducedK = k;
-        
+
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
         boolean changed;
 
@@ -93,9 +93,7 @@ public class Kernelization {
 
                 // Rule 0 & Rule 1
                 if (degree <= 1 ) {
-                    solution.verticesToRemoved.add(v);
-                    //Removes the specified vertex from this graph including all its touching edges if present.
-                    reducedGraph.removeVertex(v);
+                    Kernelization.removeVertex(solution, v, false);
                     changed = true;
                 }
 
@@ -105,19 +103,23 @@ public class Kernelization {
                     List<Integer> neighbors = Graphs.neighborListOf(reducedGraph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
                     int a = neighbors.get(0);
                     int b = neighbors.get(1);
-                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                    reducedGraph.addEdge(a, b); // a= sourceVertex, b = targetVertex
-                    solution.verticesToRemoved.add(v);
-                    reducedGraph.removeVertex(v);
+
+                    // If the new edge that needs to be introduced is a self loop, then it can be removed,
+                    if (a == b) {
+                        Kernelization.removeVertex(solution, v, true);
+                    } else {
+                        //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
+                        reducedGraph.addEdge(a, b); // a= sourceVertex, b = targetVertex
+                        Kernelization.removeVertex(solution, v, false);
+                    }
+
                     changed = true;
                 }
 
                 // Rule 3
                 if ( graph.containsEdge(v, v) ) // Returns true if this graph contains an edge between the specified source vertex and target vertex
                 {
-                    solution.verticesToRemoved.add(v);
-                    solution.reducedK += 1;
-                    reducedGraph.removeVertex(v);
+                    Kernelization.removeVertex(solution, v, true);
                     changed = true;
                 }
 
@@ -147,7 +149,6 @@ public class Kernelization {
                     {
                         if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) )
                         {
-                            //edges.remove(current);
                             it.remove();
                             continue;
                         }
@@ -163,5 +164,22 @@ public class Kernelization {
         while(changed);
         solution.stillPossible = (solution.reducedK > 0 || reducedGraph.edgeSet().size() == 0);
         return solution;
+    }
+
+    /**
+     * Helper function to remove a vertex from the graph
+     *
+     * @param solution The solution found thus far
+     * @param vertex Vertex that needs to be removed
+     * @param inSolution IF the vertex needs to be in the solution, or if it can be removed, but is not in the solution
+     */
+    protected static void removeVertex(ReductionSolution solution, int vertex, boolean inSolution) {
+        solution.reducedGraph.removeVertex(vertex);
+
+        if (inSolution) {
+            solution.verticesToRemoved.add(vertex);
+            solution.reducedK -= 1;
+        }
+
     }
 }

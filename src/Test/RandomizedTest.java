@@ -1,37 +1,39 @@
-package Alg;
+package Test;
 
 import Alg.Algorithms.Randomized;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import Alg.FVSAlgorithmInterface;
+import Alg.InputReader;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
+import org.junit.Test;
 
-public class Main {
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.Scanner;
 
-    public static void main(String[] args) {
+import static org.junit.Assert.*;
 
+/**
+ * Test for randomized algorithms
+ */
+public class RandomizedTest {
+
+    @Test
+    public void testSimpleCycle() {
         // Read from command line
         // Scanner scanner = new Scanner(System.in);
 
         // Read from file
         Scanner scanner = null;
         try {
-            scanner = new Scanner(new File("instances/001.graph"));
+            scanner = new Scanner(new File("instances/simple/000.graph"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
         }
 
         Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
-
-       // GraphDisplayer.display(graph);
-
-//        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
-//        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
-
 
         FVSAlgorithmInterface randomized = new Randomized();
 
@@ -42,6 +44,6 @@ public class Main {
             System.out.print(s + ", ");
         }
 
-
     }
+
 }

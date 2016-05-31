@@ -29,10 +29,12 @@ public class Randomized implements FVSAlgorithmInterface
 
 
         for (int k =1; ;k++) {
-            Solution s = oneSidedMonteCarloFVS(graph, k);
+            for (int j = 0; j < Math.pow(4, k); j++) {
+                Solution s = oneSidedMonteCarloFVS(graph, k);
 
-            if (s.hasSolution) {
-                return s.solution;
+                if (s.hasSolution) {
+                    return s.solution;
+                }
             }
         }
     }

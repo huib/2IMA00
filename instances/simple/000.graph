@@ -1,0 +1,4 @@
+# A simple graph with 3 vertices, and a loop. K should be 1
+0 1
+1 2
+2 0
