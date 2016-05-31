@@ -20,6 +20,16 @@ import Alg.Lib.CycleDetector;
 public class Randomized implements FVSAlgorithmInterface
 {
     /**
+     * How many times we have to repeat the 4^k tries.
+     *
+     * The probability of an error must be at most 10^-12. Since one run gets an error of at most 1/e, we can calculate
+     * this value:
+     *
+     * https://www.wolframalpha.com/input/?i=(1%2Fe)%5Ex+%3D+10%5E-12
+     */
+    final int REPEATS = 28;
+
+    /**
      * Random number generator
      */
     protected Random random;
@@ -28,10 +38,8 @@ public class Randomized implements FVSAlgorithmInterface
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
         this.random = new Random();
 
-
         for (int k =1; ;k++) {
-            System.out.println("k: " + k);
-            for (int j = 0; j < Math.pow(4, k); j++) {
+            for (int j = 0; j < REPEATS*Math.pow(4, k); j++) {
                 Solution s = oneSidedMonteCarloFVS(graph, k);
 
                 if (s.hasSolution) {
