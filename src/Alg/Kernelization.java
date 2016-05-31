@@ -97,7 +97,7 @@ public class Kernelization {
                 int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 
                 // Rule 0 & Rule 1
-                if (degree <= 1 ) {
+                if (degree <= 1) {
                     Kernelization.removeVertex(solution, v, false);
                     changed = true;
                 }
@@ -120,51 +120,45 @@ public class Kernelization {
 
                     changed = true;
                 }
-
-                // Rule 4
-                LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
-                Collections.sort(edges, (o1, o2) -> {
-                    int a = graph.getEdgeSource(o1) - graph.getEdgeSource(o2);
-                    if ( a > 0 )
-                    {
-                        return 1;
-                    }
-                    if ( a < 0 )
-                    {
-                        return -1;
-                    }
-
-                    return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
-                });
-                Iterator<DefaultEdge> it = edges.iterator();
-
-                // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
-                // in the next run
-                if (!it.hasNext()) {
-                    continue;
-                }
-                DefaultEdge current = it.next();
-
-                while (it.hasNext())
-                {
-                    DefaultEdge next = it.next();
-
-                    if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) )
-                    {
-                        if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) )
-                        {
-                            it.remove();
-                            changed = true;
-                            continue;
-                        }
-                    }
-                    current = next;
-                }
-
-                // Rule 5
-
-                // Rule 6
             }
+
+            // Rule 4
+            LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
+            Collections.sort(edges, (o1, o2) -> {
+                int a = graph.getEdgeSource(o1) - graph.getEdgeSource(o2);
+                if ( a > 0 ) {
+                    return 1;
+                }
+                if ( a < 0 ) {
+                    return -1;
+                }
+                return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
+            });
+            Iterator<DefaultEdge> it = edges.iterator();
+
+            // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
+            // in the next run
+            if (!it.hasNext()) {
+                continue;
+            }
+            DefaultEdge current = it.next();
+
+            while (it.hasNext()) {
+                DefaultEdge next = it.next();
+
+                if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) ) {
+                    if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) ) {
+                        it.remove();
+                        changed = true;
+                        continue;
+                    }
+                }
+                current = next;
+            }
+
+            // Rule 5
+
+            // Rule 6
         } while(changed);
 
         solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
