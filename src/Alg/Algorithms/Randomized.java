@@ -36,14 +36,20 @@ public class Randomized implements FVSAlgorithmInterface
 
     @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
+
+        // Reduce the graph already for our kernelization
+        // This may reduce the k upto which we have to search by a lot
+        ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
+
         this.random = new Random();
 
         for (int k =1; ;k++) {
             for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
-                Solution s = oneSidedMonteCarloFVS(graph, k);
+                Solution s = oneSidedMonteCarloFVS((Multigraph<Integer, DefaultEdge>) reduced.reducedGraph.clone(), k);
 
                 if (s.hasSolution) {
-                    return s.solution;
+                    reduced.verticesToRemoved.addAll(s.solution);
+                    return reduced.verticesToRemoved;
                 }
             }
         }
