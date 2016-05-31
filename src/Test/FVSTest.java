@@ -1,6 +1,6 @@
 package Test;
 
-import Alg.Algorithms.Randomized;
+import Alg.Algorithms.Randomized.Randomized;
 import Alg.FVSAlgorithmInterface;
 import Alg.InputReader;
 import org.jgrapht.graph.DefaultEdge;

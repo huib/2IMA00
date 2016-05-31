@@ -1,4 +1,4 @@
-package Alg.Algorithms;
+package Alg.Algorithms.Randomized;
 
 import Alg.FVSAlgorithmInterface;
 import Alg.Kernelization;

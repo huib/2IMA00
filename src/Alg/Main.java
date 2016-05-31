@@ -1,9 +1,8 @@
 package Alg;
 
-import Alg.Algorithms.Randomized;
+import Alg.Algorithms.Randomized.Randomized;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import org.jgrapht.graph.DefaultEdge;

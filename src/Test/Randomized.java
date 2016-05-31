@@ -11,6 +11,6 @@ public class Randomized extends FVSTest {
      * @param alg
      */
     public Randomized() {
-        super(new Alg.Algorithms.Randomized());
+        super(new Alg.Algorithms.Randomized.Randomized());
     }
 }
