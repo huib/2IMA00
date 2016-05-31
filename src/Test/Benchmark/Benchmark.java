@@ -52,14 +52,33 @@ public abstract class Benchmark {
                 new Instance("099.graph", 8)
         };
 
+        long totalTime = 0;
+        int mistakes = 0;
+
         for (Instance i: instances) {
             Multigraph<Integer, DefaultEdge> graph = this.loadGraph(i.filename);
+
+            long startTime = System.nanoTime();
             List<Integer> solution = alg.findFeedbackVertexSet(graph);
+            long endTime = System.nanoTime();
+
+            totalTime += (endTime - startTime) / 1_000_000;
+            System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
+
 
             if (solution.size() != i.k){
-                System.out.println("Graph " + i.filename + " Required k:" + i.k + " Found k:" + solution.size());
+                System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
+                mistakes++;
             }
         }
+
+        System.out.println("TEST RESULTS:");
+        System.out.println("Total time "
+                + (totalTime / 60_000) + " m "
+                + ((totalTime / 1000) % 60) + " s "
+                + (totalTime % 1000) + " ms "
+        );
+        System.out.println("Total mistakes: " + mistakes);
 
     }
 
