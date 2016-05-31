@@ -3,6 +3,7 @@ package Alg.Algorithms.Randomized;
 import Alg.FVSAlgorithmInterface;
 import Alg.Kernelization;
 import Alg.ReductionSolution;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import sun.java2d.pipe.SolidTextRenderer;
@@ -34,14 +35,14 @@ public class RandomizedDensity implements FVSAlgorithmInterface
     @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
 
+
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
         ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
-
         this.random = new Random();
 
-        for (int k =0; ;k++) {
-            Solution solution = this.findSolutionRecursive(reduced.reducedGraph, k, (long)(REPEATS * Math.pow(4, k)));
+        for (int k = 1; ;k++) {
+            Solution solution = this.findSolutionRecursive((Multigraph) reduced.reducedGraph.clone(), k, (long)(REPEATS * Math.pow(4, k)));
 
             if (solution.hasSolution) {
                 reduced.verticesToRemoved.addAll(solution.solution);
@@ -67,6 +68,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
 
         // Run the kernelization over the graph
         ReductionSolution reductionSolution = Kernelization.kernelize(graph, k);
+
 
         Multigraph reducedGraph = reductionSolution.reducedGraph;
         int reducedK = reductionSolution.reducedK;
@@ -107,16 +109,20 @@ public class RandomizedDensity implements FVSAlgorithmInterface
             sourceVertexRemovalGraph.removeVertex(sourceVertex);
             Solution recursiveSolutionSource = this.findSolutionRecursive(sourceVertexRemovalGraph, reducedK - 1, runsForTargetVertex);
             if (recursiveSolutionSource.hasSolution) {
+                System.out.println("s" + sourceVertex);
                 recursiveSolutionSource.solution.add(sourceVertex);
+                recursiveSolutionSource.solution.addAll(reductionSolution.verticesToRemoved);
                 return recursiveSolutionSource;
             }
 
+
             // Run the algorithm recursively for the target vertex
-            sourceVertexRemovalGraph.removeVertex(targetVertex);
-            Solution recursiveSolutionTarget = this.findSolutionRecursive(targetVertexRemovalGraph, k-1, runsForTargetVertex);
+            targetVertexRemovalGraph.removeVertex(targetVertex);
+            Solution recursiveSolutionTarget = this.findSolutionRecursive(targetVertexRemovalGraph, reducedK-1, runsForTargetVertex);
 
             if (recursiveSolutionTarget.hasSolution) {
                 recursiveSolutionTarget.solution.add(targetVertex);
+                recursiveSolutionSource.solution.addAll(reductionSolution.verticesToRemoved);
                 return recursiveSolutionTarget;
             }
 
