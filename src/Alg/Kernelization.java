@@ -75,16 +75,19 @@ components of C. We then reduce to G' and k' := k
 
 public class Kernelization {
 
-    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, ArrayList<Integer> vertexSet ) {
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
 
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
+        solution.reducedK = k;
+        
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
-         boolean changed;
+        boolean changed;
+
         do {
             changed = false;
 
-            for ( int v : vertexSet ) {
+            for ( int v : graph.vertexSet()) {
                 //Returns the degree of the specified vertex.
                 int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 

@@ -1,6 +1,7 @@
 package Alg.Algorithms;
 
 import Alg.FVSAlgorithmInterface;
+import Alg.Kernelization;
 import Alg.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
@@ -91,15 +92,9 @@ public class Randomized implements FVSAlgorithmInterface
      * @param k
      * @return what is found in the reduction rules
      */
-    public ReductionSolution runReductionRules(Multigraph graph, int k)
+    public ReductionSolution runReductionRules(Multigraph<Integer, DefaultEdge> graph, int k)
     {
-
-        ReductionSolution solution =  new ReductionSolution();
-        solution.stillPossible = (k != 0) || (CycleDetector.hasCycle(graph));
-        solution.verticesToRemoved = new ArrayList<Integer>();
-        solution.reducedK = k;
-        solution.reducedGraph = (Multigraph) graph.clone();
-        return solution;
+        return Kernelization.kernelize(graph, k);
     }
 
     /**
