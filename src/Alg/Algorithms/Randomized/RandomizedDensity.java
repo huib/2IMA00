@@ -34,7 +34,6 @@ public class RandomizedDensity implements FVSAlgorithmInterface
     @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
 
-        System.out.println("yay");
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
         ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
@@ -42,10 +41,11 @@ public class RandomizedDensity implements FVSAlgorithmInterface
         this.random = new Random();
 
         for (int k =0; ;k++) {
-            Solution solution = this.findSolutionRecursive(graph, k, (long)(REPEATS * Math.pow(4, k)));
+            Solution solution = this.findSolutionRecursive(reduced.reducedGraph, k, (long)(REPEATS * Math.pow(4, k)));
 
             if (solution.hasSolution) {
-                return solution.solution;
+                reduced.verticesToRemoved.addAll(solution.solution);
+                return reduced.verticesToRemoved;
             }
         }
     }
@@ -68,20 +68,21 @@ public class RandomizedDensity implements FVSAlgorithmInterface
         // Run the kernelization over the graph
         ReductionSolution reductionSolution = Kernelization.kernelize(graph, k);
 
-        graph = reductionSolution.reducedGraph;
-        k = reductionSolution.reducedK;
+        Multigraph reducedGraph = reductionSolution.reducedGraph;
+        int reducedK = reductionSolution.reducedK;
+
 
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
         }
 
         // If the graph is empty, but a solution is still possible, then we have found the solution
-        if (graph.edgeSet().size() == 0) {
+        if (reducedGraph.edgeSet().size() == 0) {
             return new Solution(true, reductionSolution.verticesToRemoved);
         }
 
         // Divide the runs over all the other graphs
-        Set<DefaultEdge> edges = graph.edgeSet();
+        Set<DefaultEdge> edges = reducedGraph.edgeSet();
 
         // Randomly partion runs in amountEdges. This is done using a Geometric Distribution.
         int amountEdgesLeft = edges.size(); // The amount of edges which still need to have runs distributed
@@ -95,15 +96,16 @@ public class RandomizedDensity implements FVSAlgorithmInterface
             long runsForSourceVertex = this.randomBinomial(runsForEdge, 0.5);
             long runsForTargetVertex = runsForEdge - runsForSourceVertex;
 
-            Multigraph<Integer, DefaultEdge> sourceVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) graph.clone();
-            Multigraph<Integer, DefaultEdge> targetVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) graph.clone();
+            Multigraph<Integer, DefaultEdge> sourceVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) reducedGraph.clone();
+            Multigraph<Integer, DefaultEdge> targetVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) reducedGraph.clone();
 
-            int sourceVertex = (int) graph.getEdgeSource(e);
-            int targetVertex = (int) graph.getEdgeTarget(e);
+            int sourceVertex = (int) reducedGraph.getEdgeSource(e);
+            int targetVertex = (int) reducedGraph.getEdgeTarget(e);
+
 
             // Run the algorithm recursively for the source vertex
             sourceVertexRemovalGraph.removeVertex(sourceVertex);
-            Solution recursiveSolutionSource = this.findSolutionRecursive(sourceVertexRemovalGraph, k-1, runsForTargetVertex);
+            Solution recursiveSolutionSource = this.findSolutionRecursive(sourceVertexRemovalGraph, reducedK - 1, runsForTargetVertex);
             if (recursiveSolutionSource.hasSolution) {
                 recursiveSolutionSource.solution.add(sourceVertex);
                 return recursiveSolutionSource;

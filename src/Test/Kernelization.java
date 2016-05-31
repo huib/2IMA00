@@ -1,7 +1,5 @@
 package Test;
 
-import Alg.Algorithms.*;
-import Alg.FVSAlgorithmInterface;
 import Alg.InputReader;
 import Alg.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
@@ -10,7 +8,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.Scanner;
 
 import static org.junit.Assert.assertSame;
@@ -59,5 +56,24 @@ public class Kernelization {
         assertSame(0, solution.reducedGraph.vertexSet().size());
         assertSame(0, solution.reducedK);
         assertTrue(solution.stillPossible);
+    }
+
+    /**
+     * The following graph should return no solution possible for k=1 and 0 removed
+     #
+     #   0
+     #  /|\
+     # 1-2-3
+     #  \|
+     #   4
+     */
+    @Test
+    public void testDoNotReduceCompletely() throws FileNotFoundException {
+        Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
+        graph.removeVertex(1);
+
+        ReductionSolution solution = Alg.Kernelization.kernelize(graph, 0);
+
+        assertTrue(!solution.stillPossible);
     }
 }

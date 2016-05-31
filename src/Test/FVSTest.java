@@ -77,6 +77,7 @@ public abstract class FVSTest {
 
 
         assertSame(1, solution.size());
+        System.out.println(solution.get(0));
         assertTrue(solution.contains(2));
     }
 
