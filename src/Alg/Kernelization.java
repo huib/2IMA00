@@ -145,10 +145,9 @@ public class Kernelization {
 
             while (it.hasNext()) {
                 DefaultEdge next = it.next();
-
                 if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) ) {
                     if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) ) {
-                        it.remove();
+                        graph.removeEdge(current);
                         changed = true;
                         continue;
                     }

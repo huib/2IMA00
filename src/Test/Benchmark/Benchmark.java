@@ -49,7 +49,7 @@ public abstract class Benchmark {
     @Test
     public void benchMark() throws FileNotFoundException {
         Instance[] instances = new Instance[]{
-                new Instance("001.graph", 10)
+                new Instance("099.graph", 8)
         };
 
         for (Instance i: instances) {

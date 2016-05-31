@@ -39,7 +39,7 @@ public class Randomized implements FVSAlgorithmInterface
         this.random = new Random();
 
         for (int k =1; ;k++) {
-            for (int j = 0; j < REPEATS*Math.pow(4, k); j++) {
+            for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
                 Solution s = oneSidedMonteCarloFVS(graph, k);
 
                 if (s.hasSolution) {
@@ -63,13 +63,9 @@ public class Randomized implements FVSAlgorithmInterface
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
-        System.out.println("depth k:" + k);
-        System.out.println(reductionSolution);
 
         graph = reductionSolution.reducedGraph;
         k = reductionSolution.reducedK;
-
-
 
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
