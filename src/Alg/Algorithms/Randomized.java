@@ -57,7 +57,7 @@ public class Randomized implements FVSAlgorithmInterface
             return new Solution(false);
         }
 
-        if (reductionSolution.reducedK == 0) {
+        if (reductionSolution.reducedK == 0 || graph.edgeSet().size() == 0) {
             return new Solution(true, reductionSolution.verticesToRemoved);
         }
 

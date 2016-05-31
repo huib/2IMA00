@@ -59,4 +59,25 @@ public abstract class FVSTest {
         assertSame(1, solution.size());
     }
 
+    /**
+     * Test that we have a wheel with 3 vertices in the outside, and 1 in the inside. The 1 in the inside should be deleted
+     *
+     * @throws FileNotFoundException
+    # A graph in the form of a wheel, with one missing piece K=1, and the solution must be 2
+    #
+    #   0
+    #  /|\
+    # 1-2-3
+    #  \|
+    #   4
+     */
+    @Test
+    public void testWheel() throws FileNotFoundException {
+        Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
+        FVSAlgorithmInterface randomized = new Randomized();
+        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        assertSame(1, solution.size());
+        assertTrue(solution.contains(2));
+    }
+
 }
