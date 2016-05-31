@@ -88,6 +88,11 @@ public class Kernelization {
             changed = false;
 
             for ( int v : graph.vertexSet()) {
+                // Check if the vertex is not removed yet
+                if (!graph.containsVertex(v)) {
+                    continue;
+                }
+
                 //Returns the degree of the specified vertex.
                 int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 
@@ -113,13 +118,6 @@ public class Kernelization {
                         Kernelization.removeVertex(solution, v, false);
                     }
 
-                    changed = true;
-                }
-
-                // Rule 3
-                if ( graph.containsEdge(v, v) ) // Returns true if this graph contains an edge between the specified source vertex and target vertex
-                {
-                    Kernelization.removeVertex(solution, v, true);
                     changed = true;
                 }
 
