@@ -3,6 +3,7 @@ package Alg.Algorithms;
 import Alg.FVSAlgorithmInterface;
 import Alg.Kernelization;
 import Alg.ReductionSolution;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -54,7 +55,9 @@ public class Randomized implements FVSAlgorithmInterface
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
         ReductionSolution reductionSolution = this.runReductionRules(graph, k);
-        System.out.println(reductionSolution);
+        graph = reductionSolution.reducedGraph;
+        k = reductionSolution.reducedK;
+
 
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
@@ -73,7 +76,6 @@ public class Randomized implements FVSAlgorithmInterface
         // Select one random vertex from the edge, and remove it from the graph
         Integer vertexToRemove = (this.random.nextBoolean() ? graph.getEdgeSource(edgeToRemove) : graph.getEdgeTarget(edgeToRemove));
 
-        System.out.println("Remove vertex " + vertexToRemove);
         // Call the method recursively
         reductionSolution.reducedGraph.removeVertex(vertexToRemove);
         Solution recursiveSolution = this.oneSidedMonteCarloFVS(reductionSolution.reducedGraph, reductionSolution.reducedK - 1);
