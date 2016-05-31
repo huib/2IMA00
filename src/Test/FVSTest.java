@@ -75,9 +75,8 @@ public abstract class FVSTest {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
         List<Integer> solution = this.alg.findFeedbackVertexSet(graph);
 
-
+        System.out.println("To remove: " + solution);
         assertSame(1, solution.size());
-        System.out.println(solution.get(0));
         assertTrue(solution.contains(2));
     }
 

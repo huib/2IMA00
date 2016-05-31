@@ -3,6 +3,8 @@ package Test.Benchmark;
 import Alg.FVSAlgorithmInterface;
 
 import Alg.InputReader;
+import Alg.Lib.CycleDetector;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CyclicBarrier;
 
 import static org.junit.Assert.*;
 
@@ -86,6 +89,11 @@ public abstract class Benchmark {
                 System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
                 mistakes++;
             }
+
+            if (!verifySolution(i.filename, solution)) {
+                System.out.println("ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
+                mistakes += 10;
+            }
         }
 
         System.out.println("TEST RESULTS:");
@@ -96,6 +104,22 @@ public abstract class Benchmark {
         );
         System.out.println("Total mistakes: " + mistakes);
 
+    }
+
+    /**
+     * Verify that the given answer is a correct answer
+     *
+     * @param filename
+     * @param solution
+     * @return
+     */
+    boolean verifySolution(String filename, List<Integer> solution) throws FileNotFoundException {
+        Multigraph<Integer, DefaultEdge> graph = this.loadGraph(filename);
+        for  (int i: solution) {
+            graph.removeVertex(i);
+        }
+
+        return !CycleDetector.hasCycle(graph);
     }
 
     class Instance
