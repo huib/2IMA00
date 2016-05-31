@@ -122,38 +122,38 @@ public class Kernelization {
                 }
             }
 
-            // Rule 4
-            LinkedList<DefaultEdge> edges = new LinkedList(reducedGraph.edgeSet());
-            Collections.sort(edges, (o1, o2) -> {
-                int a = reducedGraph.getEdgeSource(o1) - reducedGraph.getEdgeSource(o2);
-                if ( a > 0 ) {
-                    return 1;
-                }
-                if ( a < 0 ) {
-                    return -1;
-                }
-                return reducedGraph.getEdgeTarget(o1) - reducedGraph.getEdgeTarget(o2);
-            });
-            Iterator<DefaultEdge> it = edges.iterator();
-
-            // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
-            // in the next run
-            if (!it.hasNext()) {
-                continue;
-            }
-            DefaultEdge current = it.next();
-
-            while (it.hasNext()) {
-                DefaultEdge next = it.next();
-                if ( reducedGraph.getEdgeSource(current) == reducedGraph.getEdgeSource(next) ) {
-                    if ( reducedGraph.getEdgeTarget(current) == reducedGraph.getEdgeTarget(next) ) {
-                        reducedGraph.removeEdge(current);
-                        changed = true;
-                        continue;
-                    }
-                }
-                current = next;
-            }
+//            // Rule 4
+//            LinkedList<DefaultEdge> edges = new LinkedList(reducedGraph.edgeSet());
+//            Collections.sort(edges, (o1, o2) -> {
+//                int a = reducedGraph.getEdgeSource(o1) - reducedGraph.getEdgeSource(o2);
+//                if ( a > 0 ) {
+//                    return 1;
+//                }
+//                if ( a < 0 ) {
+//                    return -1;
+//                }
+//                return reducedGraph.getEdgeTarget(o1) - reducedGraph.getEdgeTarget(o2);
+//            });
+//            Iterator<DefaultEdge> it = edges.iterator();
+//
+//            // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
+//            // in the next run
+//            if (!it.hasNext()) {
+//                continue;
+//            }
+//            DefaultEdge current = it.next();
+//
+//            while (it.hasNext()) {
+//                DefaultEdge next = it.next();
+//                if ( reducedGraph.getEdgeSource(current) == reducedGraph.getEdgeSource(next) ) {
+//                    if ( reducedGraph.getEdgeTarget(current) == reducedGraph.getEdgeTarget(next) ) {
+//                        reducedGraph.removeEdge(current);
+//                        changed = true;
+//                        continue;
+//                    }
+//                }
+//                current = next;
+//            }
 
             // Rule 5
 
