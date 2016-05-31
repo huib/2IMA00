@@ -9,6 +9,7 @@ import org.jgrapht.graph.Multigraph;
 import sun.java2d.pipe.SolidTextRenderer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 
@@ -59,7 +60,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
      * @param runs Total amount of runs that need to be distributed
      * @return
      */
-    public Solution findSolutionRecursive(Multigraph graph, int k, long runs)
+    public Solution findSolutionRecursive(Multigraph<Integer, DefaultEdge> graph, int k, long runs)
     {
         // No runs. we do not check this. So no solution
         if (runs == 0) {
@@ -90,6 +91,8 @@ public class RandomizedDensity implements FVSAlgorithmInterface
         int amountEdgesLeft = edges.size(); // The amount of edges which still need to have runs distributed
         long runsLeft = runs; // The total amount of runs that still need to be distributed
 
+        HashMap<Integer, Long> counter = new HashMap<>();
+
         for (DefaultEdge e: edges) {
             // Randomly decide how many runs are dedicated to this edge
             long runsForEdge = this.randomBinomial(runsLeft, 1.0/amountEdgesLeft);
@@ -97,38 +100,31 @@ public class RandomizedDensity implements FVSAlgorithmInterface
             // Randomly distribute the runs over the two vertices in the edge
             long runsForSourceVertex = this.randomBinomial(runsForEdge, 0.5);
             long runsForTargetVertex = runsForEdge - runsForSourceVertex;
-
-            Multigraph<Integer, DefaultEdge> sourceVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) reducedGraph.clone();
-            Multigraph<Integer, DefaultEdge> targetVertexRemovalGraph = (Multigraph<Integer, DefaultEdge>) reducedGraph.clone();
-
             int sourceVertex = (int) reducedGraph.getEdgeSource(e);
             int targetVertex = (int) reducedGraph.getEdgeTarget(e);
 
 
-            // Run the algorithm recursively for the source vertex
-            sourceVertexRemovalGraph.removeVertex(sourceVertex);
-            Solution recursiveSolutionSource = this.findSolutionRecursive(sourceVertexRemovalGraph, reducedK - 1, runsForTargetVertex);
+            counter.put(sourceVertex, counter.getOrDefault(sourceVertex, 0L) + runsForSourceVertex);;
+            counter.put(targetVertex, counter.getOrDefault(targetVertex, 0L) + runsForTargetVertex);
+
+
+        }
+
+        for (int vertex: graph.vertexSet()) {
+            // No counter implies zero runs for this vertex removal. So do not remove
+            if (!counter.containsKey(vertex)) {
+                continue;
+            }
+            Multigraph<Integer, DefaultEdge> newGraph = (Multigraph) reducedGraph.clone();
+            newGraph.removeVertex(vertex);
+
+            Solution recursiveSolutionSource = this.findSolutionRecursive(newGraph, reducedK - 1, counter.get(vertex));
             if (recursiveSolutionSource.hasSolution) {
-                System.out.println("s" + sourceVertex);
-                recursiveSolutionSource.solution.add(sourceVertex);
+                recursiveSolutionSource.solution.add(vertex);
                 recursiveSolutionSource.solution.addAll(reductionSolution.verticesToRemoved);
                 return recursiveSolutionSource;
             }
 
-
-            // Run the algorithm recursively for the target vertex
-            targetVertexRemovalGraph.removeVertex(targetVertex);
-            Solution recursiveSolutionTarget = this.findSolutionRecursive(targetVertexRemovalGraph, reducedK-1, runsForTargetVertex);
-
-            if (recursiveSolutionTarget.hasSolution) {
-                recursiveSolutionTarget.solution.add(targetVertex);
-                recursiveSolutionSource.solution.addAll(reductionSolution.verticesToRemoved);
-                return recursiveSolutionTarget;
-            }
-
-            // Set variables for other edges
-            amountEdgesLeft -= 1;
-            runsLeft -= runsForEdge;
         }
 
         // No solution was found
