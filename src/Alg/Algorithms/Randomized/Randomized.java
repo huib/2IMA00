@@ -43,7 +43,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         this.random = new Random();
 
-        for (int k =1; ;k++) {
+        for (int k =0; ;k++) {
             for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
                 Solution s = oneSidedMonteCarloFVS((Multigraph<Integer, DefaultEdge>) reduced.reducedGraph.clone(), k);
 

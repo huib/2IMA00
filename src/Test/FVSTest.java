@@ -54,8 +54,7 @@ public abstract class FVSTest {
     @Test
     public void testSimpleCycle() throws FileNotFoundException {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/000.graph");
-        FVSAlgorithmInterface randomized = new Randomized();
-        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = this.alg.findFeedbackVertexSet(graph);
         assertSame(1, solution.size());
     }
 
@@ -74,9 +73,8 @@ public abstract class FVSTest {
     @Test
     public void testWheel() throws FileNotFoundException {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
-        FVSAlgorithmInterface randomized = new Randomized();
-        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
-        
+        List<Integer> solution = this.alg.findFeedbackVertexSet(graph);
+
 
         assertSame(1, solution.size());
         assertTrue(solution.contains(2));

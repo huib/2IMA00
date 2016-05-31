@@ -34,13 +34,14 @@ public class RandomizedDensity implements FVSAlgorithmInterface
     @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
 
+        System.out.println("yay");
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
         ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
 
         this.random = new Random();
 
-        for (int k =1; ;k++) {
+        for (int k =0; ;k++) {
             Solution solution = this.findSolutionRecursive(graph, k, (long)(REPEATS * Math.pow(4, k)));
 
             if (solution.hasSolution) {
