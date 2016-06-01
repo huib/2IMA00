@@ -76,9 +76,20 @@ components of C. We then reduce to G' and k' := k
 public class Kernelization {
 
     public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
+        return kernelize(graph, k, true);
+    }
+
+    /**
+     *
+     * @param graph
+     * @param k
+     * @param clone Do we clone the graph, or work on the original graph directly
+     * @return
+     */
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
 
         ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
+        solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
         solution.reducedK = k;
 
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
@@ -87,17 +98,15 @@ public class Kernelization {
         do {
             changed = false;
 
-            for ( int v : graph.vertexSet()) {
-                // Check if the vertex is not removed yet
-                if (!reducedGraph.containsVertex(v)) {
-                    continue;
-                }
+
+            Integer[] vertices = (reducedGraph.vertexSet()).toArray(new Integer[reducedGraph.vertexSet().size()]);
+            for (int v:vertices) {
 
                 //Returns the degree of the specified vertex.
                 int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
 
                 // Rule 0 & Rule 1
-                if (degree <= 1 ) {
+                if (degree <= 1) {
                     Kernelization.removeVertex(solution, v, false);
                     changed = true;
                 }
@@ -109,57 +118,57 @@ public class Kernelization {
                     int a = neighbors.get(0);
                     int b = neighbors.get(1);
 
-                    // If the new edge that needs to be introduced is a self loop, then it can be removed,
+                    // If the new edge that is places introduces a self loop, then it can be removed,
                     if (a == b) {
                         Kernelization.removeVertex(solution, v, true);
                     } else {
                         //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                        reducedGraph.addEdge(a, b); // a= sourceVertex, b = targetVertex
+                        reducedGraph.addEdge(a, b); // a = sourceVertex, b = targetVertex
                         Kernelization.removeVertex(solution, v, false);
                     }
 
                     changed = true;
                 }
-
-                // Rule 4
-                LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
-                Collections.sort(edges, (o1, o2) -> {
-                    int a = graph.getEdgeSource(o1) - graph.getEdgeSource(o2);
-                    if ( a > 0 )
-                    {
-                        return 1;
-                    }
-                    if ( a < 0 )
-                    {
-                        return -1;
-                    }
-
-                    return graph.getEdgeTarget(o1) - graph.getEdgeTarget(o2);
-                });
-                Iterator<DefaultEdge> it = edges.iterator();
-                DefaultEdge current = it.next();
-
-                while (it.hasNext())
-                {
-                    DefaultEdge next = it.next();
-
-                    if ( graph.getEdgeSource(current) == graph.getEdgeSource(next) )
-                    {
-                        if ( graph.getEdgeTarget(current) == graph.getEdgeTarget(next) )
-                        {
-                            it.remove();
-                            continue;
-                        }
-                    }
-                    current = next;
-                }
-
-                // Rule 5
-
-                // Rule 6
             }
-        }
-        while(changed);
+
+//            // Rule 4
+//            LinkedList<DefaultEdge> edges = new LinkedList(reducedGraph.edgeSet());
+//            Collections.sort(edges, (o1, o2) -> {
+//                int a = reducedGraph.getEdgeSource(o1) - reducedGraph.getEdgeSource(o2);
+//                if ( a > 0 ) {
+//                    return 1;
+//                }
+//                if ( a < 0 ) {
+//                    return -1;
+//                }
+//                return reducedGraph.getEdgeTarget(o1) - reducedGraph.getEdgeTarget(o2);
+//            });
+//            Iterator<DefaultEdge> it = edges.iterator();
+//
+//            // If the iterator does not have a next item, we do not have edges. Thus rule 1 will take care of this
+//            // in the next run
+//            if (!it.hasNext()) {
+//                continue;
+//            }
+//            DefaultEdge current = it.next();
+//
+//            while (it.hasNext()) {
+//                DefaultEdge next = it.next();
+//                if ( reducedGraph.getEdgeSource(current) == reducedGraph.getEdgeSource(next) ) {
+//                    if ( reducedGraph.getEdgeTarget(current) == reducedGraph.getEdgeTarget(next) ) {
+//                        reducedGraph.removeEdge(current);
+//                        changed = true;
+//                        continue;
+//                    }
+//                }
+//                current = next;
+//            }
+
+            // Rule 5
+
+            // Rule 6
+        } while(changed);
+
         solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
         return solution;
     }
@@ -178,6 +187,5 @@ public class Kernelization {
             solution.verticesToRemoved.add(vertex);
             solution.reducedK -= 1;
         }
-
     }
 }

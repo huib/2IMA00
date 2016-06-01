@@ -1,4 +1,4 @@
-package Alg.Algorithms;
+package Alg.Algorithms.Randomized;
 
 import Alg.FVSAlgorithmInterface;
 import Alg.Kernelization;
@@ -36,14 +36,20 @@ public class Randomized implements FVSAlgorithmInterface
 
     @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
+
+        // Reduce the graph already for our kernelization
+        // This may reduce the k upto which we have to search by a lot
+        ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
+
         this.random = new Random();
 
-        for (int k =1; ;k++) {
-            for (int j = 0; j < REPEATS*Math.pow(4, k); j++) {
-                Solution s = oneSidedMonteCarloFVS(graph, k);
+        for (int k =0; ;k++) {
+            for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
+                Solution s = oneSidedMonteCarloFVS((Multigraph) reduced.reducedGraph.clone(), k);
 
                 if (s.hasSolution) {
-                    return s.solution;
+                    reduced.verticesToRemoved.addAll(s.solution);
+                    return reduced.verticesToRemoved;
                 }
             }
         }
@@ -62,14 +68,10 @@ public class Randomized implements FVSAlgorithmInterface
      */
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
-        ReductionSolution reductionSolution = this.runReductionRules(graph, k);
-        System.out.println("depth k:" + k);
-        System.out.println(reductionSolution);
+        ReductionSolution reductionSolution = Kernelization.kernelize(graph, k, false);
 
         graph = reductionSolution.reducedGraph;
         k = reductionSolution.reducedK;
-
-
 
         if (reductionSolution.stillPossible == false) {
             return new Solution(false);
@@ -104,18 +106,6 @@ public class Randomized implements FVSAlgorithmInterface
         solutionEdges.addAll(reductionSolution.verticesToRemoved);
         recursiveSolution.solution = solutionEdges;
         return recursiveSolution;
-    }
-
-    /**
-     * Run the reduction rules on the graph
-     *
-     * @param graph
-     * @param k
-     * @return what is found in the reduction rules
-     */
-    public ReductionSolution runReductionRules(Multigraph<Integer, DefaultEdge> graph, int k)
-    {
-        return Kernelization.kernelize(graph, k);
     }
 
     /**

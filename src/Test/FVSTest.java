@@ -1,6 +1,6 @@
 package Test;
 
-import Alg.Algorithms.Randomized;
+import Alg.Algorithms.Randomized.Randomized;
 import Alg.FVSAlgorithmInterface;
 import Alg.InputReader;
 import org.jgrapht.graph.DefaultEdge;
@@ -54,8 +54,7 @@ public abstract class FVSTest {
     @Test
     public void testSimpleCycle() throws FileNotFoundException {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/000.graph");
-        FVSAlgorithmInterface randomized = new Randomized();
-        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = this.alg.findFeedbackVertexSet(graph);
         assertSame(1, solution.size());
     }
 
@@ -74,13 +73,9 @@ public abstract class FVSTest {
     @Test
     public void testWheel() throws FileNotFoundException {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
-        FVSAlgorithmInterface randomized = new Randomized();
-        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = this.alg.findFeedbackVertexSet(graph);
 
-        for (int i:solution) {
-            System.out.println(i);
-        }
-
+        System.out.println("To remove: " + solution);
         assertSame(1, solution.size());
         assertTrue(solution.contains(2));
     }
