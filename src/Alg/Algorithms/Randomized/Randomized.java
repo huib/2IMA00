@@ -45,7 +45,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         for (int k =0; ;k++) {
             for (int j = 0; j < REPEATS * Math.pow(4, k); j++) {
-                Solution s = oneSidedMonteCarloFVS(reduced.reducedGraph, k);
+                Solution s = oneSidedMonteCarloFVS((Multigraph) reduced.reducedGraph.clone(), k);
 
                 if (s.hasSolution) {
                     reduced.verticesToRemoved.addAll(s.solution);
@@ -68,7 +68,7 @@ public class Randomized implements FVSAlgorithmInterface
      */
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
-        ReductionSolution reductionSolution = this.runReductionRules(graph, k);
+        ReductionSolution reductionSolution = Kernelization.kernelize(graph, k, false);
 
         graph = reductionSolution.reducedGraph;
         k = reductionSolution.reducedK;
@@ -106,18 +106,6 @@ public class Randomized implements FVSAlgorithmInterface
         solutionEdges.addAll(reductionSolution.verticesToRemoved);
         recursiveSolution.solution = solutionEdges;
         return recursiveSolution;
-    }
-
-    /**
-     * Run the reduction rules on the graph
-     *
-     * @param graph
-     * @param k
-     * @return what is found in the reduction rules
-     */
-    public ReductionSolution runReductionRules(Multigraph<Integer, DefaultEdge> graph, int k)
-    {
-        return Kernelization.kernelize(graph, k);
     }
 
     /**

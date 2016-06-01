@@ -76,9 +76,20 @@ components of C. We then reduce to G' and k' := k
 public class Kernelization {
 
     public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
+        return kernelize(graph, k, true);
+    }
+
+    /**
+     *
+     * @param graph
+     * @param k
+     * @param clone Do we clone the graph, or work on the original graph directly
+     * @return
+     */
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
 
         ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>) graph.clone();
+        solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
         solution.reducedK = k;
 
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
@@ -87,11 +98,9 @@ public class Kernelization {
         do {
             changed = false;
 
-            for ( int v : graph.vertexSet()) {
-                // Check if the vertex is not removed yet
-                if (!reducedGraph.containsVertex(v)) {
-                    continue;
-                }
+
+            Integer[] vertices = (reducedGraph.vertexSet()).toArray(new Integer[reducedGraph.vertexSet().size()]);
+            for (int v:vertices) {
 
                 //Returns the degree of the specified vertex.
                 int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
