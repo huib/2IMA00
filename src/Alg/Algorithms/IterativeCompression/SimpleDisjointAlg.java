@@ -45,6 +45,6 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         //    prohibited. Try this.solve(g, prohibited+v, k), otherwise return
         //    this.solve(g-v, prohibited, k-1)
         
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null; // act as if there is no solution that is small enough.
     }
 }

@@ -1,5 +1,6 @@
 package Alg;
 
+import Alg.Algorithms.IterativeCompression.IterativeCompression;
 import Alg.Algorithms.Randomized;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,7 +20,7 @@ public class Main {
         // Read from file
         Scanner scanner = null;
         try {
-            scanner = new Scanner(new File("instances/001.graph"));
+            scanner = new Scanner(new File("instances/099.graph"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
@@ -34,6 +35,7 @@ public class Main {
 
 
         FVSAlgorithmInterface randomized = new Randomized();
+        //FVSAlgorithmInterface randomized = new IterativeCompression();
 
         List<Integer> solution = randomized.findFeedbackVertexSet(graph);
 

@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -26,12 +28,19 @@ public class IterativeCompression implements FVSAlgorithmInterface
     public List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph)
     {
         ActionStack actions = new ActionStack();
+        Queue<GraphAction> queue = new LinkedList<>();
         
         // delete all vertices from graph
+        // using a queue and two passes because of deletion during iteration doesn't work..
         graph.vertexSet().stream().forEach((v) ->
         {
-            actions.push(new DeleteVertexAction(graph, v));
+            queue.add(new DeleteVertexAction(graph, v));
         });
+        
+        while(!queue.isEmpty())
+        {
+            actions.push(queue.poll());
+        }
         
         // put the vertices back, one by one, in reverse order
         // with each vertex we put back, find a minimal FVS
