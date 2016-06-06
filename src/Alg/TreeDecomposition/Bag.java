@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 public class Bag {
     
+    Integer num;
     Bag parent;
     ArrayList<Bag> children;
-    ArrayList<String> vert;
+    ArrayList<Integer> vert;
     
     Bag(){
         children = new ArrayList<>();
@@ -15,10 +16,10 @@ public class Bag {
     
     Bag(Bag b){
         children = new ArrayList<>();
-        vert = (ArrayList<String>) b.vert.clone();
+        vert = (ArrayList<Integer>) b.vert.clone();
     }
     
-    void add(String s){
+    void add(Integer s){
         if(!vert.contains(s)){
             vert.add(s);
         }
@@ -48,5 +49,22 @@ public class Bag {
             b.parent = this;
             this.children.set(0, b);
         }
+    }
+    
+    Bag findNum(Integer n){
+//        System.out.print("Looking for " + n);
+        if(n == num){
+//            System.out.println(", is this one");
+            return this;
+        } else {
+//            System.out.println(", I am " + num + ", so maybe in child?");
+            for(Bag b: children){
+                Bag c = b.findNum(n);
+                if(c != null){
+                    return c;
+                }
+            }
+        }
+        return null;
     }
 }
