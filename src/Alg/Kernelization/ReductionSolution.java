@@ -1,4 +1,4 @@
-package Alg;
+package Alg.Kernelization;
 
 import org.jgrapht.graph.Multigraph;
 

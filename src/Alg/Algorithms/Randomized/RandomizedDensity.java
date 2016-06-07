@@ -1,12 +1,10 @@
 package Alg.Algorithms.Randomized;
 
 import Alg.FVSAlgorithmInterface;
-import Alg.Kernelization;
-import Alg.ReductionSolution;
-import com.sun.org.apache.xpath.internal.operations.Mult;
+import Alg.Kernelization.Kernelization;
+import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
-import sun.java2d.pipe.SolidTextRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;

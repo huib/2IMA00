@@ -8,6 +8,9 @@ package Alg.Algorithms.IterativeCompression;
 
 import java.util.Collection;
 import java.util.HashSet;
+
+import Alg.Kernelization.Kernelization;
+import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -15,23 +18,19 @@ import org.jgrapht.graph.Multigraph;
  *
  * @author huib
  */
-class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
+class SimpleDisjointAlg implements DisjointFVSAlgorithm
 {
     @Override
-    public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited)
+    public Collection<Integer> solve(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited)
     {
         return this.solve(g, prohibited, prohibited.size()-1);
     }
     
-    private Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited, int k)
+    private Collection<Integer> solve(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited, int k)
     {
-        // REDUCTION RULES
-        // 1. remove vertices with degree at most 1.
-        // 2. remove any vertex v not in prohibited that is part of a cycle where all other vertices
-        //    are in prohibited. Add v to the solution.
-        // 3. remove any vertex v not in prohibited with degree 2 and at least one of its
-        //    neightbours also not in prohibited. Connect the neightbours of v.
-        
+        ReductionSolution red = this.applyReductionRules(g, prohibited);
+
+
         // ALGORITHM
         // 1. Check for a cycle in the graph consisting of only vertices in prohibited
         //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
@@ -47,4 +46,30 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    // REDUCTION RULES
+    // 1. remove vertices with degree at most 1.
+    // 2. remove any vertex v not in prohibited that is part of a cycle where all other vertices
+    //    are in prohibited. Add v to the solution.
+    // 3. remove any vertex v not in prohibited with degree 2 and at least one of its
+    //    neightbours also not in prohibited. Connect the neightbours of v.
+
+    /**
+     * Applies the reduction rules to the graph
+     *
+     * @param g
+     * @param prohibited
+     */
+    protected ReductionSolution applyReductionRules(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited)
+    {
+        ReductionSolution reductionSolution = new ReductionSolution();
+        reductionSolution.reducedGraph = g;
+
+        // Applies reduction rule 1 to the graph
+        Kernelization.rule0and1(reductionSolution, g);
+
+        return reductionSolution;
+    }
+
+
 }

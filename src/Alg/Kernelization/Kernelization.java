@@ -1,4 +1,4 @@
-package Alg;
+package Alg.Kernelization;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -75,7 +75,7 @@ components of C. We then reduce to G' and k' := k
 
 public class Kernelization {
 
-    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k) {
+    public static ReductionSolution kernelize(Multigraph<Integer, DefaultEdge> graph, int k) {
         return kernelize(graph, k, true);
     }
 
@@ -158,7 +158,7 @@ public class Kernelization {
      *
      * @param graph
      * @param k
-     * @param clone Do we clone the graph, or work on the original graph directly
+     * @param cloneGraph Do we clone the graph, or work on the original graph directly
      * @return
      */
     public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
