@@ -113,6 +113,47 @@ public class Kernelization {
 
     }
 
+    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
+    {
+        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+        return Kernelization.rule2(solution, graph, vertices);
+
+    }
+
+    /**
+     * Fast application of rule 2
+     *
+     * @param solution
+     * @param graph
+     * @param vertices
+     * @return
+     */
+    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
+        boolean changed = false;
+        for (int v:vertices) {
+            int degree = graph.degreeOf(v);
+            // Rule 2
+            if (degree == 2) {
+                //Returns a list of vertices which are adjacent to a specified vertex.
+                List<Integer> neighbors = Graphs.neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
+                int a = neighbors.get(0);
+                int b = neighbors.get(1);
+
+                // If the new edge that is places introduces a self loop, then it can be removed,
+                if (a == b) {
+                    Kernelization.removeVertex(solution, v, true);
+                } else {
+                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
+                    graph.addEdge(a, b); // a = sourceVertex, b = targetVertex
+                    Kernelization.removeVertex(solution, v, false);
+                }
+
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     /**
      *
      * @param graph
@@ -131,31 +172,10 @@ public class Kernelization {
 
         do {
             changed = false;
-            Integer[] vertices = (reducedGraph.vertexSet()).toArray(new Integer[reducedGraph.vertexSet().size()]);
+            changed |= Kernelization.rule0and1(solution, reducedGraph);
+            changed |= Kernelization.rule2(solution, reducedGraph);
 
-            changed |= Kernelization.rule0and1(solution, reducedGraph, vertices);
 
-            for (int v:vertices) {
-                int degree = graph.degreeOf(v);
-                // Rule 2
-                if (degree == 2) {
-                    //Returns a list of vertices which are adjacent to a specified vertex.
-                    List<Integer> neighbors = Graphs.neighborListOf(reducedGraph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
-                    int a = neighbors.get(0);
-                    int b = neighbors.get(1);
-
-                    // If the new edge that is places introduces a self loop, then it can be removed,
-                    if (a == b) {
-                        Kernelization.removeVertex(solution, v, true);
-                    } else {
-                        //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                        reducedGraph.addEdge(a, b); // a = sourceVertex, b = targetVertex
-                        Kernelization.removeVertex(solution, v, false);
-                    }
-
-                    changed = true;
-                }
-            }
 
 //            // Rule 4
 //            LinkedList<DefaultEdge> edges = new LinkedList(reducedGraph.edgeSet());
