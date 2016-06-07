@@ -80,6 +80,40 @@ public class Kernelization {
     }
 
     /**
+     * Applies Rule 0 and 1 to the graph. Mainly meant for outside usage.
+     *
+     * @param solution
+     * @param graph
+     * @return
+     */
+    public static boolean rule0and1(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
+    {
+        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+        return Kernelization.rule0and1(solution, graph, vertices);
+
+    }
+
+    /**
+     * Fast application of rule 0 and 1 to the graph, where the set of verties is already extracted. Is faster than
+     * the other rule0and1 method therefore
+     */
+    public static boolean rule0and1(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
+    {
+        boolean changed = false;
+        for (int v:vertices) {        //Returns the degree of the specified vertex.
+            int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
+
+            // Rule 0 & Rule 1
+            if (degree <= 1) {
+                Kernelization.removeVertex(solution, v, false);
+                changed = true;
+            }
+        }
+        return changed;
+
+    }
+
+    /**
      *
      * @param graph
      * @param k
@@ -97,20 +131,12 @@ public class Kernelization {
 
         do {
             changed = false;
-
-
             Integer[] vertices = (reducedGraph.vertexSet()).toArray(new Integer[reducedGraph.vertexSet().size()]);
+
+            changed |= Kernelization.rule0and1(solution, reducedGraph, vertices);
+
             for (int v:vertices) {
-
-                //Returns the degree of the specified vertex.
-                int degree = reducedGraph.degreeOf(v); // swap vertex "v" with actual vertex identifier
-
-                // Rule 0 & Rule 1
-                if (degree <= 1) {
-                    Kernelization.removeVertex(solution, v, false);
-                    changed = true;
-                }
-
+                int degree = graph.degreeOf(v);
                 // Rule 2
                 if (degree == 2) {
                     //Returns a list of vertices which are adjacent to a specified vertex.
