@@ -26,26 +26,45 @@ class SimpleDisjointAlg implements DisjointFVSAlgorithm
     {
         return this.solve(g, prohibited, prohibited.size()-1);
     }
-    
+
+
+    // ALGORITHM
+    // 1. Check for a cycle in the graph consisting of only vertices in prohibited
+    //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
+    // 2. Exhaustively apply reduction rules (you can stop before when the solution grows too
+    //    big, see step 3)
+    // 3. When after applying the reduction rules, the intermediate solution (created by rule 2)
+    //    is larger of equal to prohibited.size(), return null. There is no solution small enough
+    // There is a vertex v not in prohibited with degree 1 (not counting edges to vertices in
+    // prohibited)
+    // 4. Find a vertex v not in prohibited with exectly one neightbour that is not in
+    //    prohibited. Try this.solve(g, prohibited+v, k), otherwise return
+    //    this.solve(g-v, prohibited, k-1)
+
+    /**
+     * Solve the Simple Disjoint algorithm problem
+     *
+     * @param g
+     * @param prohibited
+     * @param k
+     * @return
+     */
     private Collection<Integer> solve(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited, int k)
     {
+
+
+        // 1. Check for a cycle in the graph consisting of only vertices in prohibited
+        //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
+        if (this.containsCycleWithOnlyProhibited(g, prohibited)) {
+            return null;
+        }
+
+        // 2. Exhaustively apply reduction rules (you can stop before when the solution grows too
+        //    big, see step 3)
         ReductionSolution red = this.applyReductionRules(g, prohibited);
 
 
-        // ALGORITHM
-        // 1. Check for a cycle in the graph consisting of only vertices in prohibited
-        //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
-        // 2. Exhaustively apply reduction rules (you can stop before when the solution grows too
-        //    big, see step 3)
-        // 3. When after applying the reduction rules, the intermediate solution (created by rule 2)
-        //    is larger of equal to prohibited.size(), return null. There is no solution small enough
-        // There is a vertex v not in prohibited with degree 1 (not counting edges to vertices in
-        // prohibited)
-        // 4. Find a vertex v not in prohibited with exectly one neightbour that is not in
-        //    prohibited. Try this.solve(g, prohibited+v, k), otherwise return
-        //    this.solve(g-v, prohibited, k-1)
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     // REDUCTION RULES
@@ -58,24 +77,48 @@ class SimpleDisjointAlg implements DisjointFVSAlgorithm
     /**
      * Applies the reduction rules to the graph
      *
-     * @param g
+     * @param graph
      * @param prohibited
      */
-    protected ReductionSolution applyReductionRules(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited)
+    protected ReductionSolution applyReductionRules(Multigraph<Integer, DefaultEdge> graph, HashSet<Integer> prohibited)
     {
         ReductionSolution reductionSolution = new ReductionSolution();
-        reductionSolution.reducedGraph = g;
+        reductionSolution.reducedGraph = graph;
 
-        // Applies reduction rule 1 to the graph
-        Kernelization.rule0and1(reductionSolution, g);
+        // Apply the reduction rules exhaustively
+        while (true) {
+            boolean changed = false;
 
-        // Applies reduction rule 2 on the graph
-        SimpleDisjointKernelization.removeOnlyVertexInProhibitedCycle(reductionSolution, g, prohibited);
+            // Applies reduction rule 1 to the graph
+            changed |= Kernelization.rule0and1(reductionSolution, graph);
 
-        // Applies reduction rule 3 on the graph
-        SimpleDisjointKernelization.removeNonProhibitedVertexWithDegree2(reductionSolution, g, prohibited);
+            // Applies reduction rule 2 on the graph
+            changed |= SimpleDisjointKernelization.removeOnlyVertexInProhibitedCycle(reductionSolution, graph, prohibited);
 
-        return reductionSolution;
+            // Applies reduction rule 3 on the graph
+            changed |= SimpleDisjointKernelization.removeNonProhibitedVertexWithDegree2(reductionSolution, graph, prohibited);
+
+            if (!changed) {
+                return ReductionSolution
+            }
+        }
+    }
+
+    /**
+     * Checks if there is a cycle in the graph consisting only of vertices in the prohibited list
+     *
+     * @param graph
+     * @param prohibited
+     * @return
+     */
+    protected boolean containsCycleWithOnlyProhibited(Multigraph<Integer, DefaultEdge> graph, HashSet<Integer> prohibited)
+    {
+        for (int v : prohibited) {
+            if (SimpleDisjointKernelization.inCycleWith(v, graph, prohibited)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

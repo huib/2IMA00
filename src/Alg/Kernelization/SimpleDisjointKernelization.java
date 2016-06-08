@@ -21,25 +21,28 @@ public class SimpleDisjointKernelization extends Kernelization {
      * @param solution
      * @param graph
      * @param prohibited
+     * @return Was a change done on the graph?
      */
-    public static void removeOnlyVertexInProhibitedCycle(
+    public static boolean removeOnlyVertexInProhibitedCycle(
             ReductionSolution solution,
             Multigraph<Integer, DefaultEdge> graph,
             HashSet<Integer> prohibited
     ) {
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
 
+        boolean changed = false;
         for (int v: vertices) {
             // We do not have to check prohibited vertices
             if (prohibited.contains(v)) {
-                return;
+                continue;
             }
 
             if (SimpleDisjointKernelization.inCycleWith(v, graph, prohibited)) {
                 Kernelization.removeVertex(solution, v, false);
+                changed = true;
             }
         }
-
+        return changed;
     }
 
     /**
@@ -101,14 +104,16 @@ public class SimpleDisjointKernelization extends Kernelization {
      *
      * @param solution
      * @param graph
+     * @return Was a change done on the graph?
      */
-    public static void removeNonProhibitedVertexWithDegree2(
+    public static boolean removeNonProhibitedVertexWithDegree2(
             ReductionSolution solution,
             Multigraph<Integer, DefaultEdge> graph,
             HashSet<Integer> prohibited
     ) {
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
 
+        boolean changed = false;
         for (int v:vertices) {
             // Skip prohibited graphs
             if (prohibited.contains(v)) {
@@ -125,11 +130,13 @@ public class SimpleDisjointKernelization extends Kernelization {
                     continue;
                 }
 
+                changed = true;
                 // Now we can remove the vertex, and join the neighbours
                 Kernelization.removeVertex(solution, v, true);
                 graph.addEdge(neighbours.get(0), neighbours.get(1));
             }
         }
+        return changed;
     }
 
 
