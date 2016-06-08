@@ -7,14 +7,18 @@ import org.jgrapht.graph.Multigraph;
 public class TreeDecomposition {
     
     // Returns the root of a tree decomposition of g
+    // Might completely mangle g
+    // Assumes g is connected
     public static Bag makeTreeDecomposition(Multigraph g){
-        Bag root = new Bag();
+        // Just put everything in one bag
+//        return simpleTD(g);
         
-        Set<String> vertices = g.vertexSet();
-        for(String vertex: vertices){
-            root.add(vertex);
-        }
-        return root;
+        Choice c;
+//        c = new FixedOrderChoice();
+        c = new DeGreedy();
+        
+        Bag toRet = permutationToTD(g, c);
+        return toRet;
     }
     
     // Turns the given tree decomposition into a nice tree decomposition, i.e. each bag is either:
@@ -49,10 +53,10 @@ public class TreeDecomposition {
         } else if(b.isAddOrForget()){
             Bag child = b.children.get(0);
             
-            ArrayList<String> toRem = (ArrayList<String>) b.vert.clone();
+            ArrayList<Integer> toRem = (ArrayList<Integer>) b.vert.clone();
             toRem.removeAll(child.vert);
             
-            ArrayList<String> toAdd = (ArrayList<String>) child.vert.clone();
+            ArrayList<Integer> toAdd = (ArrayList<Integer>) child.vert.clone();
             toAdd.removeAll(b.vert);
             
             if(toRem.isEmpty() && toAdd.size() > 1){
@@ -101,20 +105,109 @@ public class TreeDecomposition {
         return b;
     }
     
+    // Prints the Tree Decomposition (sub)tree starting at this bag
     public static void print(Bag b){
         print(b, 0);
     }
     
-    public static void print(Bag b, int d){
+    // Prints the Tree Decomposition (sub)tree starting at this bag with an extra indent of size d
+    private static void print(Bag b, int d){
         for(int i = 0; i < d; i++){
             System.out.print(" ");
         }
-        for(String v: b.vert){
-            System.out.print(v + " ");
+        if(b.vert.isEmpty()){
+            System.out.print("∅");
+        } else {
+            for(Integer v: b.vert){
+                if(v < 10){
+                    System.out.print(".");
+                }
+                System.out.print(v + " ");
+            }
         }
         System.out.println("");
         for(Bag b2: b.children){
             print(b2, d + 1);
         }
     }
+    
+    private static Bag simpleTD(Multigraph g){
+        Bag root = new Bag();
+        
+        Set<Integer> vertices = g.vertexSet();
+        for(Integer vertex: vertices){
+            root.add(vertex);
+        }
+        return root;
+    }
+    
+    // Converts the given graph g and the list of vertices to a TD.
+    // Might completely mangle g and the list of vertices.
+    private static Bag permutationToTD(Multigraph g, Choice c){
+        // find v0 and its neighbours
+        Integer v0 = c.nextChoice(g);
+//        print("Current: " + v0 + ", vertices left: " + vertices.size(), d);
+        ArrayList<Integer> neighbours = new ArrayList<>();
+        for(Object e: g.edgesOf(v0)){
+            Integer t = (Integer) g.getEdgeTarget(e);
+            if(!neighbours.contains(t)){
+                neighbours.add(t);
+            }
+            Integer s = (Integer) g.getEdgeSource(e);
+            if(!neighbours.contains(s)){
+                neighbours.add(s);
+            }
+        }
+        neighbours.remove(v0);
+        
+        // if n=1 then trivial
+        if(g.vertexSet().size() == 1){
+            Bag root = new Bag();
+            root.add(v0);
+            root.num = v0;
+//            print("Done!",d);
+            return root;
+        }
+        
+//        print("Making new bag...", d);
+        // Construct bag with neighbours of v0 in G
+        Bag toAdd = new Bag();
+        toAdd.add(v0);
+        toAdd.num = v0;
+        for(Integer i: neighbours){
+//            print("Add " + i, d);
+            toAdd.add(i);
+        }
+        
+        // v_j = lowest neighbour of v_0
+        Integer vj = Integer.MAX_VALUE;
+        for(Integer i: neighbours){
+            if(i < vj){
+                vj = i;
+            }
+        }
+        
+        // compute G' obtained by elim. v0: add an edge between all non-adjacent neighbours of v0, then remove v0
+        for(Integer s: neighbours){
+            for(Integer t: neighbours){
+                if(s != t){
+                    if(!g.containsEdge(s, t)){
+                        g.addEdge(s, t);
+                    }
+                }
+            }
+        }
+        g.removeVertex(v0);
+        
+        // call PermToTD(G',(v1,...v_{n-1}))
+        Bag subTD = permutationToTD(g, c);
+        
+        // connect X_v_0 to X_v_j
+        Bag toConnect = subTD.findNum(vj);
+        toConnect.children.add(toAdd);
+        toAdd.parent = toConnect;
+        
+        return subTD;
+    }
+    
 }

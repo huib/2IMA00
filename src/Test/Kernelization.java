@@ -1,7 +1,7 @@
 package Test;
 
 import Alg.InputReader;
-import Alg.ReductionSolution;
+import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class Kernelization {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
         graph.removeVertex(2);
 
-        ReductionSolution solution = Alg.Kernelization.kernelize(graph, 0);
+        ReductionSolution solution = Alg.Kernelization.Kernelization.kernelize(graph, 0);
 
         assertSame(0, solution.verticesToRemoved.size());
         assertSame(0, solution.reducedGraph.vertexSet().size());
@@ -72,7 +72,7 @@ public class Kernelization {
         Multigraph<Integer, DefaultEdge> graph = this.loadGraph("instances/simple/001.graph");
         graph.removeVertex(1);
 
-        ReductionSolution solution = Alg.Kernelization.kernelize(graph, 0);
+        ReductionSolution solution = Alg.Kernelization.Kernelization.kernelize(graph, 0);
 
         assertTrue(!solution.stillPossible);
     }
