@@ -7,6 +7,7 @@
 package Alg.Algorithms.IterativeCompression;
 
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  *
@@ -15,42 +16,20 @@ import java.util.LinkedList;
 public class ActionStack
 {
     private final LinkedList<GraphAction> actions = new LinkedList<>();
-    private final LinkedList<Integer> subroutines = new LinkedList<>();
     
     public void push(GraphAction a)
     {
         a.perform();
-        actions.push(a);
+        actions.addLast(a);
     }
     
     public GraphAction pop()
     {
-        if(actions.size() > this.getCurrentSubroutine())
-            return actions.pop();
-        else
-            throw new RuntimeException("Cannot pop this action, it was pushed in another subroutine");
+        return actions.pollLast();
     }
     
     public boolean isEmpty()
     {
         return this.actions.isEmpty();
-    }
-    
-    public void startSubroutine()
-    {
-        subroutines.push(actions.size());
-    }
-    
-    public void stopSubroutine()
-    {
-        if(actions.size() == this.getCurrentSubroutine())
-            subroutines.pop();
-        else
-            throw new RuntimeException("Cannot end subroutine here, not all actions are reverted");
-    }
-    
-    private int getCurrentSubroutine()
-    {
-        return subroutines.peek();
     }
 }
