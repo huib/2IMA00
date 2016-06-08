@@ -18,7 +18,7 @@ import org.jgrapht.graph.Multigraph;
  * 
  * @author huib
  */
-public interface DisjointFVSAlgorithm
+public interface DisjointFVSAlgorithm<V>
 {
     /**
      * Returns a feedback vertex set x for graph g that satisfies the following:
@@ -30,5 +30,5 @@ public interface DisjointFVSAlgorithm
      * vertices for our own FVS.
      * @return a FVS of size prohibited.size()-1 of g, not containing any vertex in prohibited.
      */
-    public Collection<Integer> solve(Multigraph<Integer, DefaultEdge> g, HashSet<Integer> prohibited);
+    public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited);
 }

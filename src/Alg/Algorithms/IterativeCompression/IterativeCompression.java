@@ -70,8 +70,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
             // remove this subset from the graph, G-Z
             // solve disjoint problem: find FVS in graph G-Z using only vertices in V(G)\C
             
-            DisjointFVSAlgorithm disjointSolver;
-            disjointSolver = new SimpleDisjointAlg();
+            DisjointFVSAlgorithm<V> disjointSolver;
+            disjointSolver = new SimpleDisjointAlg<>();
             
             for(Collection<V> subset : this.subsets())
             {
