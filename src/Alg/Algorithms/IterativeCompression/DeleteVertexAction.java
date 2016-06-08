@@ -45,15 +45,6 @@ public class DeleteVertexAction<V> implements GraphAction
                     edge
             );
 
-        //removeVertex doesn't seem to remove edges touching the vertex, even though the
-        // documentation says it does... So let's remove the edge manually
-        for(EdgeWrapper<V,Object> e : this.edges)
-        {
-            this.graph.removeEdge(e.source, e.target);
-            this.graph.removeEdge(e.target, e.source);
-            this.graph.removeEdge(e.edge);
-        }
-        
         this.graph.removeVertex(this.v);
         this.place = order++;
         
