@@ -17,21 +17,25 @@ class DeleteVerticesAction<V> implements GraphAction
 {
     private final AbstractBaseGraph<V,Object> graph;
     private final Collection<V> vertices;
-    private final EdgeWrapper<V,Object>[] edges;
+    private EdgeWrapper<V,Object>[] edges;
     
     public DeleteVerticesAction(AbstractBaseGraph g, Collection<V> vertices)
     {
         this.vertices = vertices;
         this.graph    = g;
-        
+    }
+    
+    @Override
+    public void perform()
+    {
         int size = 0;
         size = this.vertices.stream().map((v) -> this.graph.degreeOf(v)).reduce(size, Integer::sum);
         
         this.edges = new EdgeWrapper[size];
         
-        this.vertices.stream().forEach((v) ->
+        int i = 0;
+        for(V v : this.vertices)
         {
-            int i = 0;
             for(Object edge : this.graph.edgesOf(v))
                 this.edges[i++] = new EdgeWrapper<>(
                         this.graph.getEdgeSource(edge),
@@ -39,12 +43,8 @@ class DeleteVerticesAction<V> implements GraphAction
                         this.graph.getEdgeWeight(edge),
                         edge
                 );
-        });
-    }
-    
-    @Override
-    public void perform()
-    {
+        }
+        
         this.graph.removeAllVertices(this.vertices);
     }
 
@@ -59,7 +59,7 @@ class DeleteVerticesAction<V> implements GraphAction
         for(EdgeWrapper<V,Object> edge : this.edges)
         {
             this.graph.addEdge(edge.source, edge.target, edge.edge);
-            this.graph.setEdgeWeight(edge.edge, edge.weight);
+            //this.graph.setEdgeWeight(edge.edge, edge.weight);
         }
     }
     

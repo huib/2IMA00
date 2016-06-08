@@ -33,8 +33,8 @@ public class Main {
 //        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
 
 
-        FVSAlgorithmInterface randomized = new Randomized();
-        //FVSAlgorithmInterface randomized = new IterativeCompression();
+        //FVSAlgorithmInterface randomized = new Randomized();
+        FVSAlgorithmInterface randomized = new IterativeCompression();
 
         List<Integer> solution = randomized.findFeedbackVertexSet(graph);
 

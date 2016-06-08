@@ -23,4 +23,10 @@ public class EdgeWrapper<V, E>
         this.edge   = edge;
         this.weight = weight;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "(" + source + ", " + target + ")";
+    }
 }
