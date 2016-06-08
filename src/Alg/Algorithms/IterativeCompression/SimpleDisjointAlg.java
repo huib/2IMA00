@@ -11,6 +11,7 @@ import java.util.HashSet;
 
 import Alg.Kernelization.Kernelization;
 import Alg.Kernelization.ReductionSolution;
+import Alg.Kernelization.SimpleDisjointKernelization;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -67,6 +68,12 @@ class SimpleDisjointAlg implements DisjointFVSAlgorithm
 
         // Applies reduction rule 1 to the graph
         Kernelization.rule0and1(reductionSolution, g);
+
+        // Applies reduction rule 2 on the graph
+        SimpleDisjointKernelization.removeOnlyVertexInProhibitedCycle(reductionSolution, g, prohibited);
+
+        // Applies reduction rule 3 on the graph
+        SimpleDisjointKernelization.removeNonProhibitedVertexWithDegree2(reductionSolution, g, prohibited);
 
         return reductionSolution;
     }

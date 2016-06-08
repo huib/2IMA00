@@ -18,12 +18,12 @@ public class SimpleDisjointKernelization extends Kernelization {
      * remove any vertex v not in prohibited that is part of a cycle where all other vertices
      *    are in prohibited. Add v to the solution.s
      *
-     * @param reductionSolution
+     * @param solution
      * @param graph
      * @param prohibited
      */
     public static void removeOnlyVertexInProhibitedCycle(
-            ReductionSolution reductionSolution,
+            ReductionSolution solution,
             Multigraph<Integer, DefaultEdge> graph,
             HashSet<Integer> prohibited
     ) {
@@ -36,8 +36,7 @@ public class SimpleDisjointKernelization extends Kernelization {
             }
 
             if (SimpleDisjointKernelization.inCycleWith(v, graph, prohibited)) {
-                reductionSolution.verticesToRemoved.add(v);
-                graph.removeVertex(v);
+                Kernelization.removeVertex(solution, v, false);
             }
         }
 
@@ -53,7 +52,7 @@ public class SimpleDisjointKernelization extends Kernelization {
      */
     public static boolean inCycleWith(Integer v, Multigraph<Integer, DefaultEdge> graph, HashSet<Integer> withSet)
     {
-        return SimpleDisjointKernelization.inCycleWithRecusive(v, graph, withSet, v, v);
+        return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v);
     }
 
     /**
@@ -66,7 +65,7 @@ public class SimpleDisjointKernelization extends Kernelization {
      * @param lastVertex Last vertex, needed to ensure we do not go back the same way
      * @return
      */
-    protected static boolean inCycleWithRecusive(
+    protected static boolean inCycleWithRecursive(
             Integer v,
             Multigraph<Integer, DefaultEdge> graph,
             HashSet<Integer> withSet,
@@ -88,13 +87,51 @@ public class SimpleDisjointKernelization extends Kernelization {
             }
 
             if (withSet.contains(vertex)) {
-                return SimpleDisjointKernelization.inCycleWithRecusive(v, graph, withSet, vertex, v);
+                return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v);
             }
         }
 
         // We could not find
         return false;
     }
+
+    /**
+     * remove any vertex v not in prohibited with degree 2 and at least one of its
+     * neightbours also not in prohibited. Connect the neightbours of v.
+     *
+     * @param solution
+     * @param graph
+     */
+    public static void removeNonProhibitedVertexWithDegree2(
+            ReductionSolution solution,
+            Multigraph<Integer, DefaultEdge> graph,
+            HashSet<Integer> prohibited
+    ) {
+        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+
+        for (int v:vertices) {
+            // Skip prohibited graphs
+            if (prohibited.contains(v)) {
+                continue;
+            }
+
+            // Make sure that the vertex is of degree 2
+            if (graph.degreeOf(v) == 2) {
+                ArrayList<Integer> neighbours = SimpleDisjointKernelization.getNeighbours(graph, v)
+                        .collect(Collectors.toCollection(ArrayList<Integer>::new));
+
+                // Both neighbours are prohibited, so we can not do anything about it
+                if (prohibited.containsAll(neighbours)) {
+                    continue;
+                }
+
+                // Now we can remove the vertex, and join the neighbours
+                Kernelization.removeVertex(solution, v, true);
+                graph.addEdge(neighbours.get(0), neighbours.get(1));
+            }
+        }
+    }
+
 
     /**
      * Get the neighbours of vertex v in graph graph
