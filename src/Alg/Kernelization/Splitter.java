@@ -18,19 +18,34 @@ public class Splitter {
      */
     public static List<Multigraph<Integer, DefaultEdge>> split(Multigraph<Integer, DefaultEdge> graph)
     {
-        Set<DefaultEdge> edgeSet = graph.edgeSet();
+        removeEdgesNotInCylce(graph);
 
+        return splitGraph(graph);
+    }
+
+    /**
+     * Remove all the edges from the graph that are not part of a cycle
+     *
+     * @param graph
+     */
+    public static void removeEdgesNotInCylce(Multigraph<Integer, DefaultEdge> graph)
+    {
+        Set<DefaultEdge> edgeSet = graph.edgeSet();
         ArrayList<DefaultEdge> edgesToBeRemoved = new ArrayList();
         for (DefaultEdge edge: edgeSet) {
+            HashSet<Integer> done = new HashSet<>();
+            done.add(graph.getEdgeSource(edge)); // Makes sure that we do not visit the source again
+            System.out.println("-----------------------");
+            System.out.println("Checking vertex " + graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge));
             // Only works because our implementation does not visit nodes twice. So it won't visit the start node again
             // Furthermore, it does not go to the target node directly
             // So it only finds the target node if
             if (! Splitter.DFSRecursive(
-                graph.getEdgeTarget(edge),  // Find the target of the edge
-                graph,
-                graph.getEdgeSource(edge), // From the source of the edge
-                graph.getEdgeTarget(edge), // And we are not allowed to go back directly
-                new HashSet<>(graph.getEdgeSource(edge)) // Makes sure that we do not visit
+                    graph.getEdgeTarget(edge),  // Find the target of the edge
+                    graph,
+                    graph.getEdgeSource(edge), // From the source of the edge
+                    graph.getEdgeTarget(edge), // And we are not allowed to go back directly
+                    done
             )) {
                 edgesToBeRemoved.add(edge);
             }
@@ -39,8 +54,6 @@ public class Splitter {
         for (DefaultEdge e: edgesToBeRemoved) {
             graph.removeEdge(e);
         }
-
-        return new ArrayList<>();
     }
 
     /**
@@ -88,7 +101,7 @@ public class Splitter {
         });
 
         // Remove the vertex from the original graph, and return new graph
-        graph.removeVertex(v);
+        graph.removeVertex(vertex);
     }
 
 
@@ -112,8 +125,10 @@ public class Splitter {
                 .collect(Collectors.toCollection(ArrayList<Integer>::new));
 
         for (int vertex : neighbours) {
+            System.out.println("(" + v + ")" + currentVertex + "->" + vertex);
             // Do not go back the same way
             if (vertex == lastVertex) {
+                System.out.println(">back");
                 continue;
             }
 
@@ -124,14 +139,15 @@ public class Splitter {
 
             // We have already checked this vertex.
             if (done.contains(vertex)) {
+                System.out.println(">done");
                 continue;
             }
 
             done.add(vertex);
-            if(Splitter.inCycleRecursive(v, graph, vertex, v, done)) {
+            if (Splitter.DFSRecursive(v, graph, vertex, currentVertex, done)) {
                 return true;
             }
-            done.remove(vertex);
+            done.remove(vertex); // TODO: is this really necessary? Might speed up the algorithm if removed
         }
 
         // We could not find
