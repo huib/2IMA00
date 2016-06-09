@@ -33,10 +33,7 @@ public class Main {
         //FVSAlgorithmInterface randomized = new Randomized();
         FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
 
-
         List<Integer> solution = randomized.findFeedbackVertexSet(graph);
-
-
 
         for (Integer s: solution) {
             System.out.print(s + ", ");
