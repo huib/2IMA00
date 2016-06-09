@@ -52,11 +52,15 @@ public class IterativeCompression implements FVSAlgorithmInterface
             action.revert();
             solution.add(action.getVertex());
             
+            System.out.println("solution size= "+solution.size()+", k= "+k);
             if(solution.size() > k)
             {
+                System.out.println("compressing");
                 solution.compress(graph);
                 k = Math.max(k, solution.size());
+                System.out.println("new solution size= "+solution.size()+", k= "+k);
             }
+            
         }
         
         return solution;
@@ -75,10 +79,12 @@ public class IterativeCompression implements FVSAlgorithmInterface
             
             for(Collection<V> subset : this.subsets())
             {
+                System.out.println("Trying subset of size "+subset.size());
                 if(subset.size() == this.size())
                     continue; // not a strict subset
                 
                 HashSet<V> complement = this.complementOf(subset);
+                System.out.println("complement of size "+complement.size());
                 
                 DeleteVerticesAction<V> removeVertices = new DeleteVerticesAction<>(graph, subset);
                 removeVertices.perform();
@@ -137,7 +143,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
     public class SubsetIterator<V> extends HashSet<V> implements Iterator<Collection<V>>
     {
         private ArrayList<V> set;
-        private long iteration = 0;
+        private long iteration = -1;
         
         public SubsetIterator(ArrayList<V> set)
         {
@@ -154,18 +160,21 @@ public class IterativeCompression implements FVSAlgorithmInterface
         @Override
         public boolean hasNext()
         {
-            return this.getFlipIndex() < this.set.size();
+            return this.iteration == -1 || this.getFlipIndex() < this.set.size();
         }
 
         @Override
         public Collection<V> next()
         {
-            V flip = this.set.get(this.getFlipIndex());
+            if(this.iteration >= 0)
+            {
+                V flip = this.set.get(this.getFlipIndex());
             
-            if(this.contains(flip))
-                this.remove(flip);
-            else
-                this.add(flip);
+                if(this.contains(flip))
+                    this.remove(flip);
+                else
+                    this.add(flip);
+            }
             
             this.iteration++;
             

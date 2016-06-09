@@ -24,7 +24,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
     @Override
     public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited)
     {
-        return this.solve(g, prohibited, prohibited.size()-1);
+        return this.solve((Multigraph<V, DefaultEdge>) g.clone(), prohibited, prohibited.size()-1);
     }
 
 
@@ -49,15 +49,8 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
      * @param k
      * @return
      */
-    private Collection<V> solve(Multigraph<V, DefaultEdge> originalGraph, HashSet<V> prohibited, int k)
+    private Collection<V> solve(Multigraph<V, DefaultEdge> graph, HashSet<V> prohibited, int k)
     {
-        //TODO!!!
-        // this is a recursive function. Cloning here will result in exponential memory usage
-        // ideas to solve:
-        // 1. clone in solve(graph, prohibited), and not here
-        // 2. don't clone, but backtrack/revert all changes made to graph
-        Multigraph<V, DefaultEdge> graph = (Multigraph<V, DefaultEdge>) originalGraph.clone();
-        
         // 1. Check for a cycle in the graph consisting of only vertices in prohibited
         //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
         if (this.containsCycleWithOnlyProhibited(graph, prohibited)) {
@@ -79,18 +72,14 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         //    when the graph contains no other vertices than the ones in prohibited, the graph is
         //    a tree, i.e. solution is the empty set.
         
-        // !!! prohibited should ONLY contain vertices that are in graph.vertexSet()
-        if(prohibited.size() == graph.vertexSet().size())
-            return new HashSet<>();
-        
         // There is a vertex v not in prohibited with degree 1 (not counting edges to vertices in
         // prohibited)
         // 4. Find a vertex v not in prohibited with exectly one neightbour that is not in
         //    prohibited. Try this.solve(g, prohibited+v, k), otherwise return
         //    this.solve(g-v, prohibited, k-1)
         V vertex = this.findVertexWithOneNonProhibitedNeighbour(graph, prohibited);
-        if(vertex == null)
-            throw new NullPointerException("no suitable vertex found, this should not happen");
+        if(vertex == null) // no nonprohibited vertices in the graph
+            return new HashSet<>();;
         
         prohibited.add(vertex);
 
@@ -118,10 +107,12 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         // other code didn't make vertex type generic.. so we'll have to do it non generic too now..
         Multigraph<Integer, DefaultEdge> integerGraph = (Multigraph<Integer, DefaultEdge>) graph;
         
+        boolean atLeastOneNonProhibited = false;
         for (V v:graph.vertexSet()) {
             if (prohibited.contains(v)) {
                 continue;
             }
+            atLeastOneNonProhibited = true;
             int nonProhibitedNeighbours = SimpleDisjointKernelization.getNeighbours(integerGraph, (Integer)v)
                    .mapToInt(neighbour -> prohibited.contains(neighbour) ? 0 : 1)
                    .sum();
@@ -129,6 +120,10 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
                 return v;
             }
         }
+        
+        if(atLeastOneNonProhibited)
+            throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
+        
         return null;
     }
 
