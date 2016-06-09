@@ -132,8 +132,8 @@ public class SimpleDisjointKernelization extends Kernelization {
 
                 changed = true;
                 // Now we can remove the vertex, and join the neighbours
-                Kernelization.removeVertex(solution, v, true);
                 graph.addEdge(neighbours.get(0), neighbours.get(1));
+                Kernelization.removeVertex(solution, v, true);
             }
         }
         return changed;

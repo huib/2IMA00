@@ -63,7 +63,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
 
         // 3. When after applying the reduction rules, the intermediate solution (created by rule 2)
         //    is larger of equal to prohibited.size(), return null. There is no solution small enough
-        if (red.verticesToRemoved.size() > k) {
+        if (red == null || red.verticesToRemoved.size() > k) {
             return null;
         }
 
