@@ -139,8 +139,10 @@ public class Kernelization {
                 int b = neighbors.get(1);
 
                 // If the new edge that is places introduces a self loop, then it can be removed,
+                // also remove the "self-loop vertex" and add it to the solution
                 if (a == b) {
-                    Kernelization.removeVertex(solution, v, true);
+                    Kernelization.removeVertex(solution, v, false);
+                    Kernelization.removeVertex(solution, a, true);
                 } else {
                     //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
                     graph.addEdge(a, b); // a = sourceVertex, b = targetVertex
