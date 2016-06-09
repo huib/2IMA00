@@ -27,16 +27,15 @@ public class Main {
 
         Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
 
-       // GraphDisplayer.display(graph);
 
-//        ArrayList<Integer> vertexSet = new ArrayList<Integer>( graph.vertexSet() );// convert set to arraylist
-//        ReductionSolution kernel = Kernelization.kernelize(graph, vertexSet );
 
 
         //FVSAlgorithmInterface randomized = new Randomized();
-        FVSAlgorithmInterface randomized = new IterativeCompression();
+        FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
+
 
         List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+
 
 
         for (Integer s: solution) {

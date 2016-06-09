@@ -1,4 +1,4 @@
-package Test;
+package Test.Kernelization;
 
 import Alg.InputReader;
 import Alg.Kernelization.ReductionSolution;
