@@ -20,6 +20,7 @@ public class Splitter {
     {
         removeEdgesNotInCylce(graph);
 
+
         return splitGraph(graph);
     }
 
@@ -31,8 +32,8 @@ public class Splitter {
     public static void removeEdgesNotInCylce(Multigraph<Integer, DefaultEdge> graph)
     {
         Set<DefaultEdge> edgeSet = graph.edgeSet();
-        ArrayList<DefaultEdge> edgesToBeRemoved = new ArrayList();
-        for (DefaultEdge edge: edgeSet) {
+        DefaultEdge[] edgeArray = edgeSet.toArray(new DefaultEdge[edgeSet.size()]);
+        for (DefaultEdge edge: edgeArray) {
             HashSet<Integer> done = new HashSet<>();
             done.add(graph.getEdgeSource(edge)); // Makes sure that we do not visit the source againrce(edge) + " -> " + graph.getEdgeTarget(edge));
             // Only works because our implementation does not visit nodes twice. So it won't visit the start node again
@@ -45,13 +46,10 @@ public class Splitter {
                     graph.getEdgeTarget(edge), // And we are not allowed to go back directly
                     done
             )) {
-                edgesToBeRemoved.add(edge);
+                graph.removeEdge(edge);
             }
         }
 
-        for (DefaultEdge e: edgesToBeRemoved) {
-            graph.removeEdge(e);
-        }
     }
 
     /**
@@ -147,7 +145,6 @@ public class Splitter {
             if (Splitter.DFSRecursive(v, graph, vertex, currentVertex, done)) {
                 return true;
             }
-            done.remove(vertex); // TODO: is this really necessary? Might speed up the algorithm if removed
         }
 
         // We could not find

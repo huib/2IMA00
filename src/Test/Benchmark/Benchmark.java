@@ -4,19 +4,17 @@ import Alg.FVSAlgorithmInterface;
 
 import Alg.InputReader;
 import Alg.Lib.CycleDetector;
+import Alg.SplitSolve;
 import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.junit.Test;
-import sun.java2d.pipe.SolidTextRenderer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CyclicBarrier;
 
-import static org.junit.Assert.*;
 
 /**
  * Run a benchmark for a algorithm. For all the example graph, reports the k. And calculates the time it takes to do so
@@ -38,7 +36,7 @@ public abstract class Benchmark {
     private FVSAlgorithmInterface alg;
 
     public Benchmark(FVSAlgorithmInterface alg) {
-        this.alg = alg;
+        this.alg = new SplitSolve(alg);
     }
 
     /**
