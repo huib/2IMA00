@@ -55,7 +55,7 @@ public class SimpleDisjointKernelization extends Kernelization {
      */
     public static boolean inCycleWith(Integer v, Multigraph<Integer, DefaultEdge> graph, HashSet<Integer> withSet)
     {
-        return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v, new HashSet<>());
+        return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v, new HashSet<>(v));
     }
 
     /**
