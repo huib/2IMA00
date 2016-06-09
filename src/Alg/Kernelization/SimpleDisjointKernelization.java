@@ -100,6 +100,7 @@ public class SimpleDisjointKernelization extends Kernelization {
                 if (SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v, done)) {
                     return true;
                 }
+                done.remove(vertex);
             }
         }
 
