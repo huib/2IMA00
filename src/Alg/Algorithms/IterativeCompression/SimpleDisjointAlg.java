@@ -79,7 +79,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         //    this.solve(g-v, prohibited, k-1)
         V vertex = this.findVertexWithOneNonProhibitedNeighbour(graph, prohibited);
         if(vertex == null) // no nonprohibited vertices in the graph
-            return new HashSet<>();;
+            return new HashSet<>();
         
         prohibited.add(vertex);
 
@@ -120,10 +120,11 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
                 return v;
             }
         }
-        
-        if(atLeastOneNonProhibited)
-            throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
-        
+
+        // + Stefan If I understand correctly this is what we want to find? Uncommented for now
+//        if(atLeastOneNonProhibited)
+//            throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
+//
         return null;
     }
 
@@ -155,6 +156,8 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
 
             // Applies reduction rule 1 to the graph
             changed |= Kernelization.rule0and1(reductionSolution, integerGraph);
+            // If one of the prohibited vertices is removed, it must be removed from prohibited as well, otherwise the rest of the
+            // algorithm
 
             // Applies reduction rule 2 on the graph
             changed |= SimpleDisjointKernelization.removeOnlyVertexInProhibitedCycle(reductionSolution, integerGraph, integerProhibited);
@@ -186,6 +189,10 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         HashSet<Integer> integerProhibited = (HashSet<Integer>) prohibited;
         
         for (V v : prohibited) {
+            // The vertex may already be removed, since it may have a degree of 1 at some point
+            if (graph.containsVertex(v)) {
+                continue;
+            }
             if (SimpleDisjointKernelization.inCycleWith((Integer)v, integerGraph, integerProhibited)) {
                 return true;
             }

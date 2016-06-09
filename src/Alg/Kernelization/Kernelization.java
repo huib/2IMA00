@@ -110,7 +110,6 @@ public class Kernelization {
             }
         }
         return changed;
-
     }
 
     public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
