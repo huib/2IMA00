@@ -55,7 +55,7 @@ public class SimpleDisjointKernelization extends Kernelization {
      */
     public static boolean inCycleWith(Integer v, Multigraph<Integer, DefaultEdge> graph, HashSet<Integer> withSet)
     {
-        return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v);
+        return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v, new HashSet<>());
     }
 
     /**
@@ -73,7 +73,8 @@ public class SimpleDisjointKernelization extends Kernelization {
             Multigraph<Integer, DefaultEdge> graph,
             HashSet<Integer> withSet,
             Integer currentVertex,
-            Integer lastVertex
+            Integer lastVertex,
+            HashSet<Integer> done
     ) {
         Collection<Integer> neighbours = SimpleDisjointKernelization.getNeighbours(graph, currentVertex)
                 .collect(Collectors.toCollection(ArrayList<Integer>::new));
@@ -89,8 +90,14 @@ public class SimpleDisjointKernelization extends Kernelization {
                 return true;
             }
 
+            // We have already checked this vertex.
+            if (done.contains(vertex)) {
+                continue;
+            }
+
             if (withSet.contains(vertex)) {
-                return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v);
+                done.add(vertex);
+                return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v, done);
             }
         }
 
