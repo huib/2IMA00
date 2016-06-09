@@ -97,7 +97,9 @@ public class SimpleDisjointKernelization extends Kernelization {
 
             if (withSet.contains(vertex)) {
                 done.add(vertex);
-                return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v, done);
+                if (SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v, done)) {
+                    return true;
+                }
             }
         }
 

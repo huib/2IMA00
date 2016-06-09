@@ -44,7 +44,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
     /**
      * Solve the Simple Disjoint algorithm problem
      *
-     * @param originalGraph
+     * @param graph
      * @param prohibited
      * @param k
      * @return
@@ -190,7 +190,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         
         for (V v : prohibited) {
             // The vertex may already be removed, since it may have a degree of 1 at some point
-            if (graph.containsVertex(v)) {
+            if (!graph.containsVertex(v)) {
                 continue;
             }
             if (SimpleDisjointKernelization.inCycleWith((Integer)v, integerGraph, integerProhibited)) {
