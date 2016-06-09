@@ -34,9 +34,7 @@ public class Splitter {
         ArrayList<DefaultEdge> edgesToBeRemoved = new ArrayList();
         for (DefaultEdge edge: edgeSet) {
             HashSet<Integer> done = new HashSet<>();
-            done.add(graph.getEdgeSource(edge)); // Makes sure that we do not visit the source again
-            System.out.println("-----------------------");
-            System.out.println("Checking vertex " + graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge));
+            done.add(graph.getEdgeSource(edge)); // Makes sure that we do not visit the source againrce(edge) + " -> " + graph.getEdgeTarget(edge));
             // Only works because our implementation does not visit nodes twice. So it won't visit the start node again
             // Furthermore, it does not go to the target node directly
             // So it only finds the target node if
@@ -87,21 +85,26 @@ public class Splitter {
             Multigraph<Integer, DefaultEdge> newgraph,
             int vertex
     )  {
-        Multigraph<Integer, DefaultEdge> graph = new Multigraph<>(DefaultEdge.class);
-
         // add vertex to new graph
-        graph.addVertex(vertex);
+        newgraph.addVertex(vertex);
 
         // Copy all the neighbours, and edges
-        SimpleDisjointKernelization.getNeighbours(originalGraph, vertex).forEach(v -> {
-            if (!graph.containsVertex(v)) {
-                copySubGraph(originalGraph, newgraph, v);
-            }
-            newgraph.addEdge(vertex, v);
-        });
+        SimpleDisjointKernelization.getNeighbours(originalGraph, vertex)
+                .collect(Collectors.toCollection(ArrayList::new))  // Collect to prevent concurrentmodificationexceptions
+                .forEach(v -> {
+                    // Only continue with our recursive copy if the vertex is not copied yet
+                    if (!newgraph.containsVertex(v)) {
+                        copySubGraph(originalGraph, newgraph, v);
+                    }
+
+                    // Make sure that edges are only copied once
+                    if (!newgraph.containsEdge(vertex, v)) {
+                        newgraph.addEdge(vertex, v);
+                    }
+                });
 
         // Remove the vertex from the original graph, and return new graph
-        graph.removeVertex(vertex);
+        originalGraph.removeVertex(vertex);
     }
 
 
@@ -125,10 +128,8 @@ public class Splitter {
                 .collect(Collectors.toCollection(ArrayList<Integer>::new));
 
         for (int vertex : neighbours) {
-            System.out.println("(" + v + ")" + currentVertex + "->" + vertex);
             // Do not go back the same way
             if (vertex == lastVertex) {
-                System.out.println(">back");
                 continue;
             }
 
@@ -139,7 +140,6 @@ public class Splitter {
 
             // We have already checked this vertex.
             if (done.contains(vertex)) {
-                System.out.println(">done");
                 continue;
             }
 
