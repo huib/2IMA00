@@ -163,8 +163,11 @@ public class SimpleDisjointKernelization extends Kernelization {
      */
     public static Set<DefaultEdge> getEdgesOf(Multigraph<Integer, DefaultEdge> graph, Integer v)
     {
+        return graph.edgesOf(v);
+        /*
         Set<DefaultEdge> edges = graph.incomingEdgesOf(v);
         edges.addAll(graph.outgoingEdgesOf(v));
         return edges;
+        */
     }
 }
