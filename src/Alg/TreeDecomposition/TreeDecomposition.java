@@ -10,15 +10,12 @@ public class TreeDecomposition {
     // Might completely mangle g
     // Assumes g is connected
     public static Bag makeTreeDecomposition(Multigraph g){
-        // Just put everything in one bag
-        return simpleTD(g);
-        
-//        Choice c;
+        Choice c;
 //        c = new FixedOrderChoice();
-//        c = new DeGreedy();
+        c = new DeGreedy();
         
-//        Bag toRet = permutationToTD(g, c);
-//        return toRet;
+        Bag toRet = permutationToTD(g, c);
+        return toRet;
     }
     
     // Turns the given tree decomposition into a nice tree decomposition, i.e. each bag is either:
@@ -38,6 +35,33 @@ public class TreeDecomposition {
         }
         // Recursively make the rest of the tree nice
         return makeSubtreeNice(b);
+    }
+    
+    // Adds `add edge' bags to the tree
+    public static Bag addEdges(Bag b, Multigraph g){
+        if(b.isAdd()){
+            ArrayList<Integer> ve = b.vert;
+            ve.removeAll(b.parent.vert);
+            Integer v = ve.get(0);
+            for(Integer w: b.vert){
+                if(w != v){
+                    if(g.containsEdge(v, w) || g.containsEdge(w, v)){
+                        Bag c = new Bag(b);
+                        c.setEdge(v,w);
+                        b.insertBelow(c);
+                    }
+                }
+            }
+        }
+        for(Bag c: b.children){
+            c = addEdges(c, g);
+        }
+        return b;
+    }
+    
+    // Returns the root of a path decomposition
+    public static Bag makePathDecomposition(Multigraph g){
+        return simpleTD(g);
     }
     
     // Recursively make a subtree nice
@@ -131,6 +155,7 @@ public class TreeDecomposition {
         }
     }
     
+    // Returns the tree decomposition gotten by putting all vertices in one bag
     private static Bag simpleTD(Multigraph g){
         Bag root = new Bag();
         
@@ -210,25 +235,4 @@ public class TreeDecomposition {
         return subTD;
     }
     
-    // Adds `add edge' bags to the tree
-    public static Bag addEdges(Bag b, Multigraph g){
-        if(b.isAdd()){
-            ArrayList<Integer> ve = b.vert;
-            ve.removeAll(b.parent.vert);
-            Integer v = ve.get(0);
-            for(Integer w: b.vert){
-                if(w != v){
-                    if(g.containsEdge(v, w) || g.containsEdge(w, v)){
-                        Bag c = new Bag(b);
-                        c.setEdge(v,w);
-                        b.insertBelow(c);
-                    }
-                }
-            }
-        }
-        for(Bag c: b.children){
-            c = addEdges(c, g);
-        }
-        return b;
-    }
 }
