@@ -116,15 +116,22 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
             int nonProhibitedNeighbours = SimpleDisjointKernelization.getNeighbours(integerGraph, (Integer)v)
                    .mapToInt(neighbour -> prohibited.contains(neighbour) ? 0 : 1)
                    .sum();
-            if (nonProhibitedNeighbours == 1) {
+            if (nonProhibitedNeighbours <= 1) {
                 return v;
             }
         }
 
         // + Stefan If I understand correctly this is what we want to find? Uncommented for now
-//        if(atLeastOneNonProhibited)
-//            throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
-//
+        // + Huib, we want to find at least one non prohibited, but one of them should have at most
+        // one non prohibited neighbour, meaning it passes the second 'if' in the loop, returning.
+        // if we reach the statements below it means we haven't found a non prohibited vertex with
+        // at most one non prohibited neighbour. Since the vertices not in prohibited form a forrest
+        // the only way for there not to be a vertex without degree 1 (after removing prohibited), is
+        // when removing prohibited results in an EMPTY graph. So, if we have encountered
+        // atLeastOneNonProhibited, but it did not have degree at most 1, something is wrong.
+        if(atLeastOneNonProhibited)
+            throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
+
         return null;
     }
 

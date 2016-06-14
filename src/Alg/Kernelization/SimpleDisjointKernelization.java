@@ -1,6 +1,5 @@
 package Alg.Kernelization;
 
-import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -110,7 +109,7 @@ public class SimpleDisjointKernelization extends Kernelization {
 
     /**
      * remove any vertex v not in prohibited with degree 2 and at least one of its
-     * neightbours also not in prohibited. Connect the neightbours of v.
+     * neighbours also not in prohibited. Connect the neighbours of v.
      *
      * @param solution
      * @param graph
