@@ -44,26 +44,33 @@ If there are more than two edges between u and v then delete all
 but two of these.
 The parameter k is unchanged.
 
+Additional:
+// 2-Approximation Alg:
+Outputs feedback vertex superset, if FVS is present
+• A graph is called clean if it contains no vertex of degree less than 2 (Rule0and1)
+• A cycle C is semidisjoint if, for every vertex u of C, d(u) = 2 with at most one exception.
+1: Given a graph (G, w) with G = (V,E), any vertex of weight zero is removed from G and placed in the solution set
+F at the outset. [We can skip this step, because we add the weights to the vertices ourselves with a default value of 1]
+2: <While loop until G becomes empty:>
+    Decompose graph (G, w) into subgraphs (Gi, wi)’s by iteratively
+    - subtracting wi from w
+    - removing vertices of weight reduced to zero
+    - adding them into F
+    - and cleaning up G (rule 0 and 1)
+    *The subgraph Gi derived in the ith iteration is either a semidisjoint cycle C contained in G or, otherwise, G itself.
+    **Note that the first case has precedence over the second; that is, Gi is a semidisjoint cycle whenever G contains one.
 
-(From the paper: A 4k^2 kernel for feedback vertex set]
+// Rule 11: Strongly Forced Vertex Rule
 
-// Rule 5 Center of flower Paths
-If there exists an x-flower F of order p and a set of
-q pairwise disjoint cycles which are moreover disjoint
-from F such that p + q ≥ k + 1, we reduce to G^n := G \ x
-and k' := k − 1.
+// Rule 12: Strongly Forced Pair Rule
 
-// Rule 6 ??
-If there is a set of vertices X, a vertex x ∈ V \ X and a set
-of connected components C of G \ (X ∪ x) [not necessarily all
-the connected components] such that:
-• There is exactly one edge between x and every C ∈ C.
-• Every C ∈ C induces a tree.
-• For every subset Z ⊆ X, the number of components of C having
-some neighbor in Z is at least 2|Z|.
-Then one can form a graph G0 by joining x to every vertex of X
-by double edges, and removing the edges between x and the
-components of C. We then reduce to G' and k' := k
+// Reduction FVS 6 (book):
+If |V (G)| ≥ (d + 1)k or |E(G)| ≥ 2dk, where d is the maximum degree of G,
+then terminate the algorithm and return that (G, k) is a no-instance.
+
+// Reduction FVS 7 (book): [flower rule]
+If there exists a vertex v ∈ V (G) and a flower with core v and more than k petals,
+then delete v and decrease k by 1.
 */
 
     /* return ReductionSolution:
@@ -159,6 +166,100 @@ public class Kernelization {
         return changed;
     }
 
+    public static boolean FVSapproximation(ReductionSolution solution, Multigraph<Integer, DefaultEdge> wgraph)
+    {
+        Integer[] vertices = (wgraph.vertexSet()).toArray(new Integer[wgraph.vertexSet().size()]);
+        return Kernelization.FVSapproximation(solution, wgraph, vertices);
+
+    }
+
+    /**
+     * FVS approximation (see FEEDBACK pseudo-code from paper)
+     *
+     * @param solution
+     * @param graph
+     * @param vertices
+     * @return
+     */
+    public static boolean FVSapproximation(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
+        boolean changed = false;
+        boolean semidisjoint = true;
+        boolean semidisjointexception = false;
+        int gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
+
+        for (int v : vertices) {
+            if (!graph.containsVertex(v)) {
+                continue;
+            }
+
+            WeightedVertex u = new WeightedVertex(v); // give default weight=1 to all v
+            int degree = graph.degreeOf(u.id); // v == u.id
+            if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
+                continue;
+            }
+            // Since we only have weights 1, gamma doesn't do much. but it's here to show that
+            // we follow FEEBACK step by step.
+            if ( gamma > u.weight/(degree-1) ) {
+                gamma = (u.weight / (degree - 1));
+            }
+
+            // semidisjoint cycle check
+            if (degree != 2 && !semidisjointexception) { // may contain at most one exception
+                semidisjointexception = true;
+            }
+            else if (degree != 2 && semidisjointexception) {// no longer semidisjoint
+                semidisjoint = false;
+                //break; // dont break yet -> more efficient to find min(gamma) first
+            }
+        }
+
+        for (int v:vertices) {
+            if (!graph.containsVertex(v)) {
+                continue;
+            }
+
+            WeightedVertex u = new WeightedVertex(v);
+            int degree = graph.degreeOf(u.id);
+            if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
+                continue;
+            }
+
+//            // while wgraph is not empty, do:
+                if (semidisjoint) { // G definitely contains FVS!
+                    u.weight = 0; //min{w(u) : u ∈ V (C)}=1, since that is the default w(u)
+                    // output subgraph with u.weight = 1 (minimum weight) for all u in subgraph
+                        // Gi = solution.reducedGraph
+                        // wi(u) = 1;
+                    // return solution.reducedGraph;
+                } else { // if wgraph is a clean graph, but not semidisjoint
+                    u.weight = u.weight - gamma * (degree - 1); // thus, w(u) = 0
+                    // output subgraph with u.weight = gamma*(degree-1) for all u in subgraph
+                        // Gi = solution.reducedGraph
+                        // wi(u) = w(u)-gamma*(d(v)-1);
+                }
+                if (u.weight == 0) { // remove all v in graph with weight 0
+                    if (!graph.containsVertex(u.id)) {
+                        continue;
+                    } // this deletes G, but the idea is that we return the subset Gi for the next iteration
+
+                    //Kernelization.removeVertex(solution, u.id, true);// we should use another solution set, since this is now a feedback vertex superset
+                    //Kernelization.rule0and1(solution, wgraph); // CleanUp(wgraph) again. -> only makes sense if we actually delete vertices from wgraph...
+
+                         /* DO COMPONENT CHECK */
+                        // 1. add u.id to STACK*
+                        // *The sole purpose of using an auxiliary stack data structure, STACK, is to keep track of the
+                        // (reverse) order in which these vertices are added into F.
+                        // 2. pop stack while checking* for every u.id whether it is redundant or not (i.e. is in F?)
+                        // *Do this with forest check!
+                        //  - Is u.id connected to a component more than once, keep it in solution F.
+                        //  - Else, remove u.id from F
+                    }
+                }
+        return changed;
+    }
+
+
+
     /**
      *
      * @param graph
@@ -178,6 +279,7 @@ public class Kernelization {
         do {
             changed = false;
             changed |= Kernelization.rule0and1(solution, reducedGraph);
+            //changed |= Kernelization.FVSapproximation(solution, reducedGraph);
             changed |= Kernelization.rule2(solution, reducedGraph);
 
 
