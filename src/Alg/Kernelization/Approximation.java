@@ -4,7 +4,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Christopher on 6/15/2016.
@@ -35,8 +35,8 @@ import java.util.List;
  */
 public class Approximation {
 
-    public static ReductionSolution approximate(Multigraph<Integer, DefaultEdge> graph, int k) {
-        return approximate(graph, k, true);
+    public static ReductionSolution kernelize(Multigraph<Integer, DefaultEdge> graph, int k) {
+        return kernelize(graph, k, true);
     }
 
     /**
@@ -66,8 +66,10 @@ public class Approximation {
 
             // Rule 0 & Rule 1
             if (degree <= 1) {
-                Approximation.removeVertex(solution, v, false);
-                changed = true;
+                if(solution.reducedGraph.containsVertex(v)) {
+                    Approximation.removeVertex(solution, v, false);
+                    changed = true;
+                }
             }
         }
         return changed;
@@ -110,7 +112,7 @@ public class Approximation {
             if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
                 continue;
             }
-            //
+            //System.out.print(v + ", ");
             if ( gamma > u.weight/(degree-1) ) {
                 gamma = (u.weight / (degree - 1));
             }
@@ -158,10 +160,12 @@ public class Approximation {
                 */
             }
             if (u.weight == 0) {
-                if (!graph.containsVertex(u.id)) {
-                    continue;
+                if (!solution.approxVerticesToRemoved.contains(u.id)) {
+                    solution.approxVerticesToRemoved.add(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
                 }
-                Approximation.removeVertex(solution, u.id, true); // add to solution F (superset)
+                if (!solution.verticesToRemoved.contains(u.id)) {
+                    solution.verticesToRemoved.add(u.id); // add to final solution FVS [but don't remove from subgraph nor update k yet]
+                }
 
                 // In FEEDBACK, graph G is deleted at this point and it uses subgraph Gi for the next iteration.
                 // However, we don't need to do this here because our weighted-vertex graph makes it so trivial.
@@ -179,14 +183,21 @@ public class Approximation {
         *       - If not, then v is redundant. => remove v from F and put v back in G-F
         */
         for (int v : solution.approxVerticesToRemoved ) {
-            List<Integer> neighbors = Graphs.neighborListOf(graph, v);
+            if (!solution.reducedGraph.containsVertex(v)) { // this should never occur...
+                continue;
+            }
+            List<Integer> neighbors = Graphs.neighborListOf(solution.reducedGraph, v);
 
             for (int i = 0; i < neighbors.size() - 1; i++) {
                 for (int j = 1; j < neighbors.size(); j++) {
                     if(!graph.containsEdge(i,j)) {
                         // no loop created by adding v to G-F, so v is redundant
-                        Approximation.revertVertex(solution, v);
-                    } // else v is essential, because it creates a loop in G-F
+                        solution.verticesToRemoved.removeAll(Collections.singleton("v"));
+                    } else {
+                        // else v is essential, because it creates a loop in G-F
+                        solution.reducedGraph.removeVertex(v); // finally, remove v from subgraph
+                        solution.reducedK -= 1; // finally, update k
+                    }
                 }
             }
         }
@@ -194,7 +205,54 @@ public class Approximation {
         return changed;
     }
 
-    public static ReductionSolution approximate( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
+    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
+    {
+        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+        return Approximation.rule2(solution, graph, vertices);
+    }
+
+    /**
+     * Fast application of rule 2
+     *
+     * @param solution
+     * @param graph
+     * @param vertices
+     * @return
+     */
+    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
+        boolean changed = false;
+        for (int v:vertices) {
+
+            // Vertex might be removed already
+            if (!graph.containsVertex(v)) {
+                continue;
+            }
+            int degree = graph.degreeOf(v);
+            // Rule 2
+            if (degree == 2) {
+                //Returns a list of vertices which are adjacent to a specified vertex.
+                List<Integer> neighbors = Graphs.neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
+                int a = neighbors.get(0);
+                int b = neighbors.get(1);
+
+                // If the new edge that is places introduces a self loop, then it can be removed,
+                // also remove the "self-loop vertex" and add it to the solution
+                if (a == b) {
+                    Approximation.removeVertex(solution, v, false);
+                    Approximation.removeVertex(solution, a, true);
+                } else {
+                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
+                    graph.addEdge(a, b); // a = sourceVertex, b = targetVertex
+                    Approximation.removeVertex(solution, v, false);
+                }
+
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
 
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
@@ -207,6 +265,8 @@ public class Approximation {
             changed = false;
             changed |= Approximation.cleanUp(solution, reducedGraph);
             changed |= Approximation.determineFVS(solution, reducedGraph);
+            changed |= Approximation.rule2(solution, reducedGraph);
+            //System.out.println(" ");
         } while(changed);
 
         solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
@@ -225,19 +285,8 @@ public class Approximation {
 
         if (inSolution) {
             solution.approxVerticesToRemoved.add(vertex);
+            solution.verticesToRemoved.add(vertex);
             solution.reducedK -= 1;
         }
-    }
-
-    /**
-     * Helper function to revert the removal of a vertex from the graph
-     *
-     * @param solution The solution found thus far
-     * @param vertex Vertex that needs to be removed
-     */
-    protected static void revertVertex(ReductionSolution solution, int vertex) {
-        solution.reducedGraph.addVertex(vertex);
-        solution.approxVerticesToRemoved.remove(vertex);
-        solution.reducedK += 1;
     }
 }
