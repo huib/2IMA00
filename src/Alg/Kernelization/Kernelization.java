@@ -379,9 +379,9 @@ public class Kernelization {
     public static void simpleVertexRules(ReductionSolution solution)
     {
         boolean changed;
+        Integer[] vertices = ((Set<Integer>) solution.reducedGraph.vertexSet()).toArray(new Integer[solution.reducedGraph.vertexSet().size()]);
         do {
             changed = false;
-            Integer[] vertices = ((Set<Integer>) solution.reducedGraph.vertexSet()).toArray(new Integer[solution.reducedGraph.vertexSet().size()]);
             for(Integer v: vertices){
                 if(solution.reducedGraph.containsVertex(v)) changed |= simpleVertexRules(solution, v);
             }
@@ -478,7 +478,8 @@ public class Kernelization {
                 return new TreeSet<>();
             } else{
                 solution.reducedGraph.addEdge(changedVertices.first(), changedVertices.last());
-                rule4Q(solution, solution.reducedGraph.edgesOf(changedVertices.first()));
+                if(Graphs.neighborListOf(solution.reducedGraph, changedVertices.first()).contains(changedVertices.last()))
+                    rule4Q(solution, solution.reducedGraph.edgesOf(changedVertices.first()));
             }
         }
         return changedVertices;
