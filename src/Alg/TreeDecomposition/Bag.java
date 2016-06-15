@@ -8,6 +8,19 @@ public class Bag {
     Bag parent;
     ArrayList<Bag> children;
     ArrayList<Integer> vert;
+    Edge edge;
+    
+    class Edge {
+        Integer a;
+        Integer b;
+        Edge(Integer a, Integer b){
+            this.a = a;
+            this.b = b;
+        }
+        boolean equals(Integer c, Integer d){
+            return (a == c && b == d) || (a == d && b == c);
+        }
+    }
     
     Bag(){
         children = new ArrayList<>();
@@ -17,6 +30,10 @@ public class Bag {
     Bag(Bag b){
         children = new ArrayList<>();
         vert = (ArrayList<Integer>) b.vert.clone();
+    }
+    
+    void setEdge(Integer a, Integer b){
+        edge = new Edge(a,b);
     }
     
     void add(Integer s){
@@ -34,7 +51,18 @@ public class Bag {
     }
     
     boolean isAddOrForget(){
-        return children.size() == 1;
+        return children.size() == 1 && edge == null;
+    }
+    
+    boolean isAdd(){
+        if(parent == null){
+            return false;
+        }
+        return parent.vert.size() < vert.size();
+    }
+    
+    boolean isForget(){
+        return isAddOrForget() && !isAdd();
     }
     
     void removeLastVert(){
