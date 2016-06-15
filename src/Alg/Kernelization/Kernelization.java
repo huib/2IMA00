@@ -281,7 +281,7 @@ public class Kernelization {
         if(useK) solution.reducedK = k;
         else solution.reducedK = 0;
         solution.stillPossible = true;
-        return kernelize(solution, solution.reducedGraph, simpleOnly, useK);
+        return kernelize(solution, solution.reducedGraph, simpleOnly, useK, false); //Don't use queue, overhead makes slower
     }
 
 
@@ -292,12 +292,14 @@ public class Kernelization {
          * @param useK Do we use the value for K from the input, or make our own where needed
          * @return
          */
-    public static ReductionSolution kernelize( ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, boolean simpleOnly, boolean useK) {
+    public static ReductionSolution kernelize( ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, boolean simpleOnly, boolean useK, boolean useQueue) {
 
         TreeSet<Integer> relevantVertices = new TreeSet<>();
-        // Set up set of relevant vertices
-        for (Integer v: graph.vertexSet()) {
-            relevantVertices.add(v);
+        if(useQueue){
+            // Set up set of relevant vertices
+            for (Integer v: graph.vertexSet()) {
+                relevantVertices.add(v);
+            }
         }
 
         LinkedList<Integer> flowerCoreVertices = new LinkedList<>();
@@ -312,10 +314,11 @@ public class Kernelization {
             changed = false;
 
             // Call Rule 4, reducing any multi edge of multiplicity >2 to multiplicity 2
-            rule4(solution, solution.reducedGraph.edgeSet());
+            //rule4Q(solution, solution.reducedGraph.edgeSet());
 
             //Perform all reduction rules on vertex degree <3, eliminating self-loops and >2 multi edges along the way
-            simpleVertexRules(solution, relevantVertices);
+            if(useQueue) simpleVertexRulesQ(solution, relevantVertices);
+            else simpleVertexRules(solution);
 
             // Call Rule 5, if possible
             if (useK) {
@@ -347,13 +350,14 @@ public class Kernelization {
      * Applies Rule 0, 1, 2 and 3 to the graph.
      *
      * @param solution
+     * @param relevantVertices set of vertices to consider
      * @return set of changed vertices required to re-inspect
      */
-    public static Set<Integer> simpleVertexRules(ReductionSolution solution, TreeSet<Integer> relevantVertices)
+    public static Set<Integer> simpleVertexRulesQ(ReductionSolution solution, TreeSet<Integer> relevantVertices)
     {
         while (!relevantVertices.isEmpty()) {
-            Integer current = relevantVertices.first();
-            relevantVertices.addAll(simpleVertexRules(solution, current, relevantVertices));
+            Integer current = relevantVertices.last();
+            relevantVertices.addAll(simpleVertexRulesQ(solution, current, relevantVertices));
             relevantVertices.remove(current);
         }
         return new TreeSet<>();
@@ -365,13 +369,66 @@ public class Kernelization {
      * @param solution
      * @return set of changed vertices required to re-inspect
      */
-    public static Set<Integer> simpleVertexRules(ReductionSolution solution, Integer v, TreeSet<Integer> relevantVertices)
+    public static void simpleVertexRules(ReductionSolution solution)
+    {
+        boolean changed;
+        do {
+            changed = false;
+            Integer[] vertices = ((Set<Integer>) solution.reducedGraph.vertexSet()).toArray(new Integer[solution.reducedGraph.vertexSet().size()]);
+            for(Integer v: vertices){
+                if(solution.reducedGraph.containsVertex(v)) changed |= simpleVertexRules(solution, v);
+            }
+        } while (changed);
+    }
+
+    /**
+     * Applies Rule 0, 1, 2 and 3 to the graph.
+     *
+     * @param solution
+     * @return set of changed vertices required to re-inspect
+     */
+    public static Set<Integer> simpleVertexRulesQ(ReductionSolution solution, Integer v, TreeSet<Integer> relevantVertices)
     {
         Set<Integer> changedVertices;
         int d = solution.reducedGraph.degreeOf(v);
-        changedVertices = rule0and1(solution, v, d);
+        changedVertices = rule0and1Q(solution, v, d);
         if(changedVertices.isEmpty()){
-            changedVertices = rule2(solution, v, d, relevantVertices);
+            changedVertices = rule2Q(solution, v, d, relevantVertices);
+        }
+        return changedVertices;
+    }
+
+    /**
+     * Applies Rule 0, 1, 2 and 3 to the graph.
+     *
+     * @param solution
+     * @return set of changed vertices required to re-inspect
+     */
+    public static boolean simpleVertexRules(ReductionSolution solution, Integer v)
+    {
+        boolean changed = false;
+        int d = solution.reducedGraph.degreeOf(v);
+        changed |= rule0and1(solution, v, d);
+        if(!changed){
+            changed |= rule2(solution, v, d);
+        }
+        return changed;
+    }
+
+
+    /**
+     * Applies Rule 0 and 1 to the graph.
+     *
+     * @param solution
+     * @param v
+     * @return
+     */
+    public static Set<Integer> rule0and1Q(ReductionSolution solution, Integer v, int d)
+    {
+        TreeSet<Integer> changedVertices = new TreeSet<>();
+        if(d<=1){
+            changedVertices.addAll(Graphs.neighborListOf(solution.reducedGraph, v));
+            removeVertex(solution, v, false);
         }
         return changedVertices;
     }
@@ -384,14 +441,13 @@ public class Kernelization {
      * @param v
      * @return
      */
-    public static Set<Integer> rule0and1(ReductionSolution solution, Integer v, int d)
+    public static boolean rule0and1(ReductionSolution solution, Integer v, int d)
     {
-        TreeSet<Integer> changedVertices = new TreeSet<>();
         if(d<=1){
-            changedVertices.addAll(Graphs.neighborListOf(solution.reducedGraph, v));
             removeVertex(solution, v, false);
+            return true;
         }
-        return changedVertices;
+        return false;
     }
 
 
@@ -402,7 +458,7 @@ public class Kernelization {
      * @param v
      * @return
      */
-    public static Set<Integer> rule2(ReductionSolution solution, Integer v, int d, TreeSet<Integer> relevantVertices)
+    public static Set<Integer> rule2Q(ReductionSolution solution, Integer v, int d, TreeSet<Integer> relevantVertices)
     {
         TreeSet<Integer> changedVertices = new TreeSet<>();
         if(d==2){
@@ -415,10 +471,23 @@ public class Kernelization {
                 return new TreeSet<>();
             } else{
                 solution.reducedGraph.addEdge(changedVertices.first(), changedVertices.last());
-                rule4(solution, solution.reducedGraph.edgesOf(changedVertices.first()));
+                rule4Q(solution, solution.reducedGraph.edgesOf(changedVertices.first()));
             }
         }
         return changedVertices;
+    }
+
+
+    /**
+     * Applies Rule 2 to the graph. Takes care to apply Rule 3 and 4 when needed.
+     *
+     * @param solution
+     * @param v
+     * @return
+     */
+    public static boolean rule2(ReductionSolution solution, Integer v, int d)
+    {
+        return !rule2Q(solution, v, d, new TreeSet<>()).isEmpty();
     }
 
 
@@ -428,7 +497,7 @@ public class Kernelization {
      * @param solution
      * @return
      */
-    public static Set<Integer> rule4(ReductionSolution solution, Set<DefaultEdge> relevantEdges)
+    public static Set<Integer> rule4Q(ReductionSolution solution, Set<DefaultEdge> relevantEdges)
     {
         Multigraph<Integer, DefaultEdge> graph = solution.reducedGraph;
         LinkedList<DefaultEdge> edges = new LinkedList(graph.edgeSet());
