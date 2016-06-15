@@ -7,6 +7,7 @@
 package Alg.Algorithms.IterativeCompression;
 
 import Alg.FVSAlgorithmInterface;
+import Alg.GraphDisplayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,19 +52,39 @@ public class IterativeCompression implements FVSAlgorithmInterface
             DeleteVertexAction<Integer> action = (DeleteVertexAction<Integer>) actions.pop();
             action.revert();
             solution.add(action.getVertex());
+            checkValidSolution(graph, solution);
             
             System.out.println("solution size= "+solution.size()+", k= "+k);
             if(solution.size() > k)
             {
-                System.out.println("compressing");
                 solution.compress(graph);
                 k = Math.max(k, solution.size());
                 System.out.println("new solution size= "+solution.size()+", k= "+k);
             }
+            else
+                System.err.println("this shouldn't happen");
             
+            
+            System.out.println(solution);
+            checkValidSolution(graph, solution);
         }
         
         return solution;
+    }
+    
+    public static void checkValidSolution(Multigraph graph, Collection solution)
+    {
+        DeleteVerticesAction removeFVS = new DeleteVerticesAction(graph, solution);
+        removeFVS.perform();
+        Multigraph cloned = (Multigraph)graph.clone();
+        removeFVS.revert();
+
+        Alg.Kernelization.Splitter.removeEdgesNotInCylce(cloned);
+        if(cloned.edgeSet().size() > 0)
+        {
+            GraphDisplayer.display(graph);
+            throw new RuntimeException("stop! "+solution+" is not a FVS for "+graph);
+        }
     }
     
     public class FVS<V> extends ArrayList<V>
@@ -79,21 +100,30 @@ public class IterativeCompression implements FVSAlgorithmInterface
             
             for(Collection<V> subset : this.subsets())
             {
-                System.out.println("Trying subset of size "+subset.size());
                 if(subset.size() == this.size())
                     continue; // not a strict subset
                 
                 HashSet<V> complement = this.complementOf(subset);
-                System.out.println("complement of size "+complement.size());
+                if(subset.size() + complement.size() != this.size())
+                    throw new RuntimeException("complement wrong!");
                 
                 DeleteVerticesAction<V> removeVertices = new DeleteVerticesAction<>(graph, subset);
                 removeVertices.perform();
-                Collection<V> solution = disjointSolver.solve(graph, complement);
+                checkValidSolution(graph, complement);
+                Collection<V> solution = disjointSolver.solve(graph, (HashSet)complement.clone());
+                if(solution != null)
+                    checkValidSolution(graph, solution);
                 removeVertices.revert();
                 
                 if(solution != null) // we found one!
                 {
+                    ArrayList tempSolution = new ArrayList(solution);
+                    tempSolution.addAll(subset);
+                    checkValidSolution(graph, tempSolution);
+                    System.out.println("Found a solution of size:"+tempSolution.size()+" ("+solution.size()+"+"+subset.size()+"), previous solution: "+this.size());
+                    
                     this.update(complement, solution);
+                    checkValidSolution(graph, this);
                     return;
                 }
             }
@@ -101,7 +131,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
         
         private void update(HashSet<V> remove, Collection<V> add)
         {
-            assert remove.size() == add.size()+1;
+            if(remove.size() != add.size()+1)
+                throw new IllegalArgumentException("\nremove: "+remove+"\nadd: "+add);
             
             Iterator<V> it = add.iterator();
             

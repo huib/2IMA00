@@ -6,12 +6,13 @@
 
 package Alg.Algorithms.IterativeCompression;
 
-import java.util.Collection;
-import java.util.HashSet;
-
+import Alg.GraphDisplayer;
 import Alg.Kernelization.Kernelization;
 import Alg.Kernelization.ReductionSolution;
 import Alg.Kernelization.SimpleDisjointKernelization;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -19,12 +20,22 @@ import org.jgrapht.graph.Multigraph;
  *
  * @author huib
  */
-class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
+public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
 {
+    // debuging
+    private Multigraph currentCompleteGraph;
+    
     @Override
     public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited)
     {
-        return this.solve((Multigraph<V, DefaultEdge>) g.clone(), prohibited, prohibited.size()-1);
+        this.currentCompleteGraph = g;
+        Collection<V> result = this.solve((Multigraph<V, DefaultEdge>) g.clone(), prohibited, prohibited.size()-1);
+        if(result != null && result.size() > prohibited.size()-1)
+            throw new IllegalStateException("This may not happen..");
+        if(result != null)
+            IterativeCompression.checkValidSolution(g, result);
+        
+        return result;
     }
 
 
@@ -49,22 +60,32 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
      * @param k
      * @return
      */
-    private Collection<V> solve(Multigraph<V, DefaultEdge> graph, HashSet<V> prohibited, int k)
+    public Collection<V> solve(Multigraph<V, DefaultEdge> graph, HashSet<V> prohibited, int k)
     {
+        if(k < 0)
+        {
+            System.err.println("k<0 !? (k="+k+")");
+            return null;
+        }
         // 1. Check for a cycle in the graph consisting of only vertices in prohibited
         //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
         if (this.containsCycleWithOnlyProhibited(graph, prohibited)) {
             return null;
         }
 
+        Multigraph beforeReduction = (Multigraph)graph.clone();
         // 2. Exhaustively apply reduction rules (you can stop before when the solution grows too
         //    big, see step 3)
         ReductionSolution red = this.applyReductionRules(graph, prohibited, k);
 
         // 3. When after applying the reduction rules, the intermediate solution (created by rule 2)
-        //    is larger of equal to prohibited.size(), return null. There is no solution small enough
+        //    is larger or equal to prohibited.size(), return null. There is no solution small enough
         if (red == null || red.verticesToRemoved.size() > k) {
             return null;
+        }
+        else
+        {
+            k -= red.verticesToRemoved.size();
         }
 
         // 3' When the reduction rules left no vertices to be included in the solution
@@ -79,19 +100,43 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         //    this.solve(g-v, prohibited, k-1)
         V vertex = this.findVertexWithOneNonProhibitedNeighbour(graph, prohibited);
         if(vertex == null) // no nonprohibited vertices in the graph
-            return new HashSet<>();
+        {
+            IterativeCompression.checkValidSolution(beforeReduction, red.verticesToRemoved);
+            System.out.println("No leaf");
+            return new HashSet((List<V>)red.verticesToRemoved);
+        }
         
         prohibited.add(vertex);
 
-        Collection<V> solution = this.solve(graph, prohibited, k);
+        Collection<V> solution = this.solve((Multigraph)graph.clone(), prohibited, k);
         if (solution != null) {
+            solution.addAll((List<V>)red.verticesToRemoved);
+            System.out.println("Leaf prohibited");
             return solution;
         }
+        
         prohibited.remove(vertex);
 
         graph.removeVertex(vertex);
+        
+        IterativeCompression.checkValidSolution(graph, prohibited);
+        System.out.println(graph);
         solution = this.solve(graph, prohibited, k-1);
-        solution.add(vertex);
+        System.out.println(solution);
+        if(solution != null)
+            IterativeCompression.checkValidSolution(graph, solution);
+        
+        if(solution != null)
+        {
+            solution.add(vertex);
+            solution.addAll((List<V>)red.verticesToRemoved);
+            System.out.println(prohibited);
+            System.out.println(solution);
+            IterativeCompression.checkValidSolution(beforeReduction, solution);
+            System.out.println("Leaf added to solution");
+        }
+        else
+            System.out.println("No solution");
         return solution;
     }
 
@@ -114,7 +159,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
             }
             atLeastOneNonProhibited = true;
             int nonProhibitedNeighbours = SimpleDisjointKernelization.getNeighbours(integerGraph, (Integer)v)
-                   .mapToInt(neighbour -> prohibited.contains(neighbour) ? 0 : 1)
+                   .mapToInt(neighbour -> prohibited.contains(neighbour) || neighbour == v ? 0 : 1)
                    .sum();
             if (nonProhibitedNeighbours <= 1) {
                 return v;
@@ -130,7 +175,12 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         // when removing prohibited results in an EMPTY graph. So, if we have encountered
         // atLeastOneNonProhibited, but it did not have degree at most 1, something is wrong.
         if(atLeastOneNonProhibited)
+        {
+            GraphDisplayer.display(this.currentCompleteGraph);
+            GraphDisplayer.display(integerGraph);
+            System.out.println(prohibited);
             throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
+        }
 
         return null;
     }
@@ -165,7 +215,7 @@ class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
             changed |= Kernelization.rule0and1(reductionSolution, integerGraph);
             // If one of the prohibited vertices is removed, it must be removed from prohibited as well, otherwise the rest of the
             // algorithm
-
+            
             // Applies reduction rule 2 on the graph
             changed |= SimpleDisjointKernelization.removeOnlyVertexInProhibitedCycle(reductionSolution, integerGraph, integerProhibited);
 

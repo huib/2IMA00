@@ -94,7 +94,7 @@ public class Kernelization {
     }
 
     /**
-     * Fast application of rule 0 and 1 to the graph, where the set of verties is already extracted. Is faster than
+     * Fast application of rule 0 and 1 to the graph, where the set of vertices is already extracted. Is faster than
      * the other rule0and1 method therefore
      */
     public static boolean rule0and1(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
