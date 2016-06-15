@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Kernelization rules mainly focessed on the Simple Disjoint Kernelization Problem.
+ * Kernelization rules mainly focused on the Simple Disjoint Kernelization Problem.
  *
  * See Section 4.3.1 from the book
  */
@@ -37,7 +37,7 @@ public class SimpleDisjointKernelization extends Kernelization {
             }
 
             if (SimpleDisjointKernelization.inCycleWith(v, graph, prohibited)) {
-                Kernelization.removeVertex(solution, v, false);
+                Kernelization.removeVertex(solution, v, true);
                 changed = true;
             }
         }
@@ -78,9 +78,14 @@ public class SimpleDisjointKernelization extends Kernelization {
         Collection<Integer> neighbours = SimpleDisjointKernelization.getNeighbours(graph, currentVertex)
                 .collect(Collectors.toCollection(ArrayList<Integer>::new));
 
+        boolean secondBack = false;
         for (int vertex : neighbours) {
             // Do not go back the same way
-            if (vertex == lastVertex) {
+            // unless the lastVertex is the vertex we are looking for (v) and this is the second time
+            // we can go back (meaning two edges going back, one already visited to get here, the
+            // other one completing the cycle)
+            if (vertex == lastVertex && !(secondBack && lastVertex.equals(v))) {
+                secondBack = true;
                 continue;
             }
 
@@ -96,10 +101,10 @@ public class SimpleDisjointKernelization extends Kernelization {
 
             if (withSet.contains(vertex)) {
                 done.add(vertex);
-                if (SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, v, done)) {
+                if (SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, currentVertex, done)) {
                     return true;
                 }
-                done.remove(vertex);
+                //done.remove(vertex);
             }
         }
 
@@ -162,7 +167,7 @@ public class SimpleDisjointKernelization extends Kernelization {
      */
     public static Stream<Integer> getNeighbours(Multigraph<Integer, DefaultEdge> graph, Integer v)
     {
-        return SimpleDisjointKernelization.getEdgesOf(graph, v)
+        return graph.edgesOf(v)
                 .stream()
                 .map((DefaultEdge e)-> new Integer(graph.getEdgeSource(e).equals(v) ? graph.getEdgeTarget(e) : graph.getEdgeSource(e)));
     }
