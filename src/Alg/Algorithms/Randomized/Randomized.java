@@ -7,6 +7,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -31,11 +32,18 @@ public class Randomized implements FVSAlgorithmInterface
     protected Random random;
 
     @Override
+    public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution){
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
+        result.addAll(partialSolution.verticesToRemoved);
+        return result;
+    }
+
+    @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
 
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
-        ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
+        ReductionSolution reduced = Kernelization.kernelittle(graph, true);
 
         this.random = new Random();
 
@@ -64,7 +72,7 @@ public class Randomized implements FVSAlgorithmInterface
      */
     public Solution oneSidedMonteCarloFVS(Multigraph<Integer, DefaultEdge> graph, int k)
     {
-        ReductionSolution reductionSolution = Kernelization.kernelize(graph, k, false);
+        ReductionSolution reductionSolution = Kernelization.kernelittle(graph, false, k);
 
         graph = reductionSolution.reducedGraph;
         k = reductionSolution.reducedK;

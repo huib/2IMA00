@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -23,6 +25,13 @@ import org.jgrapht.graph.Multigraph;
  */
 public class IterativeCompression implements FVSAlgorithmInterface
 {
+
+    @Override
+    public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution){
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
+        result.addAll(partialSolution.verticesToRemoved);
+        return result;
+    }
 
     @Override
     public List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph)
