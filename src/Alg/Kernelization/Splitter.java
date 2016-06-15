@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Class that removes vertices not part of a cycle, and splits the remaining gaph into subgraphs that can be solved independently
+ * Class that removes vertices not part of a cycle, and splits the remaining graph into subgraphs that can be solved independently
  */
 public class Splitter {
 

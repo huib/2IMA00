@@ -1,5 +1,6 @@
 package Alg.Kernelization;
 
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
  */
 public class ReductionSolution
 {
+
     /**
      * Boolean indicating whether after reduction there is still a possibility
      */

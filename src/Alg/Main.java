@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
+
+import Alg.Algorithms.Randomized.RandomizedDensity;
+import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -19,13 +22,13 @@ public class Main {
         // Read from file
         Scanner scanner = null;
         try {
-            scanner = new Scanner(new File("instances/099.graph"));
+            scanner = new Scanner(new File("instances/002.graph"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
         }
 
-        Multigraph<Integer, DefaultEdge> graph = InputReader.readGraph(scanner);
+        ReductionSolution looplessGraph = InputReader.loopSafeReadGraph(scanner);
 
 
 
@@ -33,7 +36,7 @@ public class Main {
         //FVSAlgorithmInterface randomized = new Randomized();
         FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
 
-        List<Integer> solution = randomized.findFeedbackVertexSet(graph);
+        List<Integer> solution = randomized.findFeedbackVertexSet(looplessGraph);
 
         for (Integer s: solution) {
             System.out.print(s + ", ");
