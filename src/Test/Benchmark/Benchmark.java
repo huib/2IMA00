@@ -24,13 +24,15 @@ public abstract class Benchmark {
     /*
     Log of all the benchmarks that are done
 
-    Moment            Algorithm         Time
-    31/5/16 14:16     Randomized        5m 35s 447 ms
-    31/5/16 14:34     Randomized        3m 16s 795 ms
-    31/5/16 19:45     RandomizedDensity    46s 933 ms
-    31/5/16 20:45     Randomized        1m 42s 212 ms
-    01/6/16 7:02      Randomized           42s 033 ms
-    01/6/16 7:04      RandomizedDEnsity    34s 941 ms
+    Moment            Algorithm                          Time
+    31/5/16 14:16     Randomized                         5m 35s 447 ms
+    31/5/16 14:34     Randomized                         3m 16s 795 ms
+    31/5/16 19:45     RandomizedDensity                     46s 933 ms
+    31/5/16 20:45     Randomized                         1m 42s 212 ms
+    01/6/16 7:02      Randomized                            42s 033 ms
+    01/6/16 7:04      RandomizedDensity                     34s 941 ms
+    01/6/16 21:11     Randomized + SplitSolve               50s 940 ms
+    01/6/16 21:18     RandomizedDensity + SplitSolve        33s 937 ms
 
      */
     private FVSAlgorithmInterface alg;

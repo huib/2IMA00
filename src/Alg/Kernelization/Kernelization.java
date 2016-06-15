@@ -119,7 +119,6 @@ public class Kernelization {
     {
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
         return Kernelization.rule2(solution, graph, vertices);
-
     }
 
     /**
@@ -133,7 +132,9 @@ public class Kernelization {
     public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
         boolean changed = false;
         for (int v:vertices) {
+            // Vertex might be removed already
             if(!graph.containsVertex(v)) continue;
+
             int degree = graph.degreeOf(v);
             // Rule 2
             if (degree == 2) {
