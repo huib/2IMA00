@@ -64,7 +64,6 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
     {
         if(k < 0)
         {
-            System.err.println("k<0 !? (k="+k+")");
             return null;
         }
         // 1. Check for a cycle in the graph consisting of only vertices in prohibited
@@ -101,8 +100,8 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         V vertex = this.findVertexWithOneNonProhibitedNeighbour(graph, prohibited);
         if(vertex == null) // no nonprohibited vertices in the graph
         {
-            IterativeCompression.checkValidSolution(beforeReduction, red.verticesToRemoved);
-            System.out.println("No leaf");
+            //IterativeCompression.checkValidSolution(beforeReduction, red.verticesToRemoved);
+            //System.out.println("No leaf");
             return new HashSet((List<V>)red.verticesToRemoved);
         }
         
@@ -111,7 +110,7 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         Collection<V> solution = this.solve((Multigraph)graph.clone(), prohibited, k);
         if (solution != null) {
             solution.addAll((List<V>)red.verticesToRemoved);
-            System.out.println("Leaf prohibited");
+            //System.out.println("Leaf prohibited");
             return solution;
         }
         
@@ -119,24 +118,24 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
 
         graph.removeVertex(vertex);
         
-        IterativeCompression.checkValidSolution(graph, prohibited);
-        System.out.println(graph);
+        //IterativeCompression.checkValidSolution(graph, prohibited);
+        //System.out.println(graph);
         solution = this.solve(graph, prohibited, k-1);
-        System.out.println(solution);
-        if(solution != null)
-            IterativeCompression.checkValidSolution(graph, solution);
+        //System.out.println(solution);
+        //if(solution != null)
+        //    IterativeCompression.checkValidSolution(graph, solution);
         
         if(solution != null)
         {
             solution.add(vertex);
             solution.addAll((List<V>)red.verticesToRemoved);
-            System.out.println(prohibited);
-            System.out.println(solution);
-            IterativeCompression.checkValidSolution(beforeReduction, solution);
-            System.out.println("Leaf added to solution");
+            //System.out.println(prohibited);
+            //System.out.println(solution);
+            //IterativeCompression.checkValidSolution(beforeReduction, solution);
+            //System.out.println("Leaf added to solution");
         }
-        else
-            System.out.println("No solution");
+        //else
+        //    System.out.println("No solution");
         return solution;
     }
 

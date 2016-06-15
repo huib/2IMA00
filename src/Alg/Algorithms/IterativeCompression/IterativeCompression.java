@@ -52,21 +52,21 @@ public class IterativeCompression implements FVSAlgorithmInterface
             DeleteVertexAction<Integer> action = (DeleteVertexAction<Integer>) actions.pop();
             action.revert();
             solution.add(action.getVertex());
-            checkValidSolution(graph, solution);
+            //checkValidSolution(graph, solution);
             
-            System.out.println("solution size= "+solution.size()+", k= "+k);
+            //System.out.println("solution size= "+solution.size()+", k= "+k);
             if(solution.size() > k)
             {
                 solution.compress(graph);
                 k = Math.max(k, solution.size());
-                System.out.println("new solution size= "+solution.size()+", k= "+k);
+                //System.out.println("new solution size= "+solution.size()+", k= "+k);
             }
             else
                 System.err.println("this shouldn't happen");
             
             
-            System.out.println(solution);
-            checkValidSolution(graph, solution);
+            //System.out.println(solution);
+            //checkValidSolution(graph, solution);
         }
         
         return solution;
@@ -104,26 +104,26 @@ public class IterativeCompression implements FVSAlgorithmInterface
                     continue; // not a strict subset
                 
                 HashSet<V> complement = this.complementOf(subset);
-                if(subset.size() + complement.size() != this.size())
-                    throw new RuntimeException("complement wrong!");
+                //if(subset.size() + complement.size() != this.size())
+                //    throw new RuntimeException("complement wrong!");
                 
                 DeleteVerticesAction<V> removeVertices = new DeleteVerticesAction<>(graph, subset);
                 removeVertices.perform();
-                checkValidSolution(graph, complement);
+                //checkValidSolution(graph, complement);
                 Collection<V> solution = disjointSolver.solve(graph, (HashSet)complement.clone());
-                if(solution != null)
-                    checkValidSolution(graph, solution);
+                //if(solution != null)
+                //    checkValidSolution(graph, solution);
                 removeVertices.revert();
                 
                 if(solution != null) // we found one!
                 {
-                    ArrayList tempSolution = new ArrayList(solution);
-                    tempSolution.addAll(subset);
-                    checkValidSolution(graph, tempSolution);
-                    System.out.println("Found a solution of size:"+tempSolution.size()+" ("+solution.size()+"+"+subset.size()+"), previous solution: "+this.size());
+                    //ArrayList tempSolution = new ArrayList(solution);
+                    //tempSolution.addAll(subset);
+                    //checkValidSolution(graph, tempSolution);
+                    //System.out.println("Found a solution of size:"+tempSolution.size()+" ("+solution.size()+"+"+subset.size()+"), previous solution: "+this.size());
                     
                     this.update(complement, solution);
-                    checkValidSolution(graph, this);
+                    //checkValidSolution(graph, this);
                     return;
                 }
             }
@@ -132,7 +132,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
         private void update(HashSet<V> remove, Collection<V> add)
         {
             if(remove.size() != add.size()+1)
-                throw new IllegalArgumentException("\nremove: "+remove+"\nadd: "+add);
+                throw new IllegalArgumentException("remove.size() should be one larger than add.size()\nremove: "+remove+"\nadd: "+add);
             
             Iterator<V> it = add.iterator();
             
