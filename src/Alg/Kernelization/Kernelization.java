@@ -320,7 +320,7 @@ public class Kernelization {
         boolean changed;
         do {
             changed = false;
-            System.out.println("Pre: " + solution.reducedK);
+            //System.out.println("Pre: " + solution.reducedK);
 
             // Call Rule 4, reducing any multi edge of multiplicity >2 to multiplicity 2
             //rule4Q(solution, solution.reducedGraph.edgeSet());
@@ -342,18 +342,19 @@ public class Kernelization {
             }
             // Do advanced rules, if desired
             if (!simpleOnly) {
-                System.out.println("post0: "  + solution.reducedK);
+                //System.out.println("post0: "  + solution.reducedK);
 
-                int getApprox = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
+                ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
+                simpleVertexRules(approxSolution);
+                int getApprox = approxSolution.totalFVSweight;
                 int usedK = useK ? Math.max(solution.reducedK, getApprox) : getApprox;
-
                 relevantVertices.addAll(ruleSFV(solution, flowerCoreVertices, usedK));
                 changed |= !relevantVertices.isEmpty();
-                System.out.println(changed);
+                //System.out.println(changed);
 
             }
         } while (changed);
-        System.out.println("post1: "  + solution.reducedK);
+        //System.out.println("post1: "  + solution.reducedK);
 
         return solution;
     }
@@ -625,8 +626,9 @@ public class Kernelization {
     {
         TreeSet<Integer> changedVertices = new TreeSet<>();
         //Get approximation with uniform weights, except v with weight 2k+1
-        int getApprox = Approximation.determineFVS(solution.reducedGraph, true, new Integer[]{v}, 2*k+1);
-        System.out.println("Realk: " + k + ", foundK: " + getApprox);
+        ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[]{v}, 2*k+1);
+        int getApprox = approxSolution.totalFVSweight;
+        //System.out.println("Realk: " + k + ", foundK: " + getApprox);
         if (getApprox >= (2*k+1)) {
             // v should be removed, all neighbours flagged for change
             // (should remove neighbours as well and flag their neighbours??)

@@ -27,6 +27,11 @@ public class ReductionSolution
     public int reducedK;
 
     /**
+     * The FVS weight after approximation
+     */
+    public int totalFVSweight;
+
+    /**
      * Graph after reduction Solution
      */
     public Multigraph reducedGraph;
@@ -36,6 +41,7 @@ public class ReductionSolution
         return  "Reduction Solution:\n" +
                 "\t Still possible? " + (stillPossible ? "Yes" : "No") + "\n" +
                 "\t Vertices to be removed: " + verticesToRemoved + "\n" +
+                "\t FVS weight (approx): " + totalFVSweight + "\n" +
                 "\t Reduced k: " + reducedK + "\n";
     }
 }

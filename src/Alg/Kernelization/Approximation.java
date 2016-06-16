@@ -36,13 +36,13 @@ import java.util.*;
  */
 public class Approximation {
 
-    public static int determineFVS(Multigraph<Integer, DefaultEdge> ingraph, boolean cloneGraph, Integer[] weightedVertices, int weight) // changed from boolean to int
+    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, boolean cloneGraph, Integer[] weightedVertices, int weight) // changed from boolean to int
     {
         Multigraph<Integer, DefaultEdge> graph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) ingraph.clone(): ingraph;
         ArrayList<Integer> approxVerticesToRemoved = new ArrayList();
 
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
-        return Approximation.determineFVS(graph, vertices, approxVerticesToRemoved, weightedVertices, weight);
+        return Approximation.determineFVS(ingraph, graph, vertices, approxVerticesToRemoved, weightedVertices, weight);
 
     }
 
@@ -55,12 +55,15 @@ public class Approximation {
      * @param weight
      * @return
      */
-    public static int determineFVS(Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, ArrayList<Integer> approxVerticesToRemoved, Integer[] weightedVertices, int weight){
+    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, ArrayList<Integer> approxVerticesToRemoved, Integer[] weightedVertices, int weight){
         boolean changed = false;
         boolean semidisjoint = true;
         boolean semidisjointexception = false;
         float gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
         int addedWeight = 0;
+
+        ReductionSolution solution = new ReductionSolution();
+        solution.reducedGraph = graph;
         /*
          * Check if semi-disjoint cycle in G and find min gamma value that is needed in case there isn't
          *
@@ -94,7 +97,6 @@ public class Approximation {
                 //break; // we don't break here, because we need to find min(gamma) first!
             }
         }
-
         /*
          * Fill the solution set F with the semidisjoint cycle or, otherwise, all vertices with weight reduced to 0
          *
@@ -130,25 +132,30 @@ public class Approximation {
             if (u.weight == 0.0) {
                 if (!approxVerticesToRemoved.contains(u.id)) {
                     approxVerticesToRemoved.add(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
+                    solution.reducedGraph.removeVertex(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
                 }
 
                 // In FEEDBACK, graph G is deleted at this point and it uses subgraph Gi for the next iteration.
                 // However, we don't need to do this here because our weighted-vertex graph makes it so trivial.
             }
         }
-        ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = graph;
-        Kernelization.simpleVertexRules(solution);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
+
+        //Kernelization.simpleVertexRules(solution);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
 
         UnionFind<Integer> union = new UnionFind(graph.vertexSet());
         for (Integer v : approxVerticesToRemoved ) {
-            List<Integer> neighbors = Graphs.neighborListOf(graph, v);
+            if (solution.verticesToRemoved.contains(v)) continue;
+
+            List<Integer> neighbors = Graphs.neighborListOf(ingraph, v);
             TreeSet<Integer> neighborComponents = new TreeSet();
             boolean hasDuplicates = false;
 
             for ( Integer n:neighbors ) {
-                neighborComponents.add( union.find(n) );
-                hasDuplicates |= !neighborComponents.add( union.find(n) );
+                if (graph.containsVertex(n)) {
+                    neighborComponents.add(union.find(n));
+                    hasDuplicates |= !neighborComponents.add(union.find(n));
+                }
+                if (hasDuplicates) break;
             }
 
             if(!hasDuplicates){//(v is redundant)
@@ -157,6 +164,10 @@ public class Approximation {
                     union.union(v, n);
                 }
                 approxVerticesToRemoved.remove(v);
+                solution.reducedGraph.addVertex(v);
+            } else { // essential -> finally add to solution set
+                solution.verticesToRemoved.add(v);
+                solution.reducedK -= 1;
             }
         }
 
@@ -168,6 +179,8 @@ public class Approximation {
         }
 
         int total_FVS_weight = approxVerticesToRemoved.size() + c*(weight-1);
-        return total_FVS_weight;
+        solution.totalFVSweight = total_FVS_weight;
+
+        return solution;
     }
 }
