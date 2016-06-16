@@ -21,6 +21,11 @@ class DeleteVerticesAction<V> implements GraphAction
     
     public DeleteVerticesAction(AbstractBaseGraph g, Collection<V> vertices)
     {
+        if(vertices == null)
+            throw new IllegalArgumentException("vertices may not be null");
+        if(g == null)
+            throw new IllegalArgumentException("graph may not be null");
+        
         this.vertices = vertices;
         this.graph    = g;
     }
@@ -29,13 +34,20 @@ class DeleteVerticesAction<V> implements GraphAction
     public void perform()
     {
         int size = 0;
-        size = this.vertices.stream().map((v) -> this.graph.degreeOf(v)).reduce(size, Integer::sum);
+        size = this.vertices
+                .stream()
+                .filter((v) -> (this.graph.containsVertex(v)))
+                .map((v) -> this.graph.degreeOf(v))
+                .reduce(size, Integer::sum);
         
         this.edges = new EdgeWrapper[size];
         
         int i = 0;
         for(V v : this.vertices)
         {
+            if(!this.graph.containsVertex(v))
+                continue;
+            
             for(Object edge : this.graph.edgesOf(v))
                 this.edges[i++] = new EdgeWrapper<>(
                         this.graph.getEdgeSource(edge),
@@ -45,7 +57,11 @@ class DeleteVerticesAction<V> implements GraphAction
                 );
         }
         
-        this.graph.removeAllVertices(this.vertices);
+        //this.graph.removeAllVertices(this.vertices);
+        this.vertices.stream().filter((v) -> (this.graph.containsVertex(v))).forEach((v) ->
+        {
+            this.graph.removeVertex(v);
+        });
     }
 
     @Override

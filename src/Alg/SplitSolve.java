@@ -1,5 +1,6 @@
 package Alg;
 
+import Alg.Kernelization.ReductionSolution;
 import Alg.Kernelization.Splitter;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
@@ -24,6 +25,13 @@ public class SplitSolve implements FVSAlgorithmInterface {
     }
 
     FVSAlgorithmInterface implementation;
+
+    @Override
+    public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution) {
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
+        result.addAll(partialSolution.verticesToRemoved);
+        return result;
+    }
 
     @Override
     public List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph) {

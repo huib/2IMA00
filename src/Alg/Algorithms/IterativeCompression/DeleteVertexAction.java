@@ -48,20 +48,20 @@ public class DeleteVertexAction<V> implements GraphAction
         this.graph.removeVertex(this.v);
         this.place = order++;
         
-        System.out.println(new String(new char[this.place*2]).replace('\0', ' ') + "removed "+this.v);
-        System.out.print(new String(new char[this.place*2]).replace('\0', ' ') + " including edges to ");
-        for(EdgeWrapper<V, Object> e : this.edges)
-            if(e.target == this.v)
-                System.out.print(e.source + " ");
-            else
-                System.out.print(e.target + " ");
-        System.out.println();
+        //System.out.println(new String(new char[this.place*2]).replace('\0', ' ') + "removed "+this.v);
+        //System.out.print(new String(new char[this.place*2]).replace('\0', ' ') + " including edges to ");
+        //for(EdgeWrapper<V, Object> e : this.edges)
+        //    if(e.target == this.v)
+        //        System.out.print(e.source + " ");
+        //    else
+        //        System.out.print(e.target + " ");
+        //System.out.println();
     }
 
     @Override
     public void revert()
     {
-        System.out.println(new String(new char[this.place*2]).replace('\0', ' ') + "adding "+this.v);
+        //System.out.println(new String(new char[this.place*2]).replace('\0', ' ') + "adding "+this.v);
         
         if(this.place != order-1)
             throw new RuntimeException("GraphActions out of order...");
