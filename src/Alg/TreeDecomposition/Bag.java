@@ -80,6 +80,10 @@ public class Bag {
         }
     }
     
+    void insertAbove(Bag b){
+        parent.insertBelow(b);
+    }
+    
     Bag findNum(Integer n){
 //        System.out.print("Looking for " + n);
         if(n.equals(num)){
