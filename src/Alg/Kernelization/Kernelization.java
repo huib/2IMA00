@@ -345,7 +345,7 @@ public class Kernelization {
                 System.out.println("post0: "  + solution.reducedK);
 
                 int getApprox = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
-                int usedK = useK ? solution.reducedK : getApprox;
+                int usedK = useK ? Math.max(solution.reducedK, getApprox) : getApprox;
 
                 relevantVertices.addAll(ruleSFV(solution, flowerCoreVertices, usedK));
                 changed |= !relevantVertices.isEmpty();
