@@ -342,6 +342,7 @@ public class Kernelization {
             }
             // Do advanced rules, if desired
             if (!simpleOnly) {
+                relevantVertices = new LinkedList<>();
                 //System.out.println("post0: "  + solution.reducedK);
 
                 ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
