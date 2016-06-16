@@ -1,5 +1,6 @@
 package Alg.Kernelization;
 
+import com.sun.javaws.security.AppPolicy;
 import org.jgrapht.Graphs;
 import org.jgrapht.ext.IntegerEdgeNameProvider;
 import org.jgrapht.graph.DefaultEdge;
@@ -169,7 +170,7 @@ public class Kernelization {
 
     /**
      *
-     * @param graphsolution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
+     * @param graph
      * @param k
      * @param cloneGraph Do we clone the graph, or work on the original graph directly
      * @return
@@ -319,6 +320,7 @@ public class Kernelization {
         boolean changed;
         do {
             changed = false;
+            System.out.println("Pre: " + solution.reducedK);
 
             // Call Rule 4, reducing any multi edge of multiplicity >2 to multiplicity 2
             //rule4Q(solution, solution.reducedGraph.edgeSet());
@@ -338,17 +340,20 @@ public class Kernelization {
                 rule6(solution);
                 if(!solution.stillPossible) return solution;
             }
-
             // Do advanced rules, if desired
             if (!simpleOnly) {
+                System.out.println("post0: "  + solution.reducedK);
 
-                int getApprox = solution.reducedGraph.vertexSet().size();
+                int getApprox = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
                 int usedK = useK ? solution.reducedK : getApprox;
 
                 relevantVertices.addAll(ruleSFV(solution, flowerCoreVertices, usedK));
                 changed |= !relevantVertices.isEmpty();
+                System.out.println(changed);
+
             }
         } while (changed);
+        System.out.println("post1: "  + solution.reducedK);
 
         return solution;
     }
@@ -620,10 +625,11 @@ public class Kernelization {
     {
         TreeSet<Integer> changedVertices = new TreeSet<>();
         //Get approximation with uniform weights, except v with weight 2k+1
-        int getApprox = solution.reducedGraph.vertexSet().size();
+        int getApprox = Approximation.determineFVS(solution.reducedGraph, true, new Integer[]{v}, 2*k+1);
+        System.out.println("Realk: " + k + ", foundK: " + getApprox);
         if (getApprox >= (2*k+1)) {
             // v should be removed, all neighbours flagged for change
-            // (should remove neighbours as well and flagg their neighbours??)
+            // (should remove neighbours as well and flag their neighbours??)
             changedVertices.addAll(Graphs.neighborListOf(solution.reducedGraph, v));
             removeVertex(solution, v, true);
         }

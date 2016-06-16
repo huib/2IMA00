@@ -70,7 +70,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
         }
 
         // Run the kernelization over the graph
-        ReductionSolution reductionSolution = Kernelization.kernelittle(graph, false, k);
+        ReductionSolution reductionSolution = Kernelization.kernelot(graph, false, k);
 
 
         Multigraph reducedGraph = reductionSolution.reducedGraph;

@@ -31,10 +31,8 @@ public class Main {
         ReductionSolution looplessGraph = InputReader.loopSafeReadGraph(scanner);
 
 
-
-
         //FVSAlgorithmInterface randomized = new Randomized();
-        FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
+        FVSAlgorithmInterface randomized = new SplitSolve(new RandomizedDensity());
 
         List<Integer> solution = randomized.findFeedbackVertexSet(looplessGraph);
 
