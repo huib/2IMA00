@@ -51,7 +51,7 @@ public class TreeDecomposition {
                     if(g.containsEdge(v, w) || g.containsEdge(w, v)){
                         Bag c = new Bag(b);
                         c.setEdge(v,w);
-                        b.insertBelow(c);
+                        b.insertAbove(c);
                     }
                 }
             }
