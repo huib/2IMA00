@@ -8,14 +8,17 @@ public class TreeDecomposition {
     
     // Returns the root of a tree decomposition of g
     // Might completely mangle g
-    // Assumes g is connected
+    // If g is not connected, it will simply add edges to make it so
     public static Bag makeTreeDecomposition(Multigraph g){
-        Choice c;
-//        c = new FixedOrderChoice();
-        c = new DeGreedy();
-        
-        Bag toRet = permutationToTD(g, c);
-        return toRet;
+        // stack overflow check
+        try{
+            Choice c;
+            c = new DeGreedy();
+            Bag toRet = permutationToTD(g, c);
+            return toRet;
+        } catch(StackOverflowError e) {
+            return simpleTD(g);
+        }
     }
     
     // Turns the given tree decomposition into a nice tree decomposition, i.e. each bag is either:
@@ -40,7 +43,7 @@ public class TreeDecomposition {
     // Adds `add edge' bags to the tree
     public static Bag addEdges(Bag b, Multigraph g){
         if(b.isAdd()){
-            ArrayList<Integer> ve = b.vert;
+            ArrayList<Integer> ve = (ArrayList<Integer>) b.vert.clone();
             ve.removeAll(b.parent.vert);
             Integer v = ve.get(0);
             for(Integer w: b.vert){
@@ -171,7 +174,6 @@ public class TreeDecomposition {
     private static Bag permutationToTD(Multigraph g, Choice c){
         // find v0 and its neighbours
         Integer v0 = c.nextChoice(g);
-//        print("Current: " + v0 + ", vertices left: " + vertices.size(), d);
         ArrayList<Integer> neighbours = new ArrayList<>();
         for(Object e: g.edgesOf(v0)){
             Integer t = (Integer) g.getEdgeTarget(e);
@@ -190,11 +192,26 @@ public class TreeDecomposition {
             Bag root = new Bag();
             root.add(v0);
             root.num = v0;
-//            print("Done!",d);
             return root;
         }
         
-//        print("Making new bag...", d);
+        // If it has no neighbours, the instance was not connected.
+        if(neighbours.isEmpty()){
+            //System.out.println("The given instance was not connected, adding a random edge...");
+            Set<Integer> vertices = g.vertexSet();
+            boolean foundOne = false;
+            for(Integer v: vertices){
+                if(!foundOne){
+                    if(v != v0){
+                        //System.out.println("Added (" + v0 + ", " + v + ")");
+                        g.addEdge(v0, v);
+                        foundOne = true;
+                        neighbours.add(v);
+                    }
+                }
+            }
+        }
+        
         // Construct bag with neighbours of v0 in G
         Bag toAdd = new Bag();
         toAdd.add(v0);
@@ -225,6 +242,9 @@ public class TreeDecomposition {
         g.removeVertex(v0);
         
         // call PermToTD(G',(v1,...v_{n-1}))
+        if(!g.vertexSet().contains(vj)){
+            System.out.println("Paniek!");
+        }
         Bag subTD = permutationToTD(g, c);
         
         // connect X_v_0 to X_v_j
