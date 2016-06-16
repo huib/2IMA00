@@ -96,10 +96,10 @@ public class Approximation {
         boolean semidisjointexception = false;
         int gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
 
-        for (int wv:weightedVertices){
-            WeightedVertex u = new WeightedVertex(wv);
-            u.weight = weight; //set weight to input
-        }
+//        for (int wv:weightedVertices){
+//            WeightedVertex u = new WeightedVertex(wv);
+//            u.weight = weight; //set weight to input
+//        }
         /*
          * Check if semi-disjoint cycle in G and find min gamma value that is needed in case there isn't
          *
@@ -112,6 +112,9 @@ public class Approximation {
             }
 
             WeightedVertex u = new WeightedVertex(v); // give default weight=1 to all v
+            if (Arrays.asList(weightedVertices).contains(u.id)){
+                u.weight = weight; //set weight to input
+            }
             int degree = graph.degreeOf(u.id); // v == u.id
             if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
                 continue;
