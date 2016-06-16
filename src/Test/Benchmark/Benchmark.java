@@ -125,8 +125,8 @@ public abstract class Benchmark {
                 new Instance("095.graph", 8),   // Record 9153 ms      (RandomizedDensity)
                 new Instance("028.graph", 8),   // Record 8827 ms      (RandomizedDensity)
 //                new Instance("003.graph", 1),
-                new Instance("020.graph", 9),   // Record 4569 ms      (RandomizedDEnsity
-                new Instance("042.graph", 12),  // Record 454646 ms    (RandomizedDensity)
+                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
+                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
 //                new Instance("092.graph", 1),
 //                new Instance("065.graph", 1),
 //                new Instance("046.graph", 1),

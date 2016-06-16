@@ -1,6 +1,7 @@
 package Alg.Kernelization;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.util.UnionFind;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -35,10 +36,6 @@ import java.util.*;
  */
 public class Approximation {
 
-    public static ReductionSolution kernelize(Multigraph<Integer, DefaultEdge> graph, int k, Integer[] weightedVertices, int weight){
-        return kernelize(graph, k, true, weightedVertices, weight);
-    }
-
     /**
      * Applies Rule 0 and 1 to the graph. Mainly meant for outside usage.
      *
@@ -46,39 +43,39 @@ public class Approximation {
      * @param graph
      * @return
      */
-    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
-    {
-        // kernelization reduction rules 0 and 1
-        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
-        return Approximation.cleanUp(solution, graph, vertices);
-
-    }
+//    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
+//    {
+//        // kernelization reduction rules 0 and 1
+//        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+//        return Approximation.cleanUp(solution, graph, vertices);
+//
+//    }
 
     /**
      * Fast application of rule 0 and 1 to the graph, where the set of verties is already extracted. Is faster than
      * the other rule0and1 method therefore
      */
-    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
-    {
-        boolean changed = false;
-        for (int v:vertices) {        //Returns the degree of the specified vertex.
-            int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
+//    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
+//    {
+//        boolean changed = false;
+//        for (int v:vertices) {        //Returns the degree of the specified vertex.
+//            int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
+//
+//            // Rule 0 & Rule 1
+//            if (degree <= 1) {
+//                if(solution.reducedGraph.containsVertex(v)) {
+//                    Approximation.removeVertex(solution, v, false);
+//                    changed = true;
+//                }
+//            }
+//        }
+//        return changed;
+//    }
 
-            // Rule 0 & Rule 1
-            if (degree <= 1) {
-                if(solution.reducedGraph.containsVertex(v)) {
-                    Approximation.removeVertex(solution, v, false);
-                    changed = true;
-                }
-            }
-        }
-        return changed;
-    }
-
-    public static int determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> wgraph, Integer[] weightedVertices, int weight) // changed from boolean to int
+    public static int determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] weightedVertices, int weight) // changed from boolean to int
     {
-        Integer[] vertices = (wgraph.vertexSet()).toArray(new Integer[wgraph.vertexSet().size()]);
-        return Approximation.determineFVS(solution, wgraph, vertices, weightedVertices, weight);
+        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
+        return Approximation.determineFVS(solution, graph, vertices, weightedVertices, weight);
 
     }
 
@@ -178,7 +175,9 @@ public class Approximation {
                 // However, we don't need to do this here because our weighted-vertex graph makes it so trivial.
             }
         }
-        Approximation.cleanUp(solution, graph);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
+        Kernelization.simpleVertexRules(solution);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
+
+        //UnionFind(graph.vertexSet());
 
         /*
         * At this point, FEEDBACK uses a STACK to check for redundant vertices in F
@@ -210,83 +209,10 @@ public class Approximation {
             }
         }
         int total_FVS_weight = solution.verticesToRemoved.size();
+        solution.FVSweight = total_FVS_weight;
         return total_FVS_weight;
     }
 
-    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
-    {
-        Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
-        return Approximation.rule2(solution, graph, vertices);
-    }
-
-    /**
-     * Fast application of rule 2
-     *
-     * @param solution
-     * @param graph
-     * @param vertices
-     * @return
-     */
-    public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
-        boolean changed = false;
-        for (int v:vertices) {
-
-            // Vertex might be removed already
-            if (!graph.containsVertex(v)) {
-                continue;
-            }
-            int degree = graph.degreeOf(v);
-            // Rule 2
-            if (degree == 2) {
-                //Returns a list of vertices which are adjacent to a specified vertex.
-                List<Integer> neighbors = Graphs.neighborListOf(graph, v); // get neighbors a and b of vertex v (allowing possibly a = b)
-                int a = neighbors.get(0);
-                int b = neighbors.get(1);
-
-                // If the new edge that is places introduces a self loop, then it can be removed,
-                // also remove the "self-loop vertex" and add it to the solution
-                if (a == b) {
-                    Approximation.removeVertex(solution, v, false);
-                    if(!solution.verticesToRemoved.contains("a")) {
-                        Approximation.removeVertex(solution, a, true);
-                    }
-                } else {
-                    //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
-                    graph.addEdge(a, b); // a = sourceVertex, b = targetVertex
-                    Approximation.removeVertex(solution, v, false);
-                }
-
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph, Integer[] weightedVertices, int weight) {
-
-        ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
-        solution.reducedK = k;
-
-        final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
-        boolean changed;
-        int minFVSweight = 0;
-
-        do {
-            changed = false;
-            changed |= Approximation.cleanUp(solution, reducedGraph);
-            int FVSweight = Approximation.determineFVS(solution, reducedGraph, weightedVertices, weight);
-            if (minFVSweight == 0 || FVSweight < minFVSweight) {
-                minFVSweight = FVSweight;
-            }
-            changed |= Approximation.rule2(solution, reducedGraph);
-            //System.out.println(" ");
-        } while(changed);
-
-        solution.FVSweight = minFVSweight;
-        solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
-        return solution;
-    }
 
     /**
      * Helper function to remove a vertex from the graph
