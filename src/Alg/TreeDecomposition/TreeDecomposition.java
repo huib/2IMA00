@@ -44,7 +44,7 @@ public class TreeDecomposition {
     public static Bag addEdges(Bag b, Multigraph g){
         if(b.isAdd()){
             ArrayList<Integer> ve = (ArrayList<Integer>) b.vert.clone();
-            ve.removeAll(b.parent.vert);
+            ve.removeAll(b.children.get(0).vert);
             Integer v = ve.get(0);
             for(Integer w: b.vert){
                 if(w != v){
