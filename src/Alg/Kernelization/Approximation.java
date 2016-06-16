@@ -67,7 +67,7 @@ public class Approximation {
          * Note: Since we only have weights 1 gamma doesn't do much for us, but it's here to show that we follow FEEBACK
          * step by step in case this script is at some point expanded for use on actual vertex-weighted graphs.
          */
-        for (int v : vertices) {
+        for (Integer v : vertices) {
             if (!graph.containsVertex(v)) {
                 continue;
             }
@@ -104,7 +104,7 @@ public class Approximation {
          * Note 2: We skip over vertices with degree <= 1 because these are technically still contained within our graph,
          * even though we already performed a cleanUp on it.
          */
-        for (int v:vertices) {
+        for (Integer v:vertices) {
             if (!graph.containsVertex(v)) {
                 continue;
             }
@@ -142,7 +142,7 @@ public class Approximation {
         Kernelization.simpleVertexRules(solution);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
 
         UnionFind<Integer> union = new UnionFind(graph.vertexSet());
-        for (int v : approxVerticesToRemoved ) {
+        for (Integer v : approxVerticesToRemoved ) {
             List<Integer> neighbors = Graphs.neighborListOf(graph, v);
             TreeSet<Integer> neighborComponents = new TreeSet();
             boolean hasDuplicates = false;
@@ -156,8 +156,8 @@ public class Approximation {
                 union.addElement(v);
                 for ( Integer n:neighbors ) {
                     union.union(v, n);
-                    approxVerticesToRemoved.remove(v);
                 }
+                approxVerticesToRemoved.remove(v);
             }
         }
 
