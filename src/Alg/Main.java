@@ -22,7 +22,7 @@ public class Main {
         // Read from file
         Scanner scanner = null;
         try {
-            scanner = new Scanner(new File("instances/002.graph"));
+            scanner = new Scanner(new File("instances/096.graph"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;

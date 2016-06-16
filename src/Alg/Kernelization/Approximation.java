@@ -59,7 +59,7 @@ public class Approximation {
         boolean changed = false;
         boolean semidisjoint = true;
         boolean semidisjointexception = false;
-        int gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
+        float gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
         int addedWeight = 0;
         /*
          * Check if semi-disjoint cycle in G and find min gamma value that is needed in case there isn't
@@ -81,7 +81,6 @@ public class Approximation {
             if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
                 continue;
             }
-            //System.out.print(v + ", ");
             if ( gamma > u.weight/(degree-1) ) {
                 gamma = (u.weight / (degree - 1));
             }
@@ -128,7 +127,7 @@ public class Approximation {
                 * wi(u) = w(u)-gamma*(d(u)-1), for all u in Gi
                 */
             }
-            if (u.weight == 0) {
+            if (u.weight == 0.0) {
                 if (!approxVerticesToRemoved.contains(u.id)) {
                     approxVerticesToRemoved.add(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
                 }
