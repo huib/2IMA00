@@ -35,8 +35,8 @@ import java.util.*;
  */
 public class Approximation {
 
-    public static ReductionSolution kernelize(Multigraph<Integer, DefaultEdge> graph, int k) {
-        return kernelize(graph, k, true);
+    public static ReductionSolution kernelize(Multigraph<Integer, DefaultEdge> graph, int k, Integer[] weightedVertices, int weight){
+        return kernelize(graph, k, true, weightedVertices, weight);
     }
 
     /**
@@ -75,10 +75,10 @@ public class Approximation {
         return changed;
     }
 
-    public static boolean determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> wgraph)
+    public static int determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> wgraph, Integer[] weightedVertices, int weight) // changed from boolean to int
     {
         Integer[] vertices = (wgraph.vertexSet()).toArray(new Integer[wgraph.vertexSet().size()]);
-        return Approximation.determineFVS(solution, wgraph, vertices);
+        return Approximation.determineFVS(solution, wgraph, vertices, weightedVertices, weight);
 
     }
 
@@ -90,12 +90,16 @@ public class Approximation {
      * @param vertices
      * @return
      */
-    public static boolean determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
+    public static int determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, Integer[] weightedVertices, int weight){
         boolean changed = false;
         boolean semidisjoint = true;
         boolean semidisjointexception = false;
         int gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
 
+        for (int wv:weightedVertices){
+            WeightedVertex u = new WeightedVertex(wv);
+            u.weight = weight; //set weight to input
+        }
         /*
          * Check if semi-disjoint cycle in G and find min gamma value that is needed in case there isn't
          *
@@ -192,7 +196,8 @@ public class Approximation {
                 for (int j = 1; j < neighbors.size(); j++) {
                     if(!graph.containsEdge(i,j)) {
                         // no loop created by adding v to G-F, so v is redundant
-                        solution.verticesToRemoved.removeAll(Collections.singleton("v"));
+                        solution.verticesToRemoved.removeAll(Collections.singleton((Integer) v));
+                        //solution.approxVerticesToRemoved.removeAll(Collections.singleton("v"));
                     } else {
                         // else v is essential, because it creates a loop in G-F
                         solution.reducedGraph.removeVertex(v); // finally, remove v from subgraph
@@ -201,8 +206,8 @@ public class Approximation {
                 }
             }
         }
-
-        return changed;
+        int total_FVS_weight = solution.verticesToRemoved.size();
+        return total_FVS_weight;
     }
 
     public static boolean rule2(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
@@ -239,7 +244,9 @@ public class Approximation {
                 // also remove the "self-loop vertex" and add it to the solution
                 if (a == b) {
                     Approximation.removeVertex(solution, v, false);
-                    Approximation.removeVertex(solution, a, true);
+                    if(!solution.verticesToRemoved.contains("a")) {
+                        Approximation.removeVertex(solution, a, true);
+                    }
                 } else {
                     //Creates a new edge in this graph, going from the source vertex to the target vertex, and returns the created edge.
                     graph.addEdge(a, b); // a = sourceVertex, b = targetVertex
@@ -252,7 +259,7 @@ public class Approximation {
         return changed;
     }
 
-    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
+    public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph, Integer[] weightedVertices, int weight) {
 
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
@@ -260,15 +267,20 @@ public class Approximation {
 
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
         boolean changed;
+        int minFVSweight = 0;
 
         do {
             changed = false;
             changed |= Approximation.cleanUp(solution, reducedGraph);
-            changed |= Approximation.determineFVS(solution, reducedGraph);
+            int FVSweight = Approximation.determineFVS(solution, reducedGraph, weightedVertices, weight);
+            if (minFVSweight == 0 || FVSweight < minFVSweight) {
+                minFVSweight = FVSweight;
+            }
             changed |= Approximation.rule2(solution, reducedGraph);
             //System.out.println(" ");
         } while(changed);
 
+        solution.FVSweight = minFVSweight;
         solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
         return solution;
     }
