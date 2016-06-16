@@ -169,7 +169,7 @@ public class Kernelization {
 
     /**
      *
-     * @param graph
+     * @param graphsolution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
      * @param k
      * @param cloneGraph Do we clone the graph, or work on the original graph directly
      * @return
@@ -177,7 +177,7 @@ public class Kernelization {
     public static ReductionSolution kernelize( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
 
         ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
+
         solution.reducedK = k;
 
         final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;

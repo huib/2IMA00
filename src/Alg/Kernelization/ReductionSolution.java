@@ -22,19 +22,9 @@ public class ReductionSolution
     public ArrayList<Integer> verticesToRemoved = new ArrayList();
 
     /**
-     * Approximate set of all the vertices that have to be removed by this solution (Made with FEEDBACK alg)
-     */
-    public ArrayList<Integer> approxVerticesToRemoved = new ArrayList();
-
-    /**
      * The k value after the reduction algorithm
      */
     public int reducedK;
-
-    /**
-     * The FVS weight (of verticesToRemoved)
-     */
-    public int FVSweight;
 
     /**
      * Graph after reduction Solution
@@ -45,9 +35,7 @@ public class ReductionSolution
     {
         return  "Reduction Solution:\n" +
                 "\t Still possible? " + (stillPossible ? "Yes" : "No") + "\n" +
-                "\t Approximated vertices to be removed: " + approxVerticesToRemoved + "\n" +
                 "\t Vertices to be removed: " + verticesToRemoved + "\n" +
-                "\t FVS weight: " + FVSweight + "\n" +
                 "\t Reduced k: " + reducedK + "\n";
     }
 }
