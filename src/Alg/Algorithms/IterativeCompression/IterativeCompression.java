@@ -20,6 +20,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import Alg.Kernelization.Kernelization;
+import Alg.Kernelization.ReductionSolution;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -29,6 +33,13 @@ import org.jgrapht.graph.Multigraph;
  */
 public class IterativeCompression implements FVSAlgorithmInterface
 {
+
+    @Override
+    public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution){
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
+        result.addAll(partialSolution.verticesToRemoved);
+        return result;
+    }
 
     @Override
     public List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph)
@@ -97,16 +108,19 @@ public class IterativeCompression implements FVSAlgorithmInterface
             //System.out.println("solution size= "+solution.size()+", k= "+k);
             if(solution.size() > k)
             {
-                //System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
-                solution.compress(graph);
+                try
+                {
+                    //System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
+                    solution.compress(graph);
+                }
+                catch (InterruptedException ex)
+                {
+                    System.out.println("Interupted with k="+k+", and "+nVertices+" vertices to go");
+                    throw new RuntimeException(ex);
+                }
                 k = Math.max(k, solution.size());
                 //System.out.println("new solution size= "+solution.size()+", k= "+k);
-            }
-            
-            
-            //System.out.println(solution);
-            //checkValidSolution(graph, solution);
-        }
+            }        }
         
         return solution;
     }
@@ -128,7 +142,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
     
     public class FVS<V> extends ArrayList<V>
     {
-        public void compress(Multigraph<V, DefaultEdge> graph)
+        public void compress(Multigraph<V, DefaultEdge> graph) throws InterruptedException
         {
             // try every strict subset Z of the current solution C
             // remove this subset from the graph, G-Z
@@ -139,6 +153,10 @@ public class IterativeCompression implements FVSAlgorithmInterface
             
             for(Collection<V> subset : this.subsets())
             {
+                
+                if(Thread.currentThread().isInterrupted())
+                    throw new InterruptedException();
+                
                 if(subset.size() == this.size())
                     continue; // not a strict subset
                 

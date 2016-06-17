@@ -129,8 +129,8 @@ public class SimpleDisjointKernelization extends Kernelization {
 
         boolean changed = false;
         for (int v:vertices) {
-            // Skip prohibited vertices
-            if (prohibited.contains(v)) {
+            // Skip prohibited graphs
+            if (prohibited.contains(v) || !graph.containsVertex(v)) {
                 continue;
             }
 
@@ -146,7 +146,11 @@ public class SimpleDisjointKernelization extends Kernelization {
 
                 changed = true;
                 // Now we can remove the vertex, and join the neighbours
-                graph.addEdge(neighbours.get(0), neighbours.get(1));
+                try {
+                    graph.addEdge(neighbours.get(0), neighbours.get(1));
+                } catch(IllegalArgumentException e) {
+                    Kernelization.removeVertex(solution, neighbours.get(0), true);
+                }
                 Kernelization.removeVertex(solution, v, false);
             }
         }

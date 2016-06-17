@@ -6,10 +6,7 @@ import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Same as the randomized algorithm, but distributes density rather then trying each solution
@@ -32,12 +29,19 @@ public class RandomizedDensity implements FVSAlgorithmInterface
     protected Random random;
 
     @Override
+    public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution){
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
+        result.addAll(partialSolution.verticesToRemoved);
+        return result;
+    }
+
+    @Override
     public ArrayList<Integer> findFeedbackVertexSet(Multigraph graph) {
 
 
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
-        ReductionSolution reduced = Kernelization.kernelize(graph, 1000);
+        ReductionSolution reduced = Kernelization.kernelot(graph, false);
         this.random = new Random();
 
         for (int k = 1; ;k++) {
@@ -66,7 +70,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
         }
 
         // Run the kernelization over the graph
-        ReductionSolution reductionSolution = Kernelization.kernelize(graph, k, false);
+        ReductionSolution reductionSolution = Kernelization.kernelittle(graph, false, k);
 
 
         Multigraph reducedGraph = reductionSolution.reducedGraph;

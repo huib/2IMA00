@@ -17,7 +17,7 @@ public class WeightedVertex {
      * @param component
      */
     public int id;
-    public int weight;
+    public float weight;
     public int component;
     public WeightedVertex(int id) {
         this.id = id;

@@ -3,8 +3,9 @@ package Alg.Kernelization;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
+import org.jgrapht.alg.util.UnionFind;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Christopher on 6/15/2016.
@@ -35,82 +36,54 @@ import java.util.List;
  */
 public class Approximation {
 
-    public static ReductionSolution approximate(Multigraph<Integer, DefaultEdge> graph, int k) {
-        return approximate(graph, k, true);
-    }
-
-    /**
-     * Applies Rule 0 and 1 to the graph. Mainly meant for outside usage.
-     *
-     * @param solution
-     * @param graph
-     * @return
-     */
-    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph)
+    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, boolean cloneGraph, Integer[] weightedVertices, int weight) // changed from boolean to int
     {
-        // kernelization reduction rules 0 and 1
+        Multigraph<Integer, DefaultEdge> graph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) ingraph.clone(): ingraph;
+        ArrayList<Integer> approxVerticesToRemoved = new ArrayList();
+
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
-        return Approximation.cleanUp(solution, graph, vertices);
-
-    }
-
-    /**
-     * Fast application of rule 0 and 1 to the graph, where the set of verties is already extracted. Is faster than
-     * the other rule0and1 method therefore
-     */
-    public static boolean cleanUp(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
-    {
-        boolean changed = false;
-        for (int v:vertices) {        //Returns the degree of the specified vertex.
-            int degree = graph.degreeOf(v); // swap vertex "v" with actual vertex identifier
-
-            // Rule 0 & Rule 1
-            if (degree <= 1) {
-                Approximation.removeVertex(solution, v, false);
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    public static boolean determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> wgraph)
-    {
-        Integer[] vertices = (wgraph.vertexSet()).toArray(new Integer[wgraph.vertexSet().size()]);
-        return Approximation.determineFVS(solution, wgraph, vertices);
+        return Approximation.determineFVS(ingraph, graph, vertices, approxVerticesToRemoved, weightedVertices, weight);
 
     }
 
     /**
      * Determine the FVS (superset) of G (see FEEDBACK pseudo-code from paper)
      *
-     * @param solution
      * @param graph
      * @param vertices
+     * @param weightedVertices
+     * @param weight
      * @return
      */
-    public static boolean determineFVS(ReductionSolution solution, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices){
+    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, ArrayList<Integer> approxVerticesToRemoved, Integer[] weightedVertices, int weight){
         boolean changed = false;
         boolean semidisjoint = true;
         boolean semidisjointexception = false;
-        int gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
+        float gamma = 1; // default value = min{  weight(u) : u ∈ V of (semidisjoint) wgraph  }
+        int addedWeight = 0;
 
+        ReductionSolution solution = new ReductionSolution();
+        solution.reducedGraph = graph;
         /*
          * Check if semi-disjoint cycle in G and find min gamma value that is needed in case there isn't
          *
          * Note: Since we only have weights 1 gamma doesn't do much for us, but it's here to show that we follow FEEBACK
          * step by step in case this script is at some point expanded for use on actual vertex-weighted graphs.
          */
-        for (int v : vertices) {
+        for (Integer v : vertices) {
             if (!graph.containsVertex(v)) {
                 continue;
             }
 
             WeightedVertex u = new WeightedVertex(v); // give default weight=1 to all v
+            if (Arrays.asList(weightedVertices).contains(u.id)){
+                u.weight = weight; //set weight to input
+                addedWeight += weight;
+            }
             int degree = graph.degreeOf(u.id); // v == u.id
             if (degree <= 1) { // these vertices aren't actually removed from reducedGraph, so we simply skip them
                 continue;
             }
-            //
             if ( gamma > u.weight/(degree-1) ) {
                 gamma = (u.weight / (degree - 1));
             }
@@ -124,7 +97,6 @@ public class Approximation {
                 //break; // we don't break here, because we need to find min(gamma) first!
             }
         }
-
         /*
          * Fill the solution set F with the semidisjoint cycle or, otherwise, all vertices with weight reduced to 0
          *
@@ -133,7 +105,7 @@ public class Approximation {
          * Note 2: We skip over vertices with degree <= 1 because these are technically still contained within our graph,
          * even though we already performed a cleanUp on it.
          */
-        for (int v:vertices) {
+        for (Integer v:vertices) {
             if (!graph.containsVertex(v)) {
                 continue;
             }
@@ -157,87 +129,58 @@ public class Approximation {
                 * wi(u) = w(u)-gamma*(d(u)-1), for all u in Gi
                 */
             }
-            if (u.weight == 0) {
-                if (!graph.containsVertex(u.id)) {
-                    continue;
+            if (u.weight == 0.0) {
+                if (!approxVerticesToRemoved.contains(u.id)) {
+                    approxVerticesToRemoved.add(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
+                    solution.reducedGraph.removeVertex(u.id); // add to solution F (superset) [but don't remove from subgraph nor update k yet]}
                 }
-                Approximation.removeVertex(solution, u.id, true); // add to solution F (superset)
 
                 // In FEEDBACK, graph G is deleted at this point and it uses subgraph Gi for the next iteration.
                 // However, we don't need to do this here because our weighted-vertex graph makes it so trivial.
             }
         }
-        Approximation.cleanUp(solution, graph);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
 
-        /*
-        * At this point, FEEDBACK uses a STACK to check for redundant vertices in F
-        * The following approach is very similar to that by checking for every vertex v in F (FVS superset):
-        * • What are its neighbors n in graph G-F.
-        * • Knowing what its neighbors are, check for all possible pairs whether there is an edge between them such that
-        *   a connection between v and its two neighbors n_i and n_j (where i =/= j) would create a loop.
-        *       - If this is the case, then v is essential. => Keep v in F.
-        *       - If not, then v is redundant. => remove v from F and put v back in G-F
-        */
-        for (int v : solution.approxVerticesToRemoved ) {
-            List<Integer> neighbors = Graphs.neighborListOf(graph, v);
+        //Kernelization.simpleVertexRules(solution);  // CleanUp(G) again, because we deleted all w(v) = 0 vertices it
 
-            for (int i = 0; i < neighbors.size() - 1; i++) {
-                for (int j = 1; j < neighbors.size(); j++) {
-                    if(!graph.containsEdge(i,j)) {
-                        // no loop created by adding v to G-F, so v is redundant
-                        Approximation.revertVertex(solution, v);
-                    } // else v is essential, because it creates a loop in G-F
+        UnionFind<Integer> union = new UnionFind(graph.vertexSet());
+        for (Integer v : approxVerticesToRemoved ) {
+            if (solution.verticesToRemoved.contains(v)) continue;
+
+            List<Integer> neighbors = Graphs.neighborListOf(ingraph, v);
+            TreeSet<Integer> neighborComponents = new TreeSet();
+            boolean hasDuplicates = false;
+
+            for ( Integer n:neighbors ) {
+                if (graph.containsVertex(n)) {
+                    neighborComponents.add(union.find(n));
+                    hasDuplicates |= !neighborComponents.add(union.find(n));
                 }
+                if (hasDuplicates) break;
+            }
+
+            if(!hasDuplicates){//(v is redundant)
+                union.addElement(v);
+                for ( Integer n:neighbors ) {
+                    union.union(v, n);
+                }
+                approxVerticesToRemoved.remove(v);
+                solution.reducedGraph.addVertex(v);
+            } else { // essential -> finally add to solution set
+                solution.verticesToRemoved.add(v);
+                solution.reducedK -= 1;
             }
         }
 
-        return changed;
-    }
-
-    public static ReductionSolution approximate( Multigraph<Integer, DefaultEdge> graph, int k, boolean cloneGraph) {
-
-        ReductionSolution solution = new ReductionSolution();
-        solution.reducedGraph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) graph.clone(): graph;
-        solution.reducedK = k;
-
-        final Multigraph<Integer, DefaultEdge> reducedGraph = solution.reducedGraph;
-        boolean changed;
-
-        do {
-            changed = false;
-            changed |= Approximation.cleanUp(solution, reducedGraph);
-            changed |= Approximation.determineFVS(solution, reducedGraph);
-        } while(changed);
-
-        solution.stillPossible = solution.reducedK > 0 || (solution.reducedK == 0 && reducedGraph.edgeSet().size() == 0);
-        return solution;
-    }
-
-    /**
-     * Helper function to remove a vertex from the graph
-     *
-     * @param solution The solution found thus far
-     * @param vertex Vertex that needs to be removed
-     * @param inSolution IF the vertex needs to be in the solution, or if it can be removed, but is not in the solution
-     */
-    protected static void removeVertex(ReductionSolution solution, int vertex, boolean inSolution) {
-        solution.reducedGraph.removeVertex(vertex);
-
-        if (inSolution) {
-            solution.approxVerticesToRemoved.add(vertex);
-            solution.reducedK -= 1;
+        int c = 0;
+        for (int v : approxVerticesToRemoved ) {
+            for (int w : weightedVertices){
+                if(v == w) c++;
+            }
         }
-    }
 
-    /**
-     * Helper function to revert the removal of a vertex from the graph
-     *
-     * @param solution The solution found thus far
-     * @param vertex Vertex that needs to be removed
-     */
-    protected static void revertVertex(ReductionSolution solution, int vertex) {
-        solution.reducedGraph.addVertex(vertex);
-        solution.approxVerticesToRemoved.remove(vertex);
-        solution.reducedK += 1;
+        int total_FVS_weight = approxVerticesToRemoved.size() + c*(weight-1);
+        solution.totalFVSweight = total_FVS_weight;
+
+        return solution;
     }
 }

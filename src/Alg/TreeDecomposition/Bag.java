@@ -1,6 +1,7 @@
 package Alg.TreeDecomposition;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Bag {
     
@@ -79,9 +80,13 @@ public class Bag {
         }
     }
     
+    void insertAbove(Bag b){
+        parent.insertBelow(b);
+    }
+    
     Bag findNum(Integer n){
 //        System.out.print("Looking for " + n);
-        if(n == num){
+        if(n.equals(num)){
 //            System.out.println(", is this one");
             return this;
         } else {
@@ -93,6 +98,15 @@ public class Bag {
                 }
             }
         }
+        //System.out.println(n + " not found");
         return null;
+    }
+    
+    public int treeWidth(){
+        int max = vert.size()-1;
+        for(Bag c: children){
+            max = Math.max(max, c.treeWidth());
+        }
+        return max;
     }
 }

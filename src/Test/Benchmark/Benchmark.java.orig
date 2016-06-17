@@ -48,7 +48,7 @@ public abstract class Benchmark {
      * @return
      * @throws FileNotFoundException
      */
-    protected static Multigraph<Integer, DefaultEdge> loadGraph(String filename) throws FileNotFoundException {
+    protected Multigraph<Integer, DefaultEdge> loadGraph(String filename) throws FileNotFoundException {
         // Read from command line
         // Scanner scanner = new Scanner(System.in);
 
@@ -79,7 +79,7 @@ public abstract class Benchmark {
         int mistakes = 0;
 
         for (Instance i: instances) {
-            Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
+            Multigraph<Integer, DefaultEdge> graph = this.loadGraph(i.filename);
 
             long startTime = System.nanoTime();
             List<Integer> solution = alg.findFeedbackVertexSet(graph);
@@ -124,6 +124,7 @@ public abstract class Benchmark {
                 new Instance("083.graph", 7),   // Record 3898 ms      (Randomized)
                 new Instance("095.graph", 8),   // Record 9153 ms      (RandomizedDensity)
                 new Instance("028.graph", 8),   // Record 8827 ms      (RandomizedDensity)
+<<<<<<< HEAD
                 new Instance("003.graph", 10),
                 new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
                 new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
@@ -148,6 +149,17 @@ public abstract class Benchmark {
                 //new Instance("077.graph", 16),
                 // Graph 077.graph Time:32123ms
                 // NEW SOLUTION! found a solution with k=16
+=======
+//                new Instance("003.graph", 1),
+                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
+                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
+//                new Instance("092.graph", 1),
+//                new Instance("065.graph", 1),
+//                new Instance("046.graph", 1),
+//                new Instance("005.graph", 1),
+//                new Instance("029.graph", 1),
+//                new Instance("047.graph", 1),
+>>>>>>> origin/master
         };
 
         long totalTime = 0;
@@ -195,8 +207,8 @@ public abstract class Benchmark {
      * @param solution
      * @return
      */
-    static boolean verifySolution(String filename, List<Integer> solution) throws FileNotFoundException {
-        Multigraph<Integer, DefaultEdge> graph = loadGraph(filename);
+    boolean verifySolution(String filename, List<Integer> solution) throws FileNotFoundException {
+        Multigraph<Integer, DefaultEdge> graph = this.loadGraph(filename);
         for  (int i: solution) {
             graph.removeVertex(i);
         }
@@ -204,7 +216,7 @@ public abstract class Benchmark {
         return !CycleDetector.hasCycle(graph);
     }
 
-    static class Instance
+    class Instance
     {
         public Instance(String filename, int k) {
             this.filename = filename;
