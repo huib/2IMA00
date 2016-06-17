@@ -340,6 +340,9 @@ public class Kernelization {
                 rule6(solution);
                 if(!solution.stillPossible) return solution;
             }
+
+            //if(!simpleOnly) System.out.println("Pre: " + solution.reducedK);
+
             // Do advanced rules, if desired
             if (!simpleOnly) {
                 relevantVertices = new LinkedList<>();
@@ -348,13 +351,16 @@ public class Kernelization {
                 ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
                 simpleVertexRules(approxSolution);
                 int getApprox = approxSolution.totalFVSweight;
-                int usedK = useK ? Math.max(solution.reducedK, getApprox) : getApprox;
+                int usedK = useK ? Math.min(solution.reducedK, getApprox) : getApprox;
                 relevantVertices.addAll(ruleSFV(solution, flowerCoreVertices, usedK));
                 changed |= !relevantVertices.isEmpty();
                 //System.out.println(changed);
 
             }
         } while (changed);
+
+        //if(!simpleOnly) System.out.println("Post: " + solution.reducedK);
+        
         //System.out.println("post1: "  + solution.reducedK);
 
         return solution;

@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import Alg.Kernelization.Kernelization;
 import Alg.Kernelization.ReductionSolution;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;

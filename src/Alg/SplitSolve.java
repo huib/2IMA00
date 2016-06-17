@@ -29,7 +29,7 @@ public class SplitSolve implements FVSAlgorithmInterface {
 
     @Override
     public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution) {
-        List<Integer> result = findFeedbackVertexSet(Kernelization.kernelot(partialSolution.reducedGraph, true).reducedGraph);
+        List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
         result.addAll(partialSolution.verticesToRemoved);
         return result;
     }

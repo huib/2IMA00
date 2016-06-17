@@ -22,7 +22,7 @@ public class Main {
         // Read from file
         Scanner scanner = null;
         try {
-            scanner = new Scanner(new File("instances/simple/004.graph"));
+            scanner = new Scanner(new File("instances/096.graph"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
@@ -32,7 +32,7 @@ public class Main {
 
 
         //FVSAlgorithmInterface randomized = new Randomized();
-        FVSAlgorithmInterface randomized = new SplitSolve(new RandomizedDensity());
+        FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
 
         List<Integer> solution = randomized.findFeedbackVertexSet(looplessGraph);
 
