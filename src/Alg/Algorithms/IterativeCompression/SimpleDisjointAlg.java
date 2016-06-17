@@ -23,17 +23,17 @@ import org.jgrapht.graph.Multigraph;
 public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
 {
     // debuging
-    private Multigraph currentCompleteGraph;
+    //private Multigraph currentCompleteGraph;
     
     @Override
     public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited)
     {
-        this.currentCompleteGraph = g;
+        //this.currentCompleteGraph = g;
         Collection<V> result = this.solve((Multigraph<V, DefaultEdge>) g.clone(), prohibited, prohibited.size()-1);
         if(result != null && result.size() > prohibited.size()-1)
             throw new IllegalStateException("This may not happen..");
-        if(result != null)
-            IterativeCompression.checkValidSolution(g, result);
+        //if(result != null)
+        //    IterativeCompression.checkValidSolution(g, result);
         
         return result;
     }
@@ -72,7 +72,7 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
             return null;
         }
 
-        Multigraph beforeReduction = (Multigraph)graph.clone();
+        //Multigraph beforeReduction = (Multigraph)graph.clone();
         // 2. Exhaustively apply reduction rules (you can stop before when the solution grows too
         //    big, see step 3)
         ReductionSolution red = this.applyReductionRules(graph, prohibited, k);
@@ -175,9 +175,9 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
         // atLeastOneNonProhibited, but it did not have degree at most 1, something is wrong.
         if(atLeastOneNonProhibited)
         {
-            GraphDisplayer.display(this.currentCompleteGraph);
-            GraphDisplayer.display(integerGraph);
-            System.out.println(prohibited);
+            //GraphDisplayer.display(this.currentCompleteGraph);
+            //GraphDisplayer.display(integerGraph);
+            //System.out.println(prohibited);
             throw new IllegalStateException("There should be a vertex satisfying these properties, but there is not, so there must be something wrong..");
         }
 

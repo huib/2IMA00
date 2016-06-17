@@ -8,13 +8,18 @@ package Alg.Algorithms.IterativeCompression;
 
 import Alg.FVSAlgorithmInterface;
 import Alg.GraphDisplayer;
+import Alg.Kernelization.SimpleDisjointKernelization;
+import Alg.Lib.CycleDetector;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -29,10 +34,35 @@ public class IterativeCompression implements FVSAlgorithmInterface
     public List<Integer> findFeedbackVertexSet(Multigraph<Integer, DefaultEdge> graph)
     {
         ActionStack actions = new ActionStack();
-        Queue<GraphAction> queue = new LinkedList<>();
         
+        int nVertices = graph.vertexSet().size();
+        
+        // sort them on degree (not needed, but might speed up the algorithm)
+        //*
+        List<Integer> vertices = new ArrayList(graph.vertexSet());
+        Collections.sort(vertices, (Object o1, Object o2) ->
+        {
+            int d1 = graph.degreeOf((int)o1);
+            int d2 = graph.degreeOf((int)o2);
+            
+            if(d1 < d2)
+                return 1;
+            else if(d1 == d2)
+                return 0;
+            else
+                return -1;
+        });
+        
+        vertices.stream().forEach((v) ->
+        {
+            actions.push(new DeleteVertexAction(graph, v));
+        });
+        //*/
+        /*
         // delete all vertices from graph
         // using a queue and two passes because of deletion during iteration doesn't work..
+        Queue<GraphAction> queue = new LinkedList<>();
+        
         graph.vertexSet().stream().forEach((v) ->
         {
             queue.add(new DeleteVertexAction(graph, v));
@@ -42,6 +72,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
         {
             actions.push(queue.poll());
         }
+        //*/
         
         // put the vertices back, one by one, in reverse order
         // with each vertex we put back, find a minimal FVS
@@ -51,18 +82,26 @@ public class IterativeCompression implements FVSAlgorithmInterface
         {
             DeleteVertexAction<Integer> action = (DeleteVertexAction<Integer>) actions.pop();
             action.revert();
-            solution.add(action.getVertex());
+            nVertices--;
+            
+            Set remainder = new HashSet();
+            graph.vertexSet()
+                    .stream()
+                    .filter((v) -> (!solution.contains(v)))
+                    .forEach((v) -> remainder.add(v));
+            
+            if(SimpleDisjointKernelization.inCycleWith(action.getVertex(), graph, remainder))
+                solution.add(action.getVertex());
             //checkValidSolution(graph, solution);
             
             //System.out.println("solution size= "+solution.size()+", k= "+k);
             if(solution.size() > k)
             {
+                //System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
                 solution.compress(graph);
                 k = Math.max(k, solution.size());
                 //System.out.println("new solution size= "+solution.size()+", k= "+k);
             }
-            else
-                System.err.println("this shouldn't happen");
             
             
             //System.out.println(solution);

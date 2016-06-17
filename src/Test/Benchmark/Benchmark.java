@@ -124,15 +124,30 @@ public abstract class Benchmark {
                 new Instance("083.graph", 7),   // Record 3898 ms      (Randomized)
                 new Instance("095.graph", 8),   // Record 9153 ms      (RandomizedDensity)
                 new Instance("028.graph", 8),   // Record 8827 ms      (RandomizedDensity)
-//                new Instance("003.graph", 1),
-                new Instance("020.graph", 9),   // Record 4569 ms      (RandomizedDEnsity
-                new Instance("042.graph", 12),  // Record 454646 ms    (RandomizedDensity)
-//                new Instance("092.graph", 1),
-//                new Instance("065.graph", 1),
-//                new Instance("046.graph", 1),
-//                new Instance("005.graph", 1),
-//                new Instance("029.graph", 1),
-//                new Instance("047.graph", 1),
+                new Instance("003.graph", 10),
+                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
+                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
+                
+                // All of the above: less than 2 seconds in total with iterative compression
+                // All of the below: times using iterative compression (other algorithms didn't terminate)
+                
+                //new Instance("092.graph", -1), // k=15 or 16 (last compression step takes ages)
+                //new Instance("065.graph", -1),
+                
+                //new Instance("046.graph", 18),
+                // Graph 046.graph Time:399301ms
+                // NEW SOLUTION! found a solution with k=18
+                
+                //new Instance("005.graph", 19),
+                // Graph 005.graph Time:110131ms
+                // NEW SOLUTION! found a solution with k=19
+                
+                //new Instance("029.graph", -1),
+                //new Instance("047.graph", -1),
+                
+                //new Instance("077.graph", 16),
+                // Graph 077.graph Time:32123ms
+                // NEW SOLUTION! found a solution with k=16
         };
 
         long totalTime = 0;
@@ -149,7 +164,10 @@ public abstract class Benchmark {
             System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
 
 
-            if (solution.size() != i.k){
+            if(i.k <0){
+                System.out.println("NEW SOLUTION! found a solution with k="+solution.size());
+            }
+            else if (solution.size() != i.k){
                 System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
                 mistakes++;
             }
