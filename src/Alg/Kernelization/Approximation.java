@@ -78,7 +78,7 @@ public class Approximation {
                 continue;
             }
 
-            if (gamma > u.weight / (degree - 1)) {
+            if (gamma > u.weight / (degree - 1)) { // get initial gamma value
                 gamma = (u.weight / (degree - 1));
             }
         }
@@ -197,7 +197,7 @@ public class Approximation {
                                  if (w == c) {
                                      WeightedVertex wv = new WeightedVertex(w);
                                      wv.weight = wv.weight - gamma * (degree - 1);
-                                     if (wv.weight == 0) {
+                                     if (wv.weight >= 0) {
                                          approxVerticesToRemoved.add(c);
                                          graph.removeVertex(c);
                                      }
@@ -206,6 +206,31 @@ public class Approximation {
                          }
                          // clear cycle for next iteration (find next cycle, if present)
                          semiDisjointCycle.clear();
+                     }
+                     for (Integer x : vertices) {
+                         if (!graph.containsVertex(x)) {
+                             continue;
+                         }
+
+                         if (u.id == x) { // for all vertices x remaining in G-F, find new gamma
+                             int newDegree = graph.degreeOf(u.id); // update to new degree value
+
+                             // cleanup G again until nog more vertices with degrees >=1 exist
+                             if (newDegree <= 1) {
+                                 boolean changed = false;
+                                 while (!changed) {
+                                     solution.reducedGraph = graph;
+                                     changed |= Kernelization.rule0and1(solution, x, newDegree);
+                                 }
+                             }
+
+                             newDegree = graph.degreeOf(u.id); // update to new degree value again
+
+                             WeightedVertex xu = new WeightedVertex(x);
+                             if (gamma > xu.weight / (newDegree - 1)) { // set new min gamma value
+                                 gamma = (xu.weight / (newDegree - 1));
+                             }
+                         }
                      }
                  } // endif (left != right)
              } // endif (degree == 2)

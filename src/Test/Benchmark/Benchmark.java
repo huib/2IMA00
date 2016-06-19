@@ -127,6 +127,8 @@ public abstract class Benchmark {
                 new Instance("003.graph", 10),
                 new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
                 new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
+//                new Instance("059.graph", 18), // 2411895ms            (IterativeCompression)
+ //               new Instance("092.graph", -1) // 3920522ms             (IterativeCompression)
                 
                 // All of the above: less than 2 seconds in total with iterative compression
                 // All of the below: times using iterative compression (other algorithms didn't terminate)
