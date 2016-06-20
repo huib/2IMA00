@@ -326,13 +326,6 @@ public class Approximation {
             }
         }
         solution.totalFVSweight = solution.verticesToRemoved.size() + c*(weight-1);
-
-        // final cleanUp G-K
-        for (Integer v:vertices) {
-            int degree = solution.reducedGraph.degreeOf(v);
-            cleanUp(solution, v, degree);
-        }
-
         return solution;
     }
 
