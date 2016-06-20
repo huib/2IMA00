@@ -362,7 +362,6 @@ public class Approximation {
                 }
             }
         }
-
         return solution;
     }
 
