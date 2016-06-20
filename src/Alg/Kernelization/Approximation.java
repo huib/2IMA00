@@ -5,7 +5,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.jgrapht.alg.util.UnionFind;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -32,6 +31,12 @@ import java.util.*;
  * The subgraph Gi that is derived in the ith iteration is either a semidisjoint cycle C contained in G or,
  * otherwise, G itself. Note that the first case has precedence over the second; that is, Gi is a semidisjoint cycle
  * whenever G contains one.
+ *
+ *
+ * The value for gamma depends on the following cases:
+ * • Case 1: SDC was found; gamma = min{w(u) : u ∈ V (C)}, for vertex-weights w(u) and semidisjoint cycle C
+ * • Case 2: no SDC was found; gamma = min{w(u)/(d(u) − 1) : u ∈ V }, for degree d(u)
+ * ~Note that the value for gamma changes for every iteration
  *
  * After creating F, the algorithm checks for redundant vertices in F and removes them, before returning F.
  */
@@ -60,14 +65,12 @@ public class Approximation {
      * @param graph The graph G-F from the current iteration
      * @param semiDisjointCycle The vertices from the semidisjoint cycle C of the current iteration
      */
-    public static float gammaCase1(Multigraph<Integer, DefaultEdge> graph, List<Integer> semiDisjointCycle)
+    public static float gammaCase1(Multigraph<Integer, DefaultEdge> graph, List<WeightedVertex> semiDisjointCycle)
     {
-        float gamma = -999; // initialize minimum degree
-        for (Integer c : semiDisjointCycle) {
-            int degree = graph.degreeOf(c);
-
-            if (degree == -999 || degree < gamma) {
-                gamma = degree;
+        float gamma = semiDisjointCycle.get(0).weight;
+        for (WeightedVertex c : semiDisjointCycle) {
+            if (c.weight < gamma) {
+                gamma = c.weight;
             }
         }
 
@@ -81,8 +84,16 @@ public class Approximation {
      */
     public static float gammaCase2(Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
     {
-        int initializeDegree = graph.degreeOf(vertices[0]);
-        WeightedVertex initializeVertex = new WeightedVertex(vertices[0]);
+        if (graph.vertexSet().size() == 0) System.out.println("ERROR: empty graph in gamma2 function.");
+        int initializeDegree = -1;
+        WeightedVertex initializeVertex = new WeightedVertex(-1);
+        for(int i=0; i<graph.vertexSet().size(); i++) {
+            if(graph.containsVertex(vertices[i])) {
+                initializeDegree = graph.degreeOf(vertices[i]);
+                initializeVertex = new WeightedVertex(vertices[i]);
+                break;
+            }
+        }
 
         float gamma = initializeVertex.weight / (initializeDegree - 1); // initialize gamma value to compare with
 
@@ -104,10 +115,11 @@ public class Approximation {
     public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, boolean cloneGraph, Integer[] weightedVertices, int weight) // changed from boolean to int
     {
         Multigraph<Integer, DefaultEdge> graph = cloneGraph ? (Multigraph<Integer, DefaultEdge>) ingraph.clone(): ingraph;
-        ArrayList<Integer> approxVerticesToRemoved = new ArrayList();
+        Deque<Integer> STACK = new ArrayDeque();
+
 
         Integer[] vertices = (graph.vertexSet()).toArray(new Integer[graph.vertexSet().size()]);
-        return Approximation.determineFVS(ingraph, graph, vertices, approxVerticesToRemoved, weightedVertices, weight);
+        return Approximation.determineFVS(ingraph, graph, vertices, STACK, weightedVertices, weight);
 
     }
 
@@ -120,23 +132,17 @@ public class Approximation {
      * @param weight
      * @return
      */
-    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, ArrayList<Integer> approxVerticesToRemoved, Integer[] weightedVertices, int weight){
+    public static ReductionSolution determineFVS(Multigraph<Integer, DefaultEdge> ingraph, Multigraph<Integer, DefaultEdge> graph, Integer[] vertices, Deque<Integer> STACK, Integer[] weightedVertices, int weight){
         float gammaCase1, gammaCase2;
-        Multigraph<Integer, DefaultEdge> tempgraph = (Multigraph<Integer, DefaultEdge>) ingraph.clone();
+
         ReductionSolution solution = new ReductionSolution();
         solution.reducedGraph = graph;
 
-
         /**
-         * Iterative reduction of G to G-F.
+         * Iterative reduction of G to G-F by checking for semidisjoint cycles.
          *
-         * We fill the approximated solution set F with all vertices with weight reduced to 0, being at all vertices from
-         * all the semidisjoint cycles (SDC) that are detected. After that, we remove the vertices from this solution that
-         * turn out to be redundant.
-         *
-         * Note 1: we cannot merge both for-loops on vertices v, because we need to process each vertex once in order to
-         * find the minimum value for gamma which is used to decrease vertex weights in the following for-loop.
-         * Note 2: Since our default weight is 1, gamma equals 1 for vertices from an SDC.
+         * We fill the STACK with all vertices with weight reduced to 0. After that, we remove the vertices from
+         * this STACK that turn out to be redundant and add the rest to our solution F.
          */
 
          for (Integer v : vertices) {
@@ -147,214 +153,184 @@ public class Approximation {
              WeightedVertex u = new WeightedVertex(v);
              int degree = solution.reducedGraph.degreeOf(u.id);
 
-             // cleanup G (again) until nog more vertices with degrees <=1 exist
-             cleanUp(solution, v, degree);
-
-             if (degree <= 1) { // safety check
+             if (degree <= 1) { // safety check; however, this should never occur
                  continue;
              }
 
              // we now check if G contains semidisjoint cycles [SDC] (plural)
              // • This includes steps that resemble kernelization rule 2, but rule 2 is executed slightly different
              // • If a vertex isn't a member of an SDC, we reduce its weight by gamma := min{w(u)/(d(u) − 1) : u ∈ V }, for vertex u with weight w(u) and degree d(u)
-             // • gamma reduction creates and ordering of vertices for STACK, which is used to check for redundancy
+             // • gamma reduction creates an ordering of vertices for STACK, which is used to check for redundant vertices later on
              if (degree == 2) {
-                 List<Integer> semiDisjointCycle = new ArrayList();
+                 List<WeightedVertex> semiDisjointCycle = new ArrayList();
                  List<Integer> leftNeighbors;
                  List<Integer> rightNeighbors;
 
-                 semiDisjointCycle.add(v);
-
                  List<Integer> neighbors = Graphs.neighborListOf(solution.reducedGraph, v);
-                 Integer left = neighbors.get(0);
-                 Integer right = neighbors.get(1);
+                 WeightedVertex leftNeighbor = new WeightedVertex(neighbors.get(0));
+                 WeightedVertex rightNeighbor = new WeightedVertex(neighbors.get(1));
 
-                 Integer departureVertex = v;
-                 Integer terminal = -1;
+                 // Create new vertex placeholders that will be overwritten in the loops
+                 Integer predecessor = u.id;
+                 Integer vertexPlaceholder = -1;
 
-                 // clear this at the end if it turns out v is not contained in an SDC
-                 // otherwise
-                 semiDisjointCycle.add(v);
-                 semiDisjointCycle.add(left); // clear this if it turns out v is not contained in an SDC
-                 semiDisjointCycle.add(right); // clear this if it turns out v is not contained in an SDC
+                 // prematurely add vertices to our potential semidisjointCycle container
+                 semiDisjointCycle.add(u);
+                 semiDisjointCycle.add(leftNeighbor);
+                 semiDisjointCycle.add(rightNeighbor);
 
-                 if (left == right) {
-                     // would removing v create a self-loop? if yes, put neighbor of v in solution and remove both
-                     Kernelization.removeVertex(solution, v, false);
-                     Kernelization.removeVertex(solution, left, true);
-                 } else { // a != b, check cycle for matching exception vertex
-                     int degreeLeft = solution.reducedGraph.degreeOf(left);
-                     Integer l1;
-                     Integer l2;
-                     Integer leftException;
-                     int degreeRight = solution.reducedGraph.degreeOf(right);
-                     Integer r1;
-                     Integer r2;
-                     Integer rightException;
-                     while (degreeLeft == 2) { // still potential vertex contained SDC?
-                         leftNeighbors = Graphs.neighborListOf(solution.reducedGraph, left);
-                         terminal = left;
-                         l1 = leftNeighbors.get(0);
-                         l2 = leftNeighbors.get(1);
-                         if (l1 != departureVertex) {
-                             degreeLeft = ingraph.degreeOf(l1); // use degree of original graph! maybe degree got lowered cause of other SDC searches
+                 if (leftNeighbor == rightNeighbor) { // we have a self-loop -> remove it
+                     Kernelization.removeVertex(solution, u.id, false);
+                     Kernelization.removeVertex(solution, leftNeighbor.id, true);
+                 } else { // check if degrees of both neighbors uplod the properties of an SDC
+                     int degreeLeftNeighbor = solution.reducedGraph.degreeOf(leftNeighbor.id);
+                     WeightedVertex l1; // placeholder for one of the neighbors of leftNeighbor
+                     WeightedVertex l2; // placeholder for one of the neighbors of leftNeighbor
+                     WeightedVertex leftException; // placeholder for leftNeighbor.neighbor that violates SDC rules
+                     int degreeRightNeighbor = solution.reducedGraph.degreeOf(rightNeighbor.id);
+                     WeightedVertex r1; // placeholder for one of the neighbors of rightNeighbor
+                     WeightedVertex r2; // placeholder for one of the neighbors of rightNeighbor
+                     WeightedVertex rightException; // placeholder for rightNeighbor.neighbor that violates SDC rules
+
+                     while (degreeLeftNeighbor == 2) { // still potential vertex contained SDC?
+                         leftNeighbors = Graphs.neighborListOf(solution.reducedGraph, leftNeighbor.id);
+                         vertexPlaceholder = leftNeighbor.id;
+                         l1 = new WeightedVertex(leftNeighbors.get(0));
+                         l2 = new WeightedVertex(leftNeighbors.get(1));
+                         if (l1.id != predecessor) { // make sure the neighbor we process wasn't already looked at before
+                             degreeLeftNeighbor = ingraph.degreeOf(l1.id); // get degree of v in original graph G
                              semiDisjointCycle.add(l1);
-                             left = l1;
+                             leftNeighbor = l1; // set leftNeighbor of next loop (this is why we needed vertexPlaceholder)
                          } else {
-                             degreeLeft = ingraph.degreeOf(l2);
+                             degreeLeftNeighbor = ingraph.degreeOf(l2.id);
                              semiDisjointCycle.add(l2);
-                             left = l2;
+                             leftNeighbor = l2; // set leftNeighbor of next loop (this is why we needed vertexPlaceholder)
                          }
-                         departureVertex = terminal;
+                         predecessor = vertexPlaceholder; // remember vertex used in previous iteration to avoid reviewing it again
                      }
-                     leftException = left; // semidisjoint cycle exception found
-                     while (degreeRight == 2) {
-                         rightNeighbors = Graphs.neighborListOf(solution.reducedGraph, right);
-                         terminal = right;
-                         r1 = rightNeighbors.get(0);
-                         r2 = rightNeighbors.get(1);
-                         if (r1 != departureVertex) {
-                             degreeRight = ingraph.degreeOf(r1);
-                             semiDisjointCycle.add(r1);
-                             right = r1;
-                         } else {
-                             degreeRight = ingraph.degreeOf(r2);
-                             semiDisjointCycle.add(r2);
-                             right = r2;
-                         }
-                         departureVertex = terminal;
-                     }
-                     rightException = right; // another semidisjoint cycle exception found
+                     leftException = leftNeighbor; // semidisjoint cycle exception found
+                     predecessor = u.id; //reset value for rightNeighbor-loop
 
-                     /**
-                      * We now set gamma value for current iteration and subtract from the appropriate vertices
-                      * • Case 1: SDC was found; gamma = min{w(u) : u ∈ V (C)}, for vertex-weights w(u) and semidisjoint cycle C
-                      * • Case 2: no SDC was found; gamma = min{w(u)/(d(u) − 1) : u ∈ V }, for degree d(u)
-                      *
-                      * Note 1: We skip over vertices with degree <= 1 because these are technically still contained within our graph,
-                      * even though we already performed a cleanUp on it.
-                      * Note 2: gamma changes for every iteration of the for-loop following this one, depending on the case of either
-                      * finding a semidisjoint cycle (SDC) or not.
-                      */
+                     while (degreeRightNeighbor == 2) { // still potential vertex contained SDC?
+                         rightNeighbors = Graphs.neighborListOf(solution.reducedGraph, rightNeighbor.id);
+                         vertexPlaceholder = rightNeighbor.id;
+                         r1 = new WeightedVertex(rightNeighbors.get(0));
+                         r2 = new WeightedVertex(rightNeighbors.get(1));
+                         if (r1.id != predecessor) { // make sure the neighbor we process wasn't already looked at before
+                             degreeRightNeighbor = ingraph.degreeOf(r1.id); // get degree of v in original graph G
+                             semiDisjointCycle.add(r1);
+                             rightNeighbor = r1; // set leftNeighbor of next loop (this is why we needed vertexPlaceholder)
+                         } else {
+                             degreeRightNeighbor = ingraph.degreeOf(r2.id);
+                             semiDisjointCycle.add(r2);
+                             rightNeighbor = r2; // set leftNeighbor of next loop (this is why we needed vertexPlaceholder)
+                         }
+                         predecessor = vertexPlaceholder; // remember vertex used in previous iteration to avoid reviewing it again
+                     }
+                     rightException = rightNeighbor; // semidisjoint cycle exception found
 
                      // An SDC may contain at most 1 exception, so we must have that (leftException == rightException)
-                     if (leftException == rightException) { // Case 1
+                     if (leftException == rightException) { // Case 1: SDC found in current graph
                          gammaCase1 = gammaCase1(solution.reducedGraph, semiDisjointCycle);
-                         for (Integer c : semiDisjointCycle) {
+                         for (WeightedVertex c : semiDisjointCycle) { // for all members of the cycle
                              for (Integer w : vertices) {
                                  if (!solution.reducedGraph.containsVertex(w)) {
                                      continue;
                                  }
-                                 if (w == c) {
-                                     WeightedVertex wv = new WeightedVertex(w);
-                                     wv.weight = wv.weight - gammaCase1;
-                                     if (wv.weight <= 0) {
-                                         if (!approxVerticesToRemoved.contains(w)) {
-                                             approxVerticesToRemoved.add(w); // add to approx solution
-                                         }
-                                         solution.reducedGraph.removeVertex(w); // update G-F
+                                 if (w == c.id) {
+                                     c.weight = c.weight - gammaCase1;
+                                     if (c.weight <= 0) {
+                                         STACK.push(c.id); // add vertex to STACK
+                                         solution.reducedGraph.removeVertex(c.id); // update G-F
                                      }
                                  }
                              }
                          }
-                     } else { // Case 2
+                     } else { // Case 2: no SDC found in current graph
                          gammaCase2 = gammaCase2(solution.reducedGraph, vertices);
-                         for (Integer w : vertices) {
-                             if (!solution.reducedGraph.containsVertex(w)) {
-                                 continue;
-                             }
-                             WeightedVertex wv = new WeightedVertex(w);
-                             wv.weight = wv.weight - gammaCase2 * (degree - 1);
-                             if (wv.weight <= 0) {
-                                 if (!approxVerticesToRemoved.contains(w)) {
-                                     approxVerticesToRemoved.add(w); // add to approx solution
-                                 }
-                                 solution.reducedGraph.removeVertex(w); // update G-F
+                         u.weight = u.weight - gammaCase2 * (degree - 1); // only for the observed vertex
+                         if (u.weight <= 0) {
+                             if (solution.reducedGraph.containsVertex(u.id)) {
+                                 STACK.push(u.id);
+                                 solution.reducedGraph.removeVertex(u.id); // update G-F
                              }
                          }
                      }
-                     semiDisjointCycle.clear(); // prep for next iteration
+                     semiDisjointCycle.clear(); // clear collection for next iteration
                  } // endif (left != right)
              } else { // endif (degree == 2)
-                 // gamma value Case 2 again
+                 // in case we know for certain that the vertex does not belong to an SDC, immediately do:
                  gammaCase2 = gammaCase2(solution.reducedGraph, vertices);
-                 for (Integer w : vertices) {
-                     if (!solution.reducedGraph.containsVertex(w)) {
-                         continue;
-                     }
-                     WeightedVertex wv = new WeightedVertex(w);
-                     wv.weight = wv.weight - gammaCase2 * (degree - 1);
-                     if (wv.weight <= 0) {
-                         if (!approxVerticesToRemoved.contains(w)) {
-                             approxVerticesToRemoved.add(w); // add to approx solution
-                         }
-                         solution.reducedGraph.removeVertex(w); // update G-F
+                 u.weight = u.weight - gammaCase2 * (degree - 1); // only for the observed vertex
+                 if (u.weight <= 0) {
+                     if (solution.reducedGraph.containsVertex(u.id)) {
+                         STACK.push(u.id);
+                         solution.reducedGraph.removeVertex(u.id); // update G-F
                      }
                  }
              }
+
+             // cleanup G (again) until no more vertices with degrees <=1 exist
+             cleanUp(solution, v, degree);
          }// endfor (v:vertices)
 
-        // The previous steps empties G completely, so now we create forest G-F from scratch
-        boolean GminusF = tempgraph.removeAllVertices(approxVerticesToRemoved);
-        if(GminusF){
-            solution.reducedGraph = tempgraph;
-        } else {
-            System.out.println("ERROR: Something wen't wrong when creating G - F.");
-        }
 
-        // Current status: Any semidisjoint cycle (SDC) contained within G is now in F. G-F contains no (more) SDC
-        // We now filter out redundant vertices from F, since we added entire cycles instead of singular vertices
+
+        // At this point, G-F contains no (more) SDC and STACK contains all potential vertices from the solution.
+        // • We now filter out redundant vertices by popping vertices from STACK and checking whether placing them back
+        //   into G-F would create a cycle. We do this using UnionFind
         UnionFind<Integer> union = new UnionFind(solution.reducedGraph.vertexSet());
-        ArrayList<Integer> toBeRemoved = new ArrayList();
-        for (Integer v : approxVerticesToRemoved ) {
-            if (solution.verticesToRemoved.contains(v)) continue; // if already added to definitive solution F
+        while (!STACK.isEmpty()){
+            Integer currentVertex = STACK.peek(); // view top item from stack
 
-            LinkedList<DefaultEdge> edges = new LinkedList(ingraph.edgesOf(v));// all edges from v in the original graph G
+            // get all edges from current vertex in the original graph G
+            LinkedList<DefaultEdge> edges = new LinkedList(ingraph.edgesOf(currentVertex));
+            // get all corresponding neigbors n and, if n in G-F, store them in collection: neighbors
             List<Integer> neighbors = new ArrayList();
             for (DefaultEdge e:edges) {
-                Integer neighbor = Graphs.getOppositeVertex(ingraph, e, v);
-                if (solution.reducedGraph.containsVertex(neighbor)) { // if neighbor in G-F
-                    if (!neighbors.contains(neighbor)) neighbors.add(neighbor);
+                Integer neighbor = Graphs.getOppositeVertex(ingraph, e, currentVertex);
+                if (solution.reducedGraph.containsVertex(neighbor)) {
+                    neighbors.add(neighbor);// if neighbor in G-F
                 }
             }
+
+            // check if v is connected to the same component more than once using a treeset (duplicates)
             TreeSet<Integer> neighborComponents = new TreeSet();
-            boolean hasDuplicates = false; // check if v is connected to the same component more than once == duplicate
-
+            boolean hasDuplicates = false;
+            // check for multiple neighbors of currentVertex that are members of the same component
             for ( Integer n:neighbors ) {
-                if (solution.reducedGraph.containsVertex(n)) { // if n in G - F
-                    neighborComponents.add(union.find(n));
-                    hasDuplicates |= !neighborComponents.add(union.find(n));
-                }
-                if (hasDuplicates) break; // v is essential
+                neighborComponents.add(union.find(n)); // adds identifier of component to treeset
+                hasDuplicates |= !neighborComponents.add(union.find(n));
+                if (hasDuplicates) break; // we found a loop
             }
 
-            if(!hasDuplicates){ // v is redundant
-                union.addElement(v);
+            // in case we didn't find a loop, currentVertex is redundant
+            if(!hasDuplicates){
+                union.addElement(currentVertex); // add currentVertex back into G-F
                 for ( Integer n:neighbors ) {
-                    if (solution.reducedGraph.containsVertex(n)) { // if n in G - F
-                        union.union(v, n);
+                    if (solution.reducedGraph.containsVertex(n)) {
+                        union.union(currentVertex, n); // connect the vertex to its neighbors in G-F (UnionFind components)
                     }
                 }
-                solution.reducedGraph.addVertex(v); // add vertex back to G-F
-                toBeRemoved.add(v); // equivalent for "STACK" from FEEDBACK (paper ALG)
-            } else {
-                solution.verticesToRemoved.add(v); // add v to definitive solution F
-                solution.reducedK -= 1; // reduce k by one
+                solution.reducedGraph.addVertex(currentVertex); // add vertex back to G-F
+            } else { //if we found a loop, currentVertex is essential
+                solution.verticesToRemoved.add(currentVertex); // add currentVertex to solution F
             }
+            STACK.pop();
         }
-        approxVerticesToRemoved.removeAll(toBeRemoved); // remove (e.g. "pop STACK") after loop
 
-        // now, to account for any vertex whose weight was artificially increased:
+        // Next we update any vertex whose weight was artificially increased for certain reduction rules
         int c = 0;
         for (int v : solution.verticesToRemoved ) {
             for (int w : weightedVertices){
                 if(v == w) c++;
             }
         }
-        int total_FVS_weight = solution.verticesToRemoved.size() + c*(weight-1);
-        solution.totalFVSweight = total_FVS_weight;
-
-        return solution; // where: solution.verticesToRemoved = F
+        solution.totalFVSweight = solution.verticesToRemoved.size() + c*(weight-1);
+        if (solution.totalFVSweight > solution.verticesToRemoved.size()){
+            System.out.println("debug");
+        }
+        return solution;
     }
 
 }
