@@ -85,7 +85,6 @@ public class Approximation {
      */
     public static float gammaCase2(Multigraph<Integer, DefaultEdge> graph, Integer[] vertices)
     {
-        if (graph.vertexSet().size() == 0) System.out.println("ERROR: empty graph in gamma2 function.");
         int initializeDegree = -1;
         WeightedVertex initializeVertex = new WeightedVertex(-1);
         for(int i=0; i<graph.vertexSet().size(); i++) {
@@ -325,9 +324,6 @@ public class Approximation {
             }
         }
         solution.totalFVSweight = solution.verticesToRemoved.size() + c*(weight-1);
-        if (solution.totalFVSweight > solution.verticesToRemoved.size()){
-            System.out.println("debug");
-        }
         return solution;
     }
 
