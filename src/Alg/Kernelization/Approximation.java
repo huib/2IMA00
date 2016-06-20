@@ -296,8 +296,7 @@ public class Approximation {
             boolean hasDuplicates = false;
             // check for multiple neighbors of currentVertex that are members of the same component
             for ( Integer n:neighbors ) {
-                neighborComponents.add(union.find(n)); // adds identifier of component to treeset
-                hasDuplicates |= !neighborComponents.add(union.find(n));
+                if(solution.reducedGraph.containsVertex(n)) hasDuplicates |= !neighborComponents.add(union.find(n));
                 if (hasDuplicates) break; // we found a loop
             }
 
@@ -324,12 +323,6 @@ public class Approximation {
             }
         }
         solution.totalFVSweight = solution.verticesToRemoved.size() + c*(weight-1);
-
-        // final cleanUp G-K
-        for (Integer v:vertices) {
-            int degree = solution.reducedGraph.degreeOf(v);
-            cleanUp(solution, v, degree);
-        }
 
         return solution;
     }
