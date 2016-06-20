@@ -4,6 +4,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.jgrapht.alg.util.UnionFind;
+import sun.awt.image.ImageWatched;
 
 import java.util.*;
 
@@ -288,10 +289,7 @@ public class Approximation {
             // get all corresponding neigbors n and, if n in G-F, store them in collection: neighbors
             List<Integer> neighbors = new ArrayList();
             for (DefaultEdge e:edges) {
-                Integer neighbor = Graphs.getOppositeVertex(ingraph, e, currentVertex);
-                if (solution.reducedGraph.containsVertex(neighbor)) {
-                    neighbors.add(neighbor);// if neighbor in G-F
-                }
+                neighbors.add(Graphs.getOppositeVertex(ingraph, e, currentVertex));
             }
 
             // check if v is connected to the same component more than once using a treeset (duplicates)
@@ -331,6 +329,57 @@ public class Approximation {
             System.out.println("debug");
         }
         return solution;
+    }
+
+    /**
+     * Determine a weighted 2-approximation FVS of a graph G, where vertices have weight 1, or weight w if specified
+     *
+     * @param ingraph The graph G
+     * @param weightedVertices Vertices with weight w
+     * @param weight Weight w
+     * @return
+     */
+    public static ReductionSolution determineFVS2(Multigraph<Integer, DefaultEdge> ingraph, Integer[] weightedVertices, int weight){
+
+        ReductionSolution solution = new ReductionSolution();
+        // VerticesToRemoved acts as solution set F
+        solution.reducedGraph = (Multigraph<Integer, DefaultEdge>) ingraph.clone();
+        // Skip initial filling of F, by definition, no weights are 0
+        Stack<Integer> stack = new Stack<>(); // The STACK
+
+        cleanUp2(solution.reducedGraph, new LinkedList<>(solution.reducedGraph.vertexSet()));
+
+        for(Integer v: ingraph.vertexSet()){
+
+        }
+
+
+
+
+        //Determine solution weight
+        solution.totalFVSweight = 0;
+        for (Integer v: solution.verticesToRemoved){
+            solution.totalFVSweight++;
+            for (Integer u: weightedVertices){
+                if (v.equals(u)){
+                    solution.totalFVSweight += weight-1;
+                }
+            }
+        }
+
+        return solution;
+    }
+
+    public static void cleanUp2(Multigraph<Integer, DefaultEdge> graph, LinkedList<Integer> relevantVertices){
+        while (!relevantVertices.isEmpty()) {
+            Integer current = relevantVertices.pop();
+            if(graph.containsVertex(current)){
+                if(graph.degreeOf(current) <= 1){
+                    relevantVertices.addAll(Graphs.neighborListOf(graph, current));
+                    graph.removeVertex(current);
+                }
+            }
+        }
     }
 
 }
