@@ -618,9 +618,10 @@ public class Kernelization {
      */
     public static Set<Integer> ruleSFV(ReductionSolution solution, LinkedList<Integer> flowerCoreVertices, int k)
     {
-        Set<Integer> changedVertices;
+        Set<Integer> changedVertices = new TreeSet<>();
         while(!flowerCoreVertices.isEmpty()){
-            changedVertices = ruleSFV(solution, flowerCoreVertices.pollLast(), k);
+            Integer currentVertex = flowerCoreVertices.pollLast();
+            if(solution.reducedGraph.containsVertex(currentVertex)) changedVertices = ruleSFV(solution, currentVertex, k);
             if(!changedVertices.isEmpty()){
                 return changedVertices;
             }
@@ -650,6 +651,23 @@ public class Kernelization {
             removeVertex(solution, v, true);
         }
         return changedVertices;
+    }
+
+
+    /**
+     * Uses approximation to determine the importance of vertices to the FVS.
+     * If a vertex maps to the lowest value in the mapping, the vertex is entirely redundant.
+     * If a vertex maps to over twice the lowest value in the mapping, the vertex is mandatory.
+     *
+     * @param graph The graph on which the mapping is determined
+     * @return
+     */
+    public static HashMap<Integer, Integer> getImportanceApprox(Multigraph<Integer, DefaultEdge> graph){
+        HashMap<Integer, Integer> result = new HashMap<>();
+        for (Integer v: graph.vertexSet()){
+            result.put(v, Approximation.determineFVS2(graph, new Integer[]{v}, Integer.MAX_VALUE).totalFVSweight);
+        }
+        return result;
     }
 
     /**
