@@ -237,20 +237,18 @@ public abstract class Benchmark {
 //                new Instance("003.graph", 10),
 //                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
 //                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
-                
             
-                // All of the above: less than 2 seconds in total with iterative compression
+                // All of the above: less than 2 seconds in total with iterative compression              
                 // All of the below: times using iterative compression (other algorithms didn't terminate)
-                
-                //new Instance("092.graph", -1), // k=15 or 16 (last compression step takes ages)
+
                 //new Instance("065.graph", -1),
                 
                 //new Instance("046.graph", 18),
-                // Graph 046.graph Time:399301ms
+                // Graph 046.graph Time:241681ms
                 // NEW SOLUTION! found a solution with k=18
                 
                 //new Instance("005.graph", 19),
-                // Graph 005.graph Time:110131ms
+                // Graph 005.graph Time:74265ms
                 // NEW SOLUTION! found a solution with k=19
                 
                 //new Instance("029.graph", -1),
@@ -282,12 +280,14 @@ public abstract class Benchmark {
                 new Instance("077.graph", 16), // 32123ms
                 
                 // 5-10 minutes
-                new Instance("005.graph", 19), // 110131ms
-                new Instance("046.graph", 18), // 399301ms
-                new Instance("070.graph", 19), // 434357ms
+                //new Instance("005.graph", 19), // 74265ms
+                //new Instance("046.graph", 18), // 241681ms
+                //new Instance("070.graph", 19), // 434357ms
                 
                 // takes forever
-                //new Instance("059.graph", 18), // 6804546ms
+                //new Instance("059.graph", 18), // 2411895ms
+                //new Instance("092.graph", 16), // 3920522ms             (IterativeCompression)
+
         };
 
         long totalTime = 0;

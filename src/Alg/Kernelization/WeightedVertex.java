@@ -18,10 +18,8 @@ public class WeightedVertex {
      */
     public int id;
     public float weight;
-    public int component;
     public WeightedVertex(int id) {
         this.id = id;
         this.weight = 1; // default value
-        this.component = 0; // default value
     }
 }

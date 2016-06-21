@@ -57,6 +57,11 @@ public class SimpleDisjointKernelization extends Kernelization {
         return SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, v, v, new HashSet<>(v));
     }
 
+    public static class Switch
+    {
+        protected boolean value = false;
+    }
+
     /**
      * Recursive function to check if vertex v is in a cycle with only edges from set withSet
      *
@@ -75,28 +80,26 @@ public class SimpleDisjointKernelization extends Kernelization {
             Integer lastVertex,
             Set<Integer> done
     ) {
-        Collection<Integer> neighbours = SimpleDisjointKernelization.getNeighbours(graph, currentVertex)
-                .collect(Collectors.toCollection(ArrayList<Integer>::new));
+        final Switch secondBack = new Switch();
 
-        boolean secondBack = false;
-        for (int vertex : neighbours) {
+        return SimpleDisjointKernelization.getNeighbours(graph, currentVertex).anyMatch(vertex -> {
             // Do not go back the same way
             // unless the lastVertex is the vertex we are looking for (v) and this is the second time
             // we can go back (meaning two edges going back, one already visited to get here, the
             // other one completing the cycle)
-            if (vertex == lastVertex && !(secondBack && lastVertex.equals(v))) {
-                secondBack = true;
-                continue;
+            if (vertex.equals(lastVertex) && !(secondBack.value && lastVertex.equals(v))) {
+                secondBack.value = true;
+                return false;
             }
 
             // We found a cycle
-            if (vertex == v) {
+            if (vertex.equals(v)) {
                 return true;
             }
 
             // We have already checked this vertex.
             if (done.contains(vertex)) {
-                continue;
+                return false;
             }
 
             if (withSet.contains(vertex)) {
@@ -104,12 +107,9 @@ public class SimpleDisjointKernelization extends Kernelization {
                 if (SimpleDisjointKernelization.inCycleWithRecursive(v, graph, withSet, vertex, currentVertex, done)) {
                     return true;
                 }
-                //done.remove(vertex);
             }
-        }
-
-        // We could not find
-        return false;
+            return false;
+        });
     }
 
     /**

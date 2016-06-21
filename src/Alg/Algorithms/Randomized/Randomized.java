@@ -43,7 +43,7 @@ public class Randomized implements FVSAlgorithmInterface
 
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
-        ReductionSolution reduced = Kernelization.kernelot(graph, true);
+        ReductionSolution reduced = Kernelization.kernelittle(graph, true);
 
         this.random = new Random();
 
