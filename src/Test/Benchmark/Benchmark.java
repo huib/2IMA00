@@ -267,6 +267,7 @@ public abstract class Benchmark {
                 new Instance("031.graph", 33),
                 new Instance("042.graph", 11),
                 new Instance("050.graph", 7),
+                new Instance("062.graph", 7),
                 new Instance("072.graph", 9),
                 new Instance("083.graph", 7),
                 new Instance("085.graph", 51),
@@ -282,10 +283,11 @@ public abstract class Benchmark {
                 // 5-10 minutes
                 new Instance("005.graph", 19), // 74265ms
                 new Instance("046.graph", 18), // 241681ms
-                //new Instance("070.graph", 19), // 434357ms
+                new Instance("070.graph", 19), // 434357ms
+                new Instance("098.graph", 18), // 20128ms
                 
                 // takes forever
-                //new Instance("059.graph", 18), // 2411895ms
+                new Instance("059.graph", 18), // 2411895ms
                 //new Instance("092.graph", 16), // 3920522ms             (IterativeCompression)
 
         };
