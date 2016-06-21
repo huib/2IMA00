@@ -144,8 +144,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
             {
                 try
                 {
-                    if(k>8)
-                        System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
+                    //if(k>8)
+                    //    System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
                     solution.compress(graph);
                 }
                 catch (InterruptedException ex)
