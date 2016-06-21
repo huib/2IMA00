@@ -16,7 +16,9 @@ public class IterativeCompression extends Benchmark{
     {
         IterativeCompression test = new IterativeCompression();
         
-        test.benchMark();
+        //test.benchMark();
         test.largerBenchMark();
+        //test.sub20SecondProblems();
+        //test.promisingProblems();
     }
 }
