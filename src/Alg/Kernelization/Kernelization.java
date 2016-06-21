@@ -340,6 +340,9 @@ public class Kernelization {
                 if(!solution.stillPossible) return solution;
             }
 
+            // Return if finished, graph is empty
+            if(solution.reducedGraph.vertexSet().isEmpty()) return solution;
+
             //if(!simpleOnly) System.out.println("Pre: " + solution.reducedK);
 
             // Do advanced rules, if desired
@@ -613,7 +616,7 @@ public class Kernelization {
     {
         Set<Integer> changedVertices;
         while(!flowerCoreVertices.isEmpty()){
-            changedVertices = ruleSFV(solution, flowerCoreVertices.pollFirst(), k);
+            changedVertices = ruleSFV(solution, flowerCoreVertices.pollLast(), k);
             if(!changedVertices.isEmpty()){
                 return changedVertices;
             }
@@ -634,7 +637,8 @@ public class Kernelization {
         //Get approximation with uniform weights, except v with weight 2k+1
         ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[]{v}, 2*k+1);
         int getApprox = approxSolution.totalFVSweight;
-        //System.out.println("Realk: " + k + ", foundK: " + getApprox);
+        //System.out.println("Realk: " + k + ", foundK: " + getApprox + ", vertex: " + v);
+        //System.out.println(solution.reducedGraph.toString());
         if (getApprox >= (2*k+1)) {
             // v should be removed, all neighbours flagged for change
             // (should remove neighbours as well and flag their neighbours??)

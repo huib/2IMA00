@@ -44,7 +44,9 @@ public class SplitSolve implements FVSAlgorithmInterface {
             i++;
             try
             {
-                solution.addAll(this.implementation.findFeedbackVertexSet(g));
+                ReductionSolution reduced = Kernelization.kernelot(g, true);
+                solution.addAll(reduced.verticesToRemoved);
+                solution.addAll(this.implementation.findFeedbackVertexSet(reduced.reducedGraph));
             }
             catch(RuntimeException ex)
             {
