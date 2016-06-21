@@ -108,6 +108,116 @@ public abstract class Benchmark {
         );
         System.out.println("Total mistakes: " + mistakes);
     }
+    
+    @Test
+    public void sub20SecondProblems() throws FileNotFoundException {
+        Instance[] instances = new Instance[]{
+                new Instance("003.graph", 10),
+                new Instance("006.graph", 11),
+                new Instance("020.graph", 8),
+                new Instance("028.graph", 8),
+                new Instance("031.graph", 33),
+                new Instance("042.graph", 11),
+                new Instance("050.graph", 7),
+                new Instance("072.graph", 9),
+                new Instance("083.graph", 7),
+                new Instance("085.graph", 51),
+                new Instance("091.graph", 21),
+                new Instance("095.graph", 8),
+                new Instance("096.graph", 6),
+                new Instance("099.graph", 8),
+        };
+
+        long totalTime = 0;
+        int mistakes = 0;
+
+        for (Instance i: instances) {
+            Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
+
+            long startTime = System.nanoTime();
+            List<Integer> solution = alg.findFeedbackVertexSet(graph);
+            long endTime = System.nanoTime();
+
+            totalTime += (endTime - startTime) / 1_000_000;
+            System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
+
+
+            if(i.k <0){
+                System.out.println("NEW SOLUTION! found a solution with k="+solution.size());
+            }
+            else if (solution.size() != i.k){
+                System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
+                mistakes++;
+            }
+
+            if (!verifySolution(i.filename, solution)) {
+                System.out.println("ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
+                mistakes += 10;
+            }
+        }
+
+        System.out.println("TEST RESULTS:");
+        System.out.println("Total time "
+                + (totalTime / 60_000) + " m "
+                + ((totalTime / 1000) % 60) + " s "
+                + (totalTime % 1000) + " ms "
+        );
+        System.out.println("Total mistakes: " + mistakes);
+    }
+
+    
+    @Test
+    public void promisingProblems() throws FileNotFoundException {
+        Instance[] instances = new Instance[]{
+                //new Instance("007.graph", 17), //solved in 20 seconds
+                //new Instance("046.graph", 18), //solved in 400 seconds
+                new Instance("059.graph", 18),
+                // Graph 059.graph Time:6804546ms
+                // NEW SOLUTION! found a solution with k=18
+                new Instance("070.graph", 19),
+                // Graph 070.graph Time:434357ms
+                // NEW SOLUTION! found a solution with k=19
+                new Instance("029.graph", -1),
+                //new Instance("024.graph", -1),
+                //new Instance("027.graph", -1),
+        };
+
+        long totalTime = 0;
+        int mistakes = 0;
+
+        for (Instance i: instances) {
+            Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
+
+            long startTime = System.nanoTime();
+            List<Integer> solution = alg.findFeedbackVertexSet(graph);
+            long endTime = System.nanoTime();
+
+            totalTime += (endTime - startTime) / 1_000_000;
+            System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
+
+
+            if(i.k <0){
+                System.out.println("NEW SOLUTION! found a solution with k="+solution.size());
+            }
+            else if (solution.size() != i.k){
+                System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
+                mistakes++;
+            }
+
+            if (!verifySolution(i.filename, solution)) {
+                System.out.println("ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
+                mistakes += 10;
+            }
+        }
+
+        System.out.println("TEST RESULTS:");
+        System.out.println("Total time "
+                + (totalTime / 60_000) + " m "
+                + ((totalTime / 1000) % 60) + " s "
+                + (totalTime % 1000) + " ms "
+        );
+        System.out.println("Total mistakes: " + mistakes);
+    }
 
     /**
      * A larger benchmark, with more files, for those algorithms that are even faster
@@ -117,17 +227,18 @@ public abstract class Benchmark {
         // Instances are added by sorting by filesize ascending
         // Last instance added 047.graph
         Instance[] instances = new Instance[]{
-                new Instance("096.graph", 6),   // Record 765 ms       (RandomizedDensity)
-                new Instance("099.graph", 8),   // Record 618 ms       (RandomizedDensity)
-                new Instance("050.graph", 7),   // Record 3443 ms      (Randomized)
-                new Instance("062.graph", 7),   // Record 3287 ms      (Randomized)
-                new Instance("083.graph", 7),   // Record 3898 ms      (Randomized)
-                new Instance("095.graph", 8),   // Record 9153 ms      (RandomizedDensity)
-                new Instance("028.graph", 8),   // Record 8827 ms      (RandomizedDensity)
-                new Instance("003.graph", 10),
-                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
-                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
+//                new Instance("096.graph", 6),   // Record 765 ms       (RandomizedDensity)
+//                new Instance("099.graph", 8),   // Record 618 ms       (RandomizedDensity)
+//                new Instance("050.graph", 7),   // Record 3443 ms      (Randomized)
+//                new Instance("062.graph", 7),   // Record 3287 ms      (Randomized)
+//                new Instance("083.graph", 7),   // Record 3898 ms      (Randomized)
+//                new Instance("095.graph", 8),   // Record 9153 ms      (RandomizedDensity)
+//                new Instance("028.graph", 8),   // Record 8827 ms      (RandomizedDensity)
+//                new Instance("003.graph", 10),
+//                new Instance("020.graph", 8),   // Record 4569 ms      (RandomizedDEnsity
+//                new Instance("042.graph", 11),  // Record 454646 ms    (RandomizedDensity)
                 
+            
                 // All of the above: less than 2 seconds in total with iterative compression
                 // All of the below: times using iterative compression (other algorithms didn't terminate)
                 
@@ -148,13 +259,42 @@ public abstract class Benchmark {
                 //new Instance("077.graph", 16),
                 // Graph 077.graph Time:32123ms
                 // NEW SOLUTION! found a solution with k=16
+            
+                // ------------------------
+                // fast instances (<5 seconds each)
+                new Instance("003.graph", 10),
+                new Instance("006.graph", 11),
+                new Instance("020.graph", 8),
+                new Instance("028.graph", 8),
+                new Instance("031.graph", 33),
+                new Instance("042.graph", 11),
+                new Instance("050.graph", 7),
+                new Instance("072.graph", 9),
+                new Instance("083.graph", 7),
+                new Instance("085.graph", 51),
+                new Instance("091.graph", 21),
+                new Instance("095.graph", 8),
+                new Instance("096.graph", 6),
+                new Instance("099.graph", 8),
+                
+                // slower instances (15s - 5m)
+                new Instance("007.graph", 17), //~20000ms
+                new Instance("077.graph", 16), // 32123ms
+                
+                // 5-10 minutes
+                new Instance("005.graph", 19), // 110131ms
+                new Instance("046.graph", 18), // 399301ms
+                new Instance("070.graph", 19), // 434357ms
+                
+                // takes forever
+                //new Instance("059.graph", 18), // 6804546ms
         };
 
         long totalTime = 0;
         int mistakes = 0;
 
         for (Instance i: instances) {
-            Multigraph<Integer, DefaultEdge> graph = this.loadGraph(i.filename);
+            Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
 
             long startTime = System.nanoTime();
             List<Integer> solution = alg.findFeedbackVertexSet(graph);
