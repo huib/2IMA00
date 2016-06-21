@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 import Alg.Algorithms.Randomized.RandomizedDensity;
 import Alg.Kernelization.ReductionSolution;
+import jdk.internal.util.xml.impl.Input;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -28,16 +29,16 @@ public class Main {
             return;
         }
 
-        ReductionSolution looplessGraph = InputReader.loopSafeReadGraph(scanner);
+        InputWrapper input = InputReader.loopSafeReadGraph(scanner);
 
 
         //FVSAlgorithmInterface randomized = new Randomized();
         FVSAlgorithmInterface randomized = new SplitSolve(new Randomized());
 
-        List<Integer> solution = randomized.findFeedbackVertexSet(looplessGraph);
+        List<Integer> solution = randomized.findFeedbackVertexSet(input.reductionSolution);
 
         for (Integer s: solution) {
-            System.out.print(s + ", ");
+            System.out.print(input.nameMapping.get(s) + ", ");
         }
 
 

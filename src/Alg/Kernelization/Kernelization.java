@@ -656,7 +656,7 @@ public class Kernelization {
 
     /**
      * Uses approximation to determine the importance of vertices to the FVS.
-     * If a vertex maps to the lowest value in the mapping, the vertex is entirely redundant.
+     * If a vertex maps to the lowest value in the mapping, the vertex can be replaced by another in the FVS.
      * If a vertex maps to over twice the lowest value in the mapping, the vertex is mandatory.
      *
      * @param graph The graph on which the mapping is determined
