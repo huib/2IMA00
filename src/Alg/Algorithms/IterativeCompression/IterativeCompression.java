@@ -8,6 +8,9 @@ package Alg.Algorithms.IterativeCompression;
 
 import Alg.FVSAlgorithmInterface;
 import Alg.GraphDisplayer;
+import Alg.Kernelization.Approximation;
+import Alg.Kernelization.Kernelization;
+import Alg.Kernelization.ReductionSolution;
 import Alg.Kernelization.SimpleDisjointKernelization;
 import Alg.Lib.CycleDetector;
 import java.util.ArrayList;
@@ -18,10 +21,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import Alg.Kernelization.Kernelization;
-import Alg.Kernelization.ReductionSolution;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jgrapht.graph.DefaultEdge;
@@ -48,21 +50,53 @@ public class IterativeCompression implements FVSAlgorithmInterface
         
         int nVertices = graph.vertexSet().size();
         
-        // sort them on degree (not needed, but might speed up the algorithm)
         //*
         List<Integer> vertices = new ArrayList(graph.vertexSet());
+        // sort them on degree (not needed, but might speed up the algorithm)
+//        Collections.sort(vertices, (Object o1, Object o2) ->
+//        {
+//            int d1 = graph.degreeOf((int)o1);
+//            int d2 = graph.degreeOf((int)o2);
+//            
+//            if(d1 < d2)
+//                return -1;
+//            else if(d1 == d2)
+//                return 0;
+//            else
+//                return 1;
+//        });
+        Map<Integer, Integer> weights = Kernelization.getImportanceApprox(graph);
         Collections.sort(vertices, (Object o1, Object o2) ->
         {
-            int d1 = graph.degreeOf((int)o1);
-            int d2 = graph.degreeOf((int)o2);
+            int w1 = weights.get((int)o1);
+            int w2 = weights.get((int)o2);
             
-            if(d1 < d2)
-                return 1;
-            else if(d1 == d2)
+            if(w1 < w2)
+                return -1;
+            else if(w1 == w2)
                 return 0;
             else
-                return -1;
+                return 1;
         });
+//        Collections.sort(vertices, (Object o1, Object o2) ->
+//        {
+//            int w1 = weights.get((int)o1);
+//            int w2 = weights.get((int)o2);
+//            int d1 = graph.degreeOf((int)o1);
+//            int d2 = graph.degreeOf((int)o2);
+//            
+//            if(w1 < w2)
+//                return -1;
+//            else if(w1 == w2)
+//                if(d1 < d2)
+//                    return 1;
+//                else if(d1 == d2)
+//                    return 0;
+//                else
+//                    return -1;
+//            else
+//                return 1;
+//        });
         
         vertices.stream().forEach((v) ->
         {
@@ -110,7 +144,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
             {
                 try
                 {
-                    //System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
+                    //if(k>8)
+                    //    System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
                     solution.compress(graph);
                 }
                 catch (InterruptedException ex)
@@ -120,7 +155,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
                 }
                 k = Math.max(k, solution.size());
                 //System.out.println("new solution size= "+solution.size()+", k= "+k);
-            }        }
+            }
+        }
         
         return solution;
     }
@@ -142,6 +178,12 @@ public class IterativeCompression implements FVSAlgorithmInterface
     
     public class FVS<V> extends ArrayList<V>
     {
+        // the last vertex added since the last compression
+        // equals null if no vertex was added since the last compression, or if we never compressed
+        private V lastVertexAdded;
+        // true iff since the last compression more than one vertex was added (should never be true)
+        private boolean moreThanOneVertexAdded = false;
+        
         public void compress(Multigraph<V, DefaultEdge> graph) throws InterruptedException
         {
             // try every strict subset Z of the current solution C
@@ -157,8 +199,15 @@ public class IterativeCompression implements FVSAlgorithmInterface
                 if(Thread.currentThread().isInterrupted())
                     throw new InterruptedException();
                 
-                if(subset.size() == this.size())
-                    continue; // not a strict subset
+                if(     // not a strict subset
+                        subset.size() == this.size()
+                        // or the last (single!) vertex added is in the subset (meaning we can't compress this way)
+                        || !this.moreThanOneVertexAdded && subset.contains(this.lastVertexAdded)
+                        )
+                {
+                    continue;
+                }
+                
                 
                 HashSet<V> complement = this.complementOf(subset);
                 //if(subset.size() + complement.size() != this.size())
@@ -181,9 +230,25 @@ public class IterativeCompression implements FVSAlgorithmInterface
                     
                     this.update(complement, solution);
                     //checkValidSolution(graph, this);
+                    
+                    this.lastVertexAdded = null;
+                    this.moreThanOneVertexAdded = false;
                     return;
                 }
             }
+            
+            this.lastVertexAdded = null;
+            this.moreThanOneVertexAdded = false;
+        }
+        
+        @Override
+        public boolean add(V vertex)
+        {
+            if(this.lastVertexAdded != null)
+                this.moreThanOneVertexAdded = true;
+            this.lastVertexAdded = vertex;
+            
+            return super.add(vertex);
         }
         
         private void update(HashSet<V> remove, Collection<V> add)

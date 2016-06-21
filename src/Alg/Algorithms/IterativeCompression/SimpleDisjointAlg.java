@@ -28,8 +28,16 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
     @Override
     public Collection<V> solve(Multigraph<V, DefaultEdge> g, HashSet<V> prohibited)
     {
+        // 1. Check for a cycle in the graph consisting of only vertices in prohibited
+        //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
+        if (this.containsCycleWithOnlyProhibited(g, prohibited)) {
+            return null;
+        }
+        
+        Multigraph<V, DefaultEdge> graph = (Multigraph)g.clone();
+        
         //this.currentCompleteGraph = g;
-        Collection<V> result = this.solve((Multigraph<V, DefaultEdge>) g.clone(), prohibited, prohibited.size()-1);
+        Collection<V> result = this.solve((Multigraph<V, DefaultEdge>) graph, prohibited, prohibited.size()-1);
         if(result != null && result.size() > prohibited.size()-1)
             throw new IllegalStateException("This may not happen..");
         //if(result != null)
@@ -64,11 +72,6 @@ public class SimpleDisjointAlg<V> implements DisjointFVSAlgorithm<V>
     {
         if(k < 0)
         {
-            return null;
-        }
-        // 1. Check for a cycle in the graph consisting of only vertices in prohibited
-        //    If there exists such a cycle, return null (no FVS disjoint of prohibited is possible)
-        if (this.containsCycleWithOnlyProhibited(graph, prohibited)) {
             return null;
         }
 
