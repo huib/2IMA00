@@ -280,8 +280,8 @@ public abstract class Benchmark {
                 new Instance("077.graph", 16), // 32123ms
                 
                 // 5-10 minutes
-                //new Instance("005.graph", 19), // 74265ms
-                //new Instance("046.graph", 18), // 241681ms
+                new Instance("005.graph", 19), // 74265ms
+                new Instance("046.graph", 18), // 241681ms
                 //new Instance("070.graph", 19), // 434357ms
                 
                 // takes forever
