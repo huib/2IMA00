@@ -137,11 +137,11 @@ public abstract class Benchmark {
                 //new Instance("065.graph", -1),
                 
                 //new Instance("046.graph", 18),
-                // Graph 046.graph Time:399301ms
+                // Graph 046.graph Time:241681ms
                 // NEW SOLUTION! found a solution with k=18
                 
-                //new Instance("005.graph", 19),
-                // Graph 005.graph Time:110131ms
+                new Instance("005.graph", 19),
+                // Graph 005.graph Time:74265ms
                 // NEW SOLUTION! found a solution with k=19
                 
                 //new Instance("029.graph", -1),
