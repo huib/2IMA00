@@ -5,6 +5,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.jgrapht.alg.util.UnionFind;
 import sun.awt.image.ImageWatched;
+import sun.reflect.generics.tree.Tree;
 
 import java.util.*;
 
@@ -276,12 +277,14 @@ public class Approximation {
 
 
 
+
         // At this point, G-F contains no (more) SDC and STACK contains all potential vertices from the solution.
         // • We now filter out redundant vertices by popping vertices from STACK and checking whether placing them back
         //   into G-F would create a cycle. We do this using UnionFind
         UnionFind<Integer> union = new UnionFind(solution.reducedGraph.vertexSet());
+        System.out.println("Stack: " + STACK.toString());
         while (!STACK.isEmpty()){
-            Integer currentVertex = STACK.peek(); // view top item from stack
+            Integer currentVertex = STACK.pop(); // view top item from stack
 
             // get all edges from current vertex in the original graph G
             LinkedList<DefaultEdge> edges = new LinkedList(ingraph.edgesOf(currentVertex));
@@ -312,8 +315,8 @@ public class Approximation {
             } else { //if we found a loop, currentVertex is essential
                 solution.verticesToRemoved.add(currentVertex); // add currentVertex to solution F
             }
-            STACK.pop();
         }
+
 
         // Next we update any vertex whose weight was artificially increased for certain reduction rules
         int c = 0;
@@ -343,13 +346,170 @@ public class Approximation {
         // Skip initial filling of F, by definition, no weights are 0
         Stack<Integer> stack = new Stack<>(); // The STACK
 
-        cleanUp2(solution.reducedGraph, new LinkedList<>(solution.reducedGraph.vertexSet()));
+        cleanUp2(solution.reducedGraph, new LinkedList<>(solution.reducedGraph.vertexSet()), new TreeSet<>());
 
+        // Create mapping from vertices to weights
+        HashMap<Integer, Float> weightMap = new HashMap<>();
         for(Integer v: ingraph.vertexSet()){
+            weightMap.put(v, 1.0f);
+            for(Integer u: weightedVertices){
+                if(v.equals(u)) weightMap.put(v, (float) weight);
+            }
+        }
 
+        // Set of vertices
+        TreeSet<Integer> vertices = new TreeSet<>(solution.reducedGraph.vertexSet());
+
+        // Main algorithm loop
+        while(!vertices.isEmpty()){
+
+            // Detect semidisjoint cycle
+            boolean hasSDC = false;
+            LinkedList<Integer> semiDisjointCycle = new LinkedList<>();
+            LinkedList<Integer> degreeTwoVertices = new LinkedList<>();
+
+            for (Integer v: vertices){
+                if(solution.reducedGraph.degreeOf(v) == 2) degreeTwoVertices.push(v);
+            }
+
+            while(!degreeTwoVertices.isEmpty()){
+                Integer v = degreeTwoVertices.pop();// Get potential cycle segment
+                semiDisjointCycle = new LinkedList();
+                semiDisjointCycle.push(v);
+                List<Integer> neighbours = Graphs.neighborListOf(solution.reducedGraph, v);
+
+                if(neighbours.get(0).equals(neighbours.get(1))){
+                    semiDisjointCycle.push(neighbours.get(0));
+                    hasSDC = true;
+                    break; // Found a semidisjoint cycle of size 2
+                }
+                else {
+                    Integer lastNeighbour = v;
+                    Integer leftNeighbour = neighbours.get(0);
+                    // Walk left from v
+                    while (degreeTwoVertices.contains(leftNeighbour)){
+                        List<Integer> surroundings = Graphs.neighborListOf(solution.reducedGraph, leftNeighbour);
+                        for (Integer s: surroundings){
+                            if (!s.equals(lastNeighbour)){
+                                semiDisjointCycle.push(leftNeighbour);
+                                degreeTwoVertices.remove(leftNeighbour);
+                                lastNeighbour = leftNeighbour;
+                                leftNeighbour = s;
+                                break;
+                            }
+                        }
+                    }
+                    if(leftNeighbour.equals(v)){
+                        hasSDC = true;
+                        break; // Found a disjoint cycle
+                    }
+
+                    lastNeighbour = v;
+                    Integer rightNeighbour = neighbours.get(1);
+                    // Walk right from v
+                    while (degreeTwoVertices.contains(rightNeighbour)){
+                        List<Integer> surroundings = Graphs.neighborListOf(solution.reducedGraph, rightNeighbour);
+                        for (Integer s: surroundings){
+                            if (!s.equals(lastNeighbour)){
+                                semiDisjointCycle.push(leftNeighbour);
+                                degreeTwoVertices.remove(leftNeighbour);
+                                lastNeighbour = rightNeighbour;
+                                rightNeighbour = s;
+                                break;
+                            }
+                        }
+                    }
+                    if(leftNeighbour.equals(rightNeighbour)){
+                        semiDisjointCycle.push(leftNeighbour);
+                        hasSDC = true;
+                        break; // Found a semidisjoint cycle, left and right arrived at same vertex
+                    }
+                }
+            }
+
+            if(hasSDC){
+                // Semidisjoint circle case
+                float gamma = Float.MAX_VALUE;
+                for (Integer v: semiDisjointCycle){
+                    gamma = Math.min(gamma, (float) weightMap.get(v));
+                }
+                for (Integer v: semiDisjointCycle){
+                    weightMap.put(v, (float) weightMap.get(v) - gamma);
+                }
+            }
+            else {
+                // Non semidisjoint circle case
+                float gamma = Float.MAX_VALUE;
+                for (Integer v: vertices){
+                    gamma = Math.min(gamma, weightMap.get(v)/((float) solution.reducedGraph.degreeOf(v) - 1));
+                }
+                for (Integer v: vertices){
+                    weightMap.put(v, weightMap.get(v) - gamma*((float) solution.reducedGraph.degreeOf(v) -1));
+                }
+            }
+
+            // Remove zero weight vertices, add to stack and solution
+            for (Integer v: new LinkedList<>(vertices)){
+                if(weightMap.get(v) <= 0){
+                    vertices.remove(v);
+                    stack.push(v);
+                    solution.reducedGraph.removeVertex(v);
+                }
+            }
+
+            cleanUp2(solution.reducedGraph, new LinkedList<>(solution.reducedGraph.vertexSet()), vertices);
         }
 
 
+        // Set up union find
+        UnionFind<Integer> union = new UnionFind(ingraph.vertexSet());
+        TreeSet<Integer> unionedVertices = new TreeSet<>();
+        for (Integer v: ingraph.vertexSet()){
+            if(!stack.contains(v)){
+                union.addElement(v);
+                for (Integer u: Graphs.neighborListOf(ingraph, v)){
+                    if(unionedVertices.contains(u)){
+                        union.union(v, u);
+                    }
+                }
+                unionedVertices.add(v);
+            }
+        }
+
+        // Process the STACK
+        while (!stack.isEmpty()){
+            Integer currentVertex = stack.pop(); // view top item from stack
+
+            // get all edges from current vertex in the original graph G
+            LinkedList<DefaultEdge> edges = new LinkedList(ingraph.edgesOf(currentVertex));
+            // get all corresponding neigbors n and, if n in G-F, store them in collection: neighbors
+            List<Integer> neighbors = new ArrayList();
+            for (DefaultEdge e:edges) {
+                neighbors.add(Graphs.getOppositeVertex(ingraph, e, currentVertex));
+            }
+
+            // check if v is connected to the same component more than once using a treeset (duplicates)
+            TreeSet<Integer> neighborComponents = new TreeSet<>();
+            boolean hasDuplicates = false;
+            // check for multiple neighbors of currentVertex that are members of the same component
+            for ( Integer n:neighbors ) {
+                if(unionedVertices.contains(n)) hasDuplicates |= !neighborComponents.add(union.find(n));
+                if (hasDuplicates) break; // we found a loop
+            }
+
+            // in case we didn't find a loop, currentVertex is redundant
+            if(!hasDuplicates){
+                for ( Integer n:neighbors ) {
+                    if (unionedVertices.contains(n)) {
+                        union.union(currentVertex, n); // connect the vertex to its neighbors in G-F (UnionFind components)
+                    }
+                }
+            } else { //if we found a loop, currentVertex is essential
+                solution.verticesToRemoved.add(currentVertex); // add currentVertex to solution F
+            }
+
+            unionedVertices.add(currentVertex);
+        }
 
 
         //Determine solution weight
@@ -365,13 +525,14 @@ public class Approximation {
         return solution;
     }
 
-    public static void cleanUp2(Multigraph<Integer, DefaultEdge> graph, LinkedList<Integer> relevantVertices){
+    public static void cleanUp2(Multigraph<Integer, DefaultEdge> graph, LinkedList<Integer> relevantVertices, TreeSet<Integer> verts){
         while (!relevantVertices.isEmpty()) {
             Integer current = relevantVertices.pop();
             if(graph.containsVertex(current)){
                 if(graph.degreeOf(current) <= 1){
                     relevantVertices.addAll(Graphs.neighborListOf(graph, current));
                     graph.removeVertex(current);
+                    verts.remove(current);
                 }
             }
         }

@@ -350,8 +350,12 @@ public class Kernelization {
                 relevantVertices = new LinkedList<>();
                 //System.out.println("post0: "  + solution.reducedK);
 
-                ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[0], 0);
-                simpleVertexRules(approxSolution);
+                ReductionSolution approxSolution = Approximation.determineFVS2(solution.reducedGraph, new Integer[0], 0);
+
+                /*System.out.println("Weight: " + approxSolution.totalFVSweight);
+                System.out.println(solution.reducedGraph.toString());
+                System.out.println(approxSolution.verticesToRemoved.toString());*/
+
                 int getApprox = approxSolution.totalFVSweight;
                 int usedK = useK ? Math.min(solution.reducedK, getApprox) : getApprox;
                 relevantVertices.addAll(ruleSFV(solution, flowerCoreVertices, usedK));
@@ -635,7 +639,7 @@ public class Kernelization {
     {
         TreeSet<Integer> changedVertices = new TreeSet<>();
         //Get approximation with uniform weights, except v with weight 2k+1
-        ReductionSolution approxSolution = Approximation.determineFVS(solution.reducedGraph, true, new Integer[]{v}, 2*k+1);
+        ReductionSolution approxSolution = Approximation.determineFVS2(solution.reducedGraph, new Integer[]{v}, 2*k+1);
         int getApprox = approxSolution.totalFVSweight;
         //System.out.println("Realk: " + k + ", foundK: " + getApprox + ", vertex: " + v);
         //System.out.println(solution.reducedGraph.toString());
