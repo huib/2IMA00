@@ -106,7 +106,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
             int targetVertex = (int) reducedGraph.getEdgeTarget(e);
 
 
-            counter.put(sourceVertex, counter.getOrDefault(sourceVertex, 0L) + runsForSourceVertex);;
+            counter.put(sourceVertex, counter.getOrDefault(sourceVertex, 0L) + runsForSourceVertex);
             counter.put(targetVertex, counter.getOrDefault(targetVertex, 0L) + runsForTargetVertex);
 
 
