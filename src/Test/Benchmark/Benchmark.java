@@ -81,23 +81,32 @@ public abstract class Benchmark {
         for (Instance i: instances) {
             Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
 
-            long startTime = System.nanoTime();
-            List<Integer> solution = alg.findFeedbackVertexSet(graph);
-            long endTime = System.nanoTime();
+            long totalTimeGraph = 0;
+            int k = 10;
+            while(k --> 0) {
+                Multigraph<Integer, DefaultEdge> clonedgraph = (Multigraph<Integer, DefaultEdge>)graph.clone();
+                long startTime = System.nanoTime();
+                List<Integer> solution = alg.findFeedbackVertexSet(clonedgraph);
+                long endTime = System.nanoTime();
+                totalTime += (endTime - startTime) / 1_000_000;
+                totalTimeGraph +=(endTime - startTime) / 1_000_000;
 
-            totalTime += (endTime - startTime) / 1_000_000;
-            System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
+                if (solution.size() != i.k){
+                    System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
+                    mistakes++;
+                }
 
+                if (!verifySolution(i.filename, solution)) {
+                    System.out.println("ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
+                    mistakes += 10;
+                }
 
-            if (solution.size() != i.k){
-                System.out.println("MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
-                mistakes++;
+                System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
             }
 
-            if (!verifySolution(i.filename, solution)) {
-                System.out.println("ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
-                mistakes += 10;
-            }
+            System.out.println("Graph " + i.filename + " Average time:" + (totalTimeGraph / 10) + "ms");
+
+
         }
 
         System.out.println("TEST RESULTS:");
