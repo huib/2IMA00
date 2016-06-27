@@ -9,6 +9,7 @@ public class IterativeCompression extends Benchmark{
 
     public IterativeCompression() {
         super(new Alg.Algorithms.IterativeCompression.IterativeCompression());
+        //super(new Alg.Algorithms.Randomized.RandomizedDensity());
     }
     
     
@@ -20,5 +21,6 @@ public class IterativeCompression extends Benchmark{
         test.largerBenchMark();
         //test.sub20SecondProblems();
         //test.promisingProblems();
+        //test.orderBenchMark();
     }
 }

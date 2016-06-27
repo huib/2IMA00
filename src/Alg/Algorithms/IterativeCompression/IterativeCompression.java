@@ -12,20 +12,15 @@ import Alg.Kernelization.Approximation;
 import Alg.Kernelization.Kernelization;
 import Alg.Kernelization.ReductionSolution;
 import Alg.Kernelization.SimpleDisjointKernelization;
-import Alg.Lib.CycleDetector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 
@@ -35,7 +30,8 @@ import org.jgrapht.graph.Multigraph;
  */
 public class IterativeCompression implements FVSAlgorithmInterface
 {
-
+    public static int orderID = 4;
+    
     @Override
     public List<Integer> findFeedbackVertexSet(ReductionSolution partialSolution){
         List<Integer> result = findFeedbackVertexSet(partialSolution.reducedGraph);
@@ -52,53 +48,158 @@ public class IterativeCompression implements FVSAlgorithmInterface
         
         //*
         List<Integer> vertices = new ArrayList(graph.vertexSet());
-        // sort them on degree (not needed, but might speed up the algorithm)
-//        Collections.sort(vertices, (Object o1, Object o2) ->
-//        {
-//            int d1 = graph.degreeOf((int)o1);
-//            int d2 = graph.degreeOf((int)o2);
-//            
-//            if(d1 < d2)
-//                return -1;
-//            else if(d1 == d2)
-//                return 0;
-//            else
-//                return 1;
-//        });
+        Collections.shuffle(vertices);
         Map<Integer, Integer> weights = Kernelization.getImportanceApprox(graph);
-        Collections.sort(vertices, (Object o1, Object o2) ->
+        List<Integer> approxSolution = Approximation.determineFVS2(graph, new Integer[]{}, 1).verticesToRemoved;
+        
+        // <editor-fold desc="Order definitions" defaultstate="collapsed">
+        // The comparator is used to define the order in which the vertices are removed, the order
+        // in which the vertices are added is reversed. The naming of the comparators refers to the
+        // order in which the vertices are added.
+        Comparator<Integer> degreeInc = (Integer o1, Integer o2) ->
+        {
+            int d1 = graph.degreeOf((int)o1);
+            int d2 = graph.degreeOf((int)o2);
+            
+            if(d1 < d2)
+                return 1;
+            else if(d1 == d2)
+                return 0;
+            else
+                return -1;
+        };
+        Comparator<Integer> degreeDec = (Integer o1, Integer o2) ->
+        {
+            return degreeInc.compare(o2, o1);
+        };
+        Comparator<Integer> weightInc = (Integer o1, Integer o2) ->
         {
             int w1 = weights.get((int)o1);
             int w2 = weights.get((int)o2);
             
             if(w1 < w2)
-                return -1;
+                return 1;
             else if(w1 == w2)
                 return 0;
             else
+                return -1;
+        };
+        Comparator<Integer> weightDec = (Integer o1, Integer o2) ->
+        {
+            return weightInc.compare(o2, o1);
+        };
+        Comparator<Integer> weightIncDegreeInc = (Integer o1, Integer o2) ->
+        {
+            int r = weightInc.compare(o1, o2);
+            if(r == 0)
+                r = degreeInc.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> weightDecDegreeInc = (Integer o1, Integer o2) ->
+        {
+            int r = weightDec.compare(o1, o2);
+            if(r == 0)
+                r = degreeInc.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> weightIncDegreeDec = (Integer o1, Integer o2) ->
+        {
+            int r = weightInc.compare(o1, o2);
+            if(r == 0)
+                r = degreeDec.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> weightDecDegreeDec = (Integer o1, Integer o2) ->
+        {
+            int r = weightDec.compare(o1, o2);
+            if(r == 0)
+                r = degreeDec.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> degreeIncWeightInc = (Integer o1, Integer o2) ->
+        {
+            int r = degreeInc.compare(o1, o2);
+            if(r == 0)
+                r = weightInc.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> degreeIncWeightDec = (Integer o1, Integer o2) ->
+        {
+            int r = degreeInc.compare(o1, o2);
+            if(r == 0)
+                r = weightDec.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> degreeDecWeightInc = (Integer o1, Integer o2) ->
+        {
+            int r = degreeDec.compare(o1, o2);
+            if(r == 0)
+                r = weightInc.compare(o1, o2);
+            
+            return r;
+        };
+        Comparator<Integer> degreeDecWeightDec = (Integer o1, Integer o2) ->
+        {
+            int r = degreeDec.compare(o1, o2);
+            if(r == 0)
+                r = weightDec.compare(o1, o2);
+            
+            return r;
+        };
+        //</editor-fold>
+        Comparator<Integer>[] orders = new Comparator[] {
+            degreeInc, degreeDec, weightInc, weightDec,
+            degreeIncWeightInc, degreeDecWeightInc,
+            degreeIncWeightDec, degreeDecWeightDec,
+            weightIncDegreeInc, weightDecDegreeInc,
+            weightIncDegreeDec, weightDecDegreeDec,
+        };
+        Comparator<Integer> treeFirst = (Integer o1, Integer o2) ->
+        {
+            boolean c1 = approxSolution.contains(o1);
+            boolean c2 = approxSolution.contains(o2);
+            Comparator<Integer> comp = orders[orderID];
+            
+            if(c1 == c2)
+                return comp.compare(o1, o2);
+            else if(c1)
+                return -1;
+            else if(c2)
                 return 1;
-        });
-//        Collections.sort(vertices, (Object o1, Object o2) ->
-//        {
-//            int w1 = weights.get((int)o1);
-//            int w2 = weights.get((int)o2);
-//            int d1 = graph.degreeOf((int)o1);
-//            int d2 = graph.degreeOf((int)o2);
-//            
-//            if(w1 < w2)
-//                return -1;
-//            else if(w1 == w2)
-//                if(d1 < d2)
-//                    return 1;
-//                else if(d1 == d2)
-//                    return 0;
-//                else
-//                    return -1;
-//            else
-//                return 1;
-//        });
+            else
+                return 0; // this can never happen...
+        };
         
-        vertices.stream().forEach((v) ->
+        Collections.sort(vertices, treeFirst);
+        
+//        vertices.stream().forEach((v) ->
+//        {
+//            System.out.print(InputReader.map(v)+" ");
+//        });
+//        System.out.println();
+//        
+//        vertices.stream().forEach((v) ->
+//        {
+//            System.out.print(String.format("%02d", weights.get(v))+" ");
+//        });
+//        System.out.println();
+//        
+//        vertices.stream().forEach((v) ->
+//        {
+//            System.out.print(String.format("%02d", graph.degreeOf(v))+" ");
+//        });
+//        System.out.println();
+        
+        vertices
+                .stream()
+                //.filter((v) -> approxSolution.contains(v))
+                .forEach((v) ->
         {
             actions.push(new DeleteVertexAction(graph, v));
         });
@@ -144,8 +245,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
             {
                 try
                 {
-                    //if(k>8)
-                    //    System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
+//                    if(k>8)
+//                        System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
                     solution.compress(graph);
                 }
                 catch (InterruptedException ex)
@@ -157,6 +258,31 @@ public class IterativeCompression implements FVSAlgorithmInterface
                 //System.out.println("new solution size= "+solution.size()+", k= "+k);
             }
         }
+        
+//        Map<Integer, Integer> map = Kernelization.getImportanceApprox(g);
+//        g.vertexSet().stream().forEach((v) ->
+//        {
+//            String name = InputReader.map(v);
+//            int weight = map.get(v);
+//            int degree = g.degreeOf(v);
+//            int minND = Integer.MAX_VALUE;
+//            int maxND = 0;
+//            float avgND = 0;
+//            for(DefaultEdge e : g.edgesOf(v))
+//            {
+//                int nb = g.getEdgeSource(e);
+//                if(nb == v)
+//                    nb = g.getEdgeTarget(e);
+//                
+//                nb = g.degreeOf(nb);
+//                avgND += nb;
+//                minND = Math.min(minND, nb);
+//                maxND = Math.max(maxND, nb);
+//            }
+//            avgND/=degree+0.0f;
+//                
+//            System.out.println(name+", "+weight+", "+degree+", "+minND+", "+maxND+", "+avgND+", "+solution.contains(v));
+//        });
         
         return solution;
     }

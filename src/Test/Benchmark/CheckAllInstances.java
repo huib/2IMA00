@@ -10,7 +10,10 @@ import Alg.FVSAlgorithmInterface;
 import Alg.SplitSolve;
 import Test.Benchmark.Benchmark.Instance;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -29,9 +32,37 @@ public class CheckAllInstances
     public static void main(String[] args) throws FileNotFoundException
     {
         int n = 100;
-        Instance[] instances = new Instance[n];
-        for(int i=1; i<=n; i++)
-            instances[i-1] = new Instance(String.format("%03d", i)+".graph",-1);
+        Set<Integer> solved = new HashSet(Arrays.asList(new Integer[] {
+            3,
+            5,
+            6,
+            20,
+            28,
+            31,
+            42,
+            50,
+            62,
+            72,
+            83,
+            85,
+            91,
+            95,
+            96,
+            99,
+            7,
+            77,
+            5,
+            46,
+            70,
+            59,
+            92,
+            98,
+        }));
+        
+        Instance[] instances = new Instance[n-solved.size()];
+        for(int i=1; 0<n; n--)
+            if(!solved.contains(n))
+                instances[i++-1] = new Instance(String.format("%03d", n)+".graph",-1);
         
         benchmark(instances);
     }
@@ -61,7 +92,7 @@ public class CheckAllInstances
             
             try
             {
-                List<Integer> solution = (List<Integer>) worker.get(20, TimeUnit.SECONDS);
+                List<Integer> solution = (List<Integer>) worker.get(30, TimeUnit.SECONDS);
                 if(i.k <0){
                     System.out.println("NEW SOLUTION! found a solution with k="+solution.size());
                 }

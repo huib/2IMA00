@@ -5,6 +5,7 @@ import Alg.Kernelization.ReductionSolution;
 import Alg.Kernelization.Splitter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
@@ -46,7 +47,8 @@ public class SplitSolve implements FVSAlgorithmInterface {
             {
                 ReductionSolution reduced = Kernelization.kernelot(g, true);
                 solution.addAll(reduced.verticesToRemoved);
-                solution.addAll(this.implementation.findFeedbackVertexSet(reduced.reducedGraph));
+                if(!reduced.reducedGraph.vertexSet().isEmpty())
+                    solution.addAll(this.implementation.findFeedbackVertexSet(reduced.reducedGraph));
             }
             catch(RuntimeException ex)
             {

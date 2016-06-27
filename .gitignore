@@ -27,3 +27,12 @@ fabric.properties
 *.iml
 production/production/2IMA00/Alg/Algorithms/Randomized$ReductionSolution.class
 production/
+
+# Lock
+*#
+
+#LaTeX
+*.toc
+*.aux
+*.log
+*.pdf

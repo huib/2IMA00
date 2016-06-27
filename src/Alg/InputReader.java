@@ -55,8 +55,8 @@ public class InputReader {
                 //intArray[i] = Integer.parseInt( vertices[i] );
                 Integer mapped = reverseMapping.get(vertices[i]);
                 if (mapped == null) {
-                    reverseMapping.put(vertices[i], counter);
-                    intArray[i] = counter;
+                    reverseMapping.put(vertices[i], counter); //Integer.parseInt(vertices[i])); //counter);
+                    intArray[i] = counter; //Integer.parseInt(vertices[i]); //counter;
                     counter++;
                 } else {
                     intArray[i] = mapped;
@@ -88,10 +88,18 @@ public class InputReader {
         wrapper.reductionSolution = new ReductionSolution();
         wrapper.reductionSolution.reducedGraph = graph;
         wrapper.nameMapping = mapping;
+        InputReader.mapping = mapping;
 
         // Eliminate self-loops
         while (!selfLoops.isEmpty()) Kernelization.removeVertex(wrapper.reductionSolution, selfLoops.pop(), true);
 
         return wrapper;
+    }
+    
+    // just for debugging
+    private static Map<Integer, String> mapping;
+    public static String map(int v)
+    {
+        return mapping.get(v);
     }
 }

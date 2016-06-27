@@ -1,0 +1,44 @@
+To test the different algorithms 7 different graphs were determined that were relatively easy to solve. The reason that relatively easy graphs were taken was because not all algorithms gave an answer for the larger graphs. The chosen graphs were then solved 10 times by each algorithm, and the average solving time was taken to compare the algorithms. 
+
+~\\\textbf{Running time full algorithm} \\
+The following table gives an overview of the time it took each algorithm to solve the problem in their final form.
+
+~\\\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Problem} & \textbf{k} & \textbf{Randomized} & \textbf{Randomized Density} & \textbf{Iterative Compression} \\
+\hline
+096 & 6 & 695 ms & 107 ms & 40 ms \\
+099 & 8 & 743 ms & 168 ms & 6 ms \\
+050 & 7 & 4.407 ms & 8.515 ms & 37 ms \\
+062 & 7 & 3.857 ms & 1.591 ms & 39 ms \\
+083 & 7 & 4.897 ms & 12.798 ms & 12 ms \\
+095 & 8 & 17.159 ms & 8.851 ms& 40 ms \\
+028 & 8 & 18.124 ms & 9.994 ms& 40 ms \\
+\hline
+\textbf{Total:} & & 49.882 ms & 40.433 ms & 214 ms\\
+\hline
+\end{tabular}
+
+~\\\\\textbf{Split Algorithm} \\
+To show that the split algorithm works the iterative compression is run on all the instances that it could solve within 20 seconds. Then the iterative compression was run without doing splitsolve first. These were the results:
+
+~\\\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Problem} & \textbf{k} & \textbf{Without Split Solve} & \textbf{With Split Solve} & \textbf{Change} \\
+\hline
+003 & 10 & 396 ms & 401 ms  & +1,2\% \\
+006 & 11 & 2827 ms & 1.127 ms & -60.13\% \\
+020 & 8 & 35 ms & 27 ms &  -35.71\% \\
+028 & 8  & 47ms & 42 ms & -10.64 \% \\
+031 & 33 & $>$ 5 min & 153 ms & $>$ -99.95\% \\
+042 & 11 & 246 ms & 142 ms & -42.28 \% \\
+050 & 7 & 12 ms & 14 ms & 16.67\% \\
+072 & 9 & 521 ms & 509 ms & -2.3\% \\
+083 & 7 & 9 ms & 10 ms & 11.11\% \\
+085 & 51 & $>$ 5 min & 34 ms & $>$ -99.98\% \\
+091 & 21 & $>$ 5 min & 2.037 ms & $>$ - 99.32\% \\
+095 & 8 & 33 ms & 38 ms & 15.15\% \\
+096 & 6 & 9 ms & 11 ms & 22.22\% \\
+099 & 8 & 17 ms & 6 ms & -64.71\% \\
+\hline
+\end{tabular}

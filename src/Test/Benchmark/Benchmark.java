@@ -1,19 +1,22 @@
 package Test.Benchmark;
 
 import Alg.FVSAlgorithmInterface;
-
 import Alg.InputReader;
+import Alg.InputWrapper;
 import Alg.Lib.CycleDetector;
 import Alg.SplitSolve;
 import com.sun.org.apache.xpath.internal.operations.Mult;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Scanner;
 
 
 /**
@@ -56,6 +59,16 @@ public abstract class Benchmark {
         Scanner scanner = null;
         scanner = new Scanner(new File("instances/" + filename));
         return InputReader.readGraph(scanner);
+    }
+    
+    protected static InputWrapper loadGraph2(String filename) throws FileNotFoundException {
+        // Read from command line
+        // Scanner scanner = new Scanner(System.in);
+
+        // Read from file
+        Scanner scanner = null;
+        scanner = new Scanner(new File("instances/" + filename));
+        return InputReader.loopSafeReadGraph(scanner);
     }
 
     /**
@@ -305,7 +318,8 @@ public abstract class Benchmark {
         int mistakes = 0;
 
         for (Instance i: instances) {
-            Multigraph<Integer, DefaultEdge> graph = loadGraph(i.filename);
+            InputWrapper input = loadGraph2(i.filename);
+            Multigraph<Integer, DefaultEdge> graph = input.reductionSolution.reducedGraph;
 
             long startTime = System.nanoTime();
             List<Integer> solution = alg.findFeedbackVertexSet(graph);
@@ -313,6 +327,10 @@ public abstract class Benchmark {
 
             totalTime += (endTime - startTime) / 1_000_000;
             System.out.println("Graph " + i.filename + " Time:" + (endTime - startTime) / 1_000_000 + "ms");
+//            for (Integer s: solution) {
+//                System.out.print(input.nameMapping.get(s) + ", ");
+//            }
+//            System.out.println();
 
 
             if(i.k <0){
@@ -336,6 +354,93 @@ public abstract class Benchmark {
                 + (totalTime % 1000) + " ms "
         );
         System.out.println("Total mistakes: " + mistakes);
+    }
+    
+    /**
+     * A larger benchmark, with more files, for those algorithms that are even faster
+     */
+    @Test
+    public void orderBenchMark() throws FileNotFoundException {
+        Instance[] instances = new Instance[]{
+                // fast instances (<2 seconds each)
+                new Instance("003.graph", 10),
+                new Instance("006.graph", 11),
+                new Instance("020.graph", 8),
+                new Instance("028.graph", 8),
+                new Instance("031.graph", 33),
+                new Instance("042.graph", 11),
+                new Instance("050.graph", 7),
+                new Instance("062.graph", 7),
+                new Instance("072.graph", 9),
+                new Instance("083.graph", 7),
+                new Instance("085.graph", 51),
+                new Instance("091.graph", 21),
+                new Instance("095.graph", 8),
+                new Instance("096.graph", 6),
+                new Instance("099.graph", 8),
+                
+                // slower instances (2s - 2m)
+                new Instance("007.graph", 17),
+                new Instance("077.graph", 16),
+                new Instance("005.graph", 19),
+                new Instance("046.graph", 18),
+                new Instance("059.graph", 18),
+                new Instance("070.graph", 19),
+                new Instance("098.graph", 18),
+                
+                // takes forever (~30m)
+                //new Instance("092.graph", 16),
+        };
+        
+        List orderIDs = new ArrayList();
+        for(int i=0; i<12; i++)
+            orderIDs.add(i);
+        List[] instanceOrderIDs = new List[instances.length];
+        for(int i=0; i<instances.length; i++)
+        {
+            instanceOrderIDs[i] = new ArrayList(orderIDs);
+        }
+        List<Instance> instanceList = Arrays.asList(instances);
+        List<Instance> shuffledInstances = new ArrayList();
+        shuffledInstances.addAll(instanceList);
+        
+        int count = 0;
+        while(true)
+        {
+            for(List l : instanceOrderIDs)
+                Collections.shuffle(l);
+            for(int o=0; o<orderIDs.size(); o++)
+            {
+                Collections.shuffle(shuffledInstances);
+
+                for (Instance i: shuffledInstances) {
+                    Alg.Algorithms.IterativeCompression.IterativeCompression.orderID = (int)instanceOrderIDs[instanceList.indexOf(i)].get(o);
+                    InputWrapper input = loadGraph2(i.filename);
+                    Multigraph<Integer, DefaultEdge> graph = input.reductionSolution.reducedGraph;
+
+                    long startTime = System.nanoTime();
+                    List<Integer> solution = alg.findFeedbackVertexSet(graph);
+                    long endTime = System.nanoTime();
+
+                    System.out.println(
+                            count+", "+
+                            o+", "+
+                            i.filename+", "+
+                            Alg.Algorithms.IterativeCompression.IterativeCompression.orderID+", "+
+                            (endTime - startTime) / 1_000_000
+                    );
+                    
+                    if (solution.size() != i.k){
+                        System.err.print(", MISTAKE! Required k:" + i.k + " Found k:" + solution.size());
+                    }
+
+                    if (!verifySolution(i.filename, solution)) {
+                        System.err.print(", ERROR, THIS IS NOT A FEEDBACK VERTEX SET!");
+                    }
+                }
+            }
+            count++;
+        }
     }
 
 
