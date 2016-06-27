@@ -43,6 +43,12 @@ public class Bag {
         }
     }
     
+    void addAll(ArrayList<Integer> s){
+        for(Integer i: s){
+            add(i);
+        }
+    }
+    
     boolean isEmpty(){
         return vert.isEmpty();
     }
@@ -108,5 +114,13 @@ public class Bag {
             max = Math.max(max, c.treeWidth());
         }
         return max;
+    }
+    
+    public Bag findRoot(){
+        if(parent == null){
+            return this;
+        } else {
+            return parent.findRoot();
+        }
     }
 }

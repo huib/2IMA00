@@ -11,14 +11,15 @@ public class TreeDecomposition {
     // If g is not connected, it will simply add edges to make it so
     public static Bag makeTreeDecomposition(Multigraph g){
         // stack overflow check
-        try{
+//        try{
             Choice c;
             c = new DeGreedy();
             Bag toRet = permutationToTD(g, c);
             return toRet;
-        } catch(StackOverflowError e) {
-            return simpleTD(g);
-        }
+//        } catch(StackOverflowError e) {
+//            System.out.println("Error!");
+//            return simpleTD(g);
+//        }
     }
     
     // Turns the given tree decomposition into a nice tree decomposition, i.e. each bag is either:
@@ -172,8 +173,87 @@ public class TreeDecomposition {
     // Converts the given graph g and the list of vertices to a TD.
     // Might completely mangle g and the list of vertices.
     private static Bag permutationToTD(Multigraph g, Choice c){
-        // find v0 and its neighbours
-        Integer v0 = c.nextChoice(g);
+        
+        Bag root;
+        ArrayList<Integer> vjs = new ArrayList<>();
+        ArrayList<Bag> toAdds = new ArrayList<>();
+        
+        while(true){
+            // find v0 and its neighbours
+            Integer v0 = c.nextChoice(g);
+            ArrayList<Integer> neighbours = getNeighbours(g, v0);
+
+            // if n=1 then done
+            if(g.vertexSet().size() == 1){
+                root = new Bag();
+                root.add(v0);
+                root.num = v0;
+                break;
+            }
+
+            // If it has no neighbours, the instance was not connected.
+            if(neighbours.isEmpty()){
+                //System.out.println("The given instance was not connected, adding a random edge...");
+                Set<Integer> vertices = g.vertexSet();
+                boolean foundOne = false;
+                for(Integer v: vertices){
+                    if(!foundOne){
+                        if(v != v0){
+                            //System.out.println("Added (" + v0 + ", " + v + ")");
+                            g.addEdge(v0, v);
+                            foundOne = true;
+                            neighbours.add(v);
+                        }
+                    }
+                }
+            }
+
+            // Construct bag with neighbours of v0 in G
+            Bag toAdd = new Bag();
+            toAdd.add(v0);
+            toAdd.num = v0;
+            toAdd.addAll(neighbours);
+
+            // v_j = lowest neighbour of v_0
+            Integer vj = findLowest(neighbours);
+
+            // compute G' obtained by elim. v0: add an edge between all non-adjacent neighbours of v0, then remove v0
+            for(Integer s: neighbours){
+                for(Integer t: neighbours){
+                    if(s != t){
+                        if(!g.containsEdge(s, t)){
+                            g.addEdge(s, t);
+                        }
+                    }
+                }
+            }
+            g.removeVertex(v0);
+
+            // call PermToTD(G',(v1,...v_{n-1}))
+            if(!g.vertexSet().contains(vj)){
+                System.out.println("Paniek!");
+            }
+            vjs.add(vj);
+            toAdds.add(toAdd);
+        }
+        
+        while(!vjs.isEmpty()){
+            Integer vj = vjs.get(vjs.size()-1);
+            vjs.remove(vjs.size()-1);
+            Bag toAdd = toAdds.get(toAdds.size()-1);
+            toAdds.remove(toAdds.size()-1);
+            
+            // connect X_v_0 to X_v_j
+            Bag toConnect = root.findNum(vj);
+            toConnect.children.add(toAdd);
+            toAdd.parent = toConnect;
+            root = root.findRoot();
+        }
+        
+        return root;
+    }
+    
+    private static ArrayList<Integer> getNeighbours(Multigraph g, Integer v0){
         ArrayList<Integer> neighbours = new ArrayList<>();
         for(Object e: g.edgesOf(v0)){
             Integer t = (Integer) g.getEdgeTarget(e);
@@ -186,73 +266,16 @@ public class TreeDecomposition {
             }
         }
         neighbours.remove(v0);
-        
-        // if n=1 then trivial
-        if(g.vertexSet().size() == 1){
-            Bag root = new Bag();
-            root.add(v0);
-            root.num = v0;
-            return root;
-        }
-        
-        // If it has no neighbours, the instance was not connected.
-        if(neighbours.isEmpty()){
-            //System.out.println("The given instance was not connected, adding a random edge...");
-            Set<Integer> vertices = g.vertexSet();
-            boolean foundOne = false;
-            for(Integer v: vertices){
-                if(!foundOne){
-                    if(v != v0){
-                        //System.out.println("Added (" + v0 + ", " + v + ")");
-                        g.addEdge(v0, v);
-                        foundOne = true;
-                        neighbours.add(v);
-                    }
-                }
-            }
-        }
-        
-        // Construct bag with neighbours of v0 in G
-        Bag toAdd = new Bag();
-        toAdd.add(v0);
-        toAdd.num = v0;
-        for(Integer i: neighbours){
-//            print("Add " + i, d);
-            toAdd.add(i);
-        }
-        
-        // v_j = lowest neighbour of v_0
-        Integer vj = Integer.MAX_VALUE;
-        for(Integer i: neighbours){
-            if(i < vj){
-                vj = i;
-            }
-        }
-        
-        // compute G' obtained by elim. v0: add an edge between all non-adjacent neighbours of v0, then remove v0
-        for(Integer s: neighbours){
-            for(Integer t: neighbours){
-                if(s != t){
-                    if(!g.containsEdge(s, t)){
-                        g.addEdge(s, t);
-                    }
-                }
-            }
-        }
-        g.removeVertex(v0);
-        
-        // call PermToTD(G',(v1,...v_{n-1}))
-        if(!g.vertexSet().contains(vj)){
-            System.out.println("Paniek!");
-        }
-        Bag subTD = permutationToTD(g, c);
-        
-        // connect X_v_0 to X_v_j
-        Bag toConnect = subTD.findNum(vj);
-        toConnect.children.add(toAdd);
-        toAdd.parent = toConnect;
-        
-        return subTD;
+        return neighbours;
     }
     
+    private static Integer findLowest(ArrayList<Integer> s){
+        Integer toRet = Integer.MAX_VALUE;
+        for(Integer i: s){
+            if(i < toRet){
+                toRet = i;
+            }
+        }
+        return toRet;
+    }
 }

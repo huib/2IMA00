@@ -41,7 +41,7 @@ public class RandomizedDensity implements FVSAlgorithmInterface
 
         // Reduce the graph already for our kernelization
         // This may reduce the k upto which we have to search by a lot
-        ReductionSolution reduced = Kernelization.kernelittle(graph, false);
+        ReductionSolution reduced = Kernelization.kernelot(graph, false);
         this.random = new Random();
 
         for (int k = 1; ;k++) {
@@ -106,9 +106,10 @@ public class RandomizedDensity implements FVSAlgorithmInterface
             int targetVertex = (int) reducedGraph.getEdgeTarget(e);
 
 
-            counter.put(sourceVertex, counter.getOrDefault(sourceVertex, 0L) + runsForSourceVertex);;
+            counter.put(sourceVertex, counter.getOrDefault(sourceVertex, 0L) + runsForSourceVertex);
             counter.put(targetVertex, counter.getOrDefault(targetVertex, 0L) + runsForTargetVertex);
 
+            amountEdgesLeft--;
 
         }
 
