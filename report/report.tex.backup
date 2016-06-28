@@ -1,8 +1,7 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[toc]{appendix}
 \usepackage{a4wide,amsmath,amssymb}
-\usepackage{color,hyperref}
+\usepackage{color}
 
 \newcommand{\todo}[1]{\textcolor{red}{#1}}
 
@@ -25,7 +24,6 @@
 
 \begin{document}
 \maketitle
-\setcounter{tocdepth}{2}
 \tableofcontents
 \clearpage
 
@@ -33,34 +31,28 @@
 \input{abstract.tex}
 \end{abstract}
 
-\section{Introduction} \label{sec:intro}
+\section{Introduction}
 \input{introduction.tex}
 
-\section{Kernelization} \label{sec:kern}
+\section{Kernelization}
 \input{kernelization.tex}
 
-\section{SplitSolve} \label{sec:splitsolve}
+\section{SplitSolve}
 \input{splitsolve.tex}
 
-\section{Randomized Algorithm} \label{sec:rand}
+\section{Randomized Algorithm}
 \input{randomized.tex}
 
-\section{Iterative Compression} \label{sec:itcomp}
+\section{Iterative Compression}
 \input{iterativecompression.tex}
+
+\section{Comparison}
+\input{comparison.tex}
 
 \section{Tree width problem}
 
-\section{Comparison} \label{sec:comparison}
-\input{comparison.tex}
+\section{Test Results}
 
-\section{Conclusion} \label{sec:conclusion}
-
-\clearpage
-\appendix
-\section{Experimental results Iterative Compression} \label{app:itcomp}
-\input{iterativecompression-results.tex}
-
-\section{Task division}
-\input{taskdivision.tex}
+\section{Conclusion}
 
 \end{document}
