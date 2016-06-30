@@ -1,8 +1,3 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage{algorithm}  
-\usepackage{algorithmic} 
-\begin{document}
 \subsection{Improving dynamic programming for FVS} \label{sec:dynamic programming}
 Firstly, we decided to follow the option 1 suggested by lecturer for implementing dynamic programming for FVS problem.
 
@@ -76,7 +71,5 @@ Since all possible status of $s$ is $3^k$,handling matrix $|A|=n$,$|B|=n$,$|C|=n
 The dynamic algorithm has been corrected implemented based on path decomposition, while because there is no join node which make $k$ very big, so the actual running time and storage is not quite good. With 8g memory the algorithm could handle a graph with 7 vertices in 8 seconds, if more than 7 vertices ,error called "out of heap memory" will happen.
 
 \noindent I think my old way to realize this algorithm could be improved by re-design. If I can redo this program, I will not maintain same size matrix for all nodes, for example leaf node will only have one cell for matrix $A_x(0,0,0,0)=1$, it may save many wasted storage with a little sacrifice of searching time. And also the join node should be solved ,so that algorithm could work on nice tree decomposition instead of path decomposition.
-
-\end{document}
 
 
