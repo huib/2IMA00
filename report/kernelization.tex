@@ -1,0 +1,39 @@
+%Let's not describe what each step does like this to save more space for other topics
+\todo{Add intro/explanation about there being 4 different kernelization options.}\\
+% als korte inleiding voor de overige subsecties. Met en zonder k-dependency -> benoem ook gelijk hun time complexity
+% The result of solving the problem on the kernel should either be the same as on the original input, since we ensure that we adjust the size $k$ of our solution accordingly whenever we remove a vertex that should be part of the solution
+Preprocessing via data reduction or, more specifically, kernelization as a strategy of coping with hard problems is universally used in almost every implementation. The FVS problem is NP-hard and as is shown by Karp [ref1], its NP-complete for both directed and undirected graphs even if the graphs are unweighted. Due to this intractability, V. Bafna et al. suggest using a polynomial time algorithm for computing a near optimal FVS [ref2]. They show that their factor-2 approximation algorithm called \textsc{ FEEDBACK} is a simple and efficient approximation algorithm that can be implemented to run in $O(min\{|E| log |V |, |V |2\})$ time. Therefore, in coherence with the kernelization reduction rules, an algorithm has been implemented based \textsc{ FEEDBACK} in an attempt to simplify and speed up the detection of solutions to the FVS problem. This approximation is preceded and followed by various reduction rules in the implementation that allow the onfollowing processes of the application to apply their methods to reduced problem instances. Results have shown that the application of the kernelization significantly improved the processing speed of the entire application and, consequently, increased the number of solutions found within an acceptable amount of time in combination with the other processes. \\\\
+Note that the problem instances $(G,k)$ that are used are read as multigraphs, which means that they do not support self-loops as opposed to allowing multiple edges between any two vertices. Therefore, if the modification to $G$ caused by a reduction rule would theoretically induce a self-loop, the appropriate vertex inducing that self-loop along with its incident edges are immediately removed from the graph $G$ following the Self-Loop Rule, while adjusting parameter $k$ accordingly.
+
+\subsection{Simple Kernelization} % uitleg basis kernelization en terugkoppeling naar kernelittle
+Several basic reduction rules that each make simple changes to the graph have been implemented. The safeness of these reduction follows from Proposition 2 as described by H. Bodlander [ref3]. The simple kernelization process firstly removes isolated vertices $v$ from graph $G$, as well as leaves and their incident edges from $G$. Doing so does not change parameter $k$. Next, if a vertex $v$ has degree two and neighbors $a$ and $b$, possibly allowing $a=b$, then the simple kernelization modifies $G$ by replacing $v$ and its two incident edges with a single edge between its two neighbors $a$ and $b$. Note that if this were to create a self-loop, then the simple kernelization method also removes the vertex $a=b$ and its incident edges and reduces parameter $k$ accordingly. \\\\
+In case a value for $k$ is passed on to the kernelization, the simple kernelization function also makes use of the reduction rule that reduces the number of edges between two vertices of the multigraph $G$ down to a number of two where applicable.	
+%\subsubsection*{Rule 0-1: The Degree-Zero and Degree-One Rules}
+%Firstly, we process problem instances in our implementation by simultaneously performing both the Degree-Zero Rule and the Degree-One Rule. We do this by removing any unconnected vertices we find within a graph $G$. That is to say, if $v$ is an isolated vertex, meaning there is no edge incident to $v$, then remove $v$ from $G$. Furthermore, we also remove leafs from $G$ by removing every $v$ that has degree one along with its incident edge from graph $G$. Applying both of these reduction rules does not change our parameter $k$.
+%\subsubsection*{Rule 2: The Degree-Two Rule}
+%If a vertex $v$ in $G$ has 2, with neighbors $a$ and $b$ and while possibly allowing $a = b$, then we modify $G$ by replacing $v$ and its two incident edges with a single edge between $a$ and $b$. Unless this modification induces a self-loop, parameter $k$ remains unchanged after applying it. In case this modification would result in the creation of a self-loop, namely when $a=b$, then we immediatly remove it using Rule 3: The Self-Loop Rule and adjust parameter $k$ accordingly.
+%\subsubsection*{Rule 3: The Self-Loop Rule}
+%If there is a loop on a vertex $v$, then we take $v$ into the solution set and reduce our problem instance $(G,k)$ to the instance $(G - v, k - 1)$. Note that since we deal with multigraphs, our original problem instances $(G,k)$ do not support self-loops, because a multigraph is a non-simple undirected graph in which such loops are not permitted, but in which multiple edges between any two vertices are allowed. Therefore, in our implementation, we simply remove self-loops before they practically ocuur whenever applying any kernelization reduction rule would technically induce a self-loop.
+%\subsubsection*{Rule 4: The Multiedge Reduction Rule}
+%If there are more than two edges between $u$ and $v$, then we delete all but two of these edges, which does not change our parameter $k$.
+
+\subsection{The 2-Approximation for the Undirected FVS Problem}%ref: http://epubs.siam.org/doi/abs/10.1137/S0895480196305124, karp is ref of V. Bafna et al
+\label{sec:2approx}
+% 1. Waarom approximation (staat in intro)
+% 2. Is uitvoering binnen running time aangegeven door paper (+correctness -> we geven aan waarom die de paper accuraat volgt)
+% 3.uitleg data structuren etc
+% 4. (voor resultaten) verschil tussen resultaten met en zonder gebruik van approximation
+% [point-2:]
+Given a graph $(G, w)$ with $G = (V,E)$ and $w$ being the weighted vertices in $V$, any vertex of weight zero is removed from $G$ and placed in the solution set $F$ at the outset of the \textsc{Feedback} algorithm. \textsc{FEEDBACK} then decomposes $(G, w)$ into subgraphs $(G_i, w_i)$’s (in the first While loop) by iteratively subtracting $w_i$ from $w$, removing vertices of weight reduced to zero, adding them into $F$, and cleaning up $G$ by using the CleanUp procedure, which recursively deletes vertices of degree $\leq$ 1, until $G$ becomes empty.\\\\
+The implementation of \textsc{Feedback} achieves the same result. First, applies the cleanUp helper function that removes all vertices with degree $\leq$ 1 to produce a clean graph where all remaining vertices have degree $\geq$ 2. Afterwards, it creates a HashMap from the remaining vertices to a default weight value of 1 that is consistently used to modify and track the weights of all vertices within the graph of interest. While the original graph $G$ still con %wordt 1 juli afgemaakt
+\todo{TODO:remainder of approximation. Meaning/use of result}
+
+\subsection{Advanced Kernelization}% uitleg geavanceerde kernelization stappen en terugkoppeling naar kernelot
+\todo{Remaining Reduction rules}
+
+\subsection{Kernelization Running Time} %kernelot tijd, kernelittle tijd
+\todo{Why the choice between kernelot and kernelittle matters}
+% Opsomming looptijd van voorheenbesproken onderdelen
+% Let uit waarom de keuze tussen kernelot en kernelittle er toe doet
+% Let uit waarom, ondanks de nadelen van het gebruik van de extras die kernelot aanbied, kernelot gewenster kan zijn dan kernelittle en vice versa
+

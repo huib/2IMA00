@@ -2,47 +2,127 @@
 %optimal FVS - FVS with smallest size possible
 %The graph - problem instance
 
-An algorithm with a time complexity of $O(5^kn^{O(1)})$ has been implemented. This algorithm makes use of the iterative compression approach, where $O(n)$ iterations take place, adding one vertex to the graph every iteration until we reach the original graph again. Let $v_i$ denote the $i$th vertex, based on some arbitrary ordering. For iteration $i$, let $G_i$ be the graph induced by the first $i$ vertices of the original graph $G$. In the first iteration we have an empty graph $G_0$ and a trivially correct and optimal FVS $C_0 = \emptyset$. In each subsequent iteration $i>0$ we find a FVS $C_i$ for the intermediate graph $G_i$, by first obtaining the FVS $C_{i-1} \cup \{v_i\}$. When this FVS is larger than some given integer $k$, we apply a compression algorithm on the intermediate FVS $C_{i-1} \cup \{v_i\}$ to find a smaller solution, or conclude that no smaller solution is possible. This algorithm find a FVS of size at most $k$, or concludes that no such solution exists. To find an optimal solution, this $k$ should be equal to the size of the optimal solution. This problem is solved in section~\ref{sec:noK}.
+An algorithm with a time complexity of $O(5^kn^{O(1)})$ has been implemented. This algorithm makes use of the iterative
+compression approach, where $O(n)$ iterations take place, adding one vertex to the graph every iteration until we reach
+the original graph again. Let $v_i$ denote the $i$th vertex, based on some arbitrary ordering. For iteration $i$, let
+$G_i$ be the graph induced by the first $i$ vertices of the original graph $G$. In the first iteration we have an empty
+graph $G_0$ and a trivially correct and optimal FVS $C_0 = \emptyset$. In each subsequent iteration $i>0$ we find a FVS
+$C_i$ for the intermediate graph $G_i$, by first obtaining the FVS $C_{i-1} \cup \{v_i\}$. When this FVS is larger than
+some given integer $k$, we apply a compression algorithm on the intermediate FVS $C_{i-1} \cup \{v_i\}$ to find a
+smaller solution, or conclude that no smaller solution is possible. This algorithm find a FVS of size at most $k$, or
+concludes that no such solution exists. To find an optimal solution, this $k$ should be equal to the size of the optimal
+solution. This problem is solved in section~\ref{sec:noK}.
 
-In every iteration $i$, the compression algorithm is tasked to find a FVS for a graph $G_i$ that is smaller in size than a given FVS $X_i = C_{i-1} \cup \{v_i\}$. It achieves this by iterating over every non-empty subset $Z$ of $X_i$. It labels all vertices in $Z$ as `prohibited', meaning we attempt to find a FVS of a small enough size that does not include any vertex from $Z$, but does include every other vertex in $X_i$. Since $Z$ is a FVS for $G_i-(X_i\setminus Z)$, we can apply the {\sc DisjointFVS} algorithm \todo{FROM THE BOOK} to find such a FVS or conclude that no such FVS exists.
+In every iteration $i$, the compression algorithm is tasked to find a FVS for a graph $G_i$ that is smaller in size than
+a given FVS $X_i = C_{i-1} \cup \{v_i\}$. It achieves this by iterating over every non-empty subset $Z$ of $X_i$. It
+labels all vertices in $Z$ as `prohibited', meaning we attempt to find a FVS of a small enough size that does not
+include any vertex from $Z$, but does include every other vertex in $X_i$. Since $Z$ is a FVS for $G_i-(X_i\setminus
+Z)$, we can apply the {\sc DisjointFVS} algorithm from the book ``Paramaterized algorithms'' \cite{ftpbook}, section 4.3.1
+to find such a FVS or conclude that no such FVS exists.
 
-\subsection{Finding the optimal solution without knowing its size}
-\label{sec:noK}
-Since we don't know the size of the optimal solution, we use the compression algorithm every iteration to maintain an optimal solution for the intermediate graphs. This way we can guarantee that the final solution is optimal. We know that the size of an optimal FVS for $G_i$ is at most one larger than the size of an optimal solution for $G_{i-1}$, since only one vertex was added to the graph. In the best case the size of the optimal solution remains the same. Hence given that $C_{i-1}$ is an optimal solution for $G_{i-1}$ we obtain an optimal solution for $G_i$ by compressing $C_{i-1} \cup \{v_i\}$. When the compression succeeds, we have obtained a FVS of size $|C_{i-1} \cup \{v_i\}|-1 = |C_{i-1}|$, because no smaller FVS can exist. When the compression fails we know there is no solution of size $|C_{i-1}|$ and therefore $C_{i-1} \cup \{v_i\}$ is an optimal solution. Hence when $C_{i-1}$ is optimal for $G_{i-1}$, $C_i$ is optimal for $G_i$. Since $C_0$ is trivially optimal for $G_0$, we conclude that $C_i$ is optimal for $G_i$ for all iterations $i$. Also observe that $|C_{i-1}| \leq |C_i| \leq |C_{i-1}|+1$.
+\subsection{Finding the optimal solution without knowing its size} \label{sec:noK}
+Since we don't know the size of the
+optimal solution, we use the compression algorithm every iteration to maintain an optimal solution for the intermediate
+graphs. This way we can guarantee that the final solution is optimal. We know that the size of an optimal FVS for $G_i$
+is at most one larger than the size of an optimal solution for $G_{i-1}$, since only one vertex was added to the graph.
+In the best case the size of the optimal solution remains the same. Hence given that $C_{i-1}$ is an optimal solution
+for $G_{i-1}$ we obtain an optimal solution for $G_i$ by compressing $C_{i-1} \cup \{v_i\}$. When the compression
+succeeds, we have obtained a FVS of size $|C_{i-1} \cup \{v_i\}|-1 = |C_{i-1}|$, because no smaller FVS can exist. When
+the compression fails we know there is no solution of size $|C_{i-1}|$ and therefore $C_{i-1} \cup \{v_i\}$ is an
+optimal solution. Hence when $C_{i-1}$ is optimal for $G_{i-1}$, $C_i$ is optimal for $G_i$. Since $C_0$ is trivially
+optimal for $G_0$, we conclude that $C_i$ is optimal for $G_i$ for all iterations $i$. Also observe that $|C_{i-1}| \leq
+|C_i| \leq |C_{i-1}|+1$.
 
 \subsection{Improvements}
-Although running the compression algorithm every iteration does not change the worst case running time of the algorithm, running the compression algorithm every iteration might considerably increase the actual running time. However, it turns out that maintaining an optimal solution for every intermediate graph also has its benefits. 
+Although running the compression algorithm every iteration does not change the worst case
+running time of the algorithm, running the compression algorithm every iteration might considerably increase the actual
+running time. However, it turns out that maintaining an optimal solution for every intermediate graph also has its
+benefits. 
 
 \subsubsection{Reuse old solution when possible}
-We have observed that $|C_{i-1}| \leq |C_i| \leq |C_{i-1}|+1$. An easy improvement is to check whether $C_{i-1}$ is a FVS of $G_i$. If this is the case, we know that $C_{i-1}$ is an optimal solution for $G_i$ and assign $C_i = C_{i-1}$, skipping the compression algorithm for this iteration.
+We have observed that $|C_{i-1}| \leq |C_i| \leq |C_{i-1}|+1$. An easy
+improvement is to check whether $C_{i-1}$ is a FVS of $G_i$. If this is the case, we know that $C_{i-1}$ is an optimal
+solution for $G_i$ and assign $C_i = C_{i-1}$, skipping the compression algorithm for this iteration.
 
 \subsubsection{Skip half the work}
-For another improvement, observe that when in the compression algorithm, a non-empty subset $Z$ of $X_i$ does not include $v_i$, meaning $v_i \in X_i\setminus Z_i$, the {\sc DisjointFVS} algorithm is run on graph $G_i-(X_i\setminus Z)$ with prohibited vertices $Z$. Observe that $G_i-(X_i\setminus Z) = G_{i-1}-(X_{i-1}\setminus Z)$ when $v_i \not\in Z$. If {\sc DisjointFVS} would return that there exists a FVS $C$ for $G_i-(X_i\setminus Z)$ with $|C|<|Z|$, then this $C$ is also a FVS for $G_{i-1}-(X_{i-1}\setminus Z)$, meaning $C \cup (X_{i-1}\setminus Z)$ is a FVS for $G_{i-1}$ of size $|C \cup (X_{i-1}\setminus Z)| < |X_{i-1}|$. Since there cannot be a FVS for $G_{i-1}$ smaller than $X_{i-1}$, this is a contradiction, hence {\sc DisjointFVS} will return that there is no solution when $v_i \not\in Z$. This means we can skip the half of all non-empty subsets of $X_i$ that do not include $v_i$, speeding up the algorithm by almost a factor $2$. To be able to apply this strategy, the compression algorithm needs to be told which vertex has been added since the last compression.
+For another improvement, observe that when in the compression algorithm, a non-empty
+subset $Z$ of $X_i$ does not include $v_i$, meaning $v_i \in X_i\setminus Z_i$, the {\sc DisjointFVS} algorithm is run
+on graph $G_i-(X_i\setminus Z)$ with prohibited vertices $Z$. Observe that $G_i-(X_i\setminus Z) =
+G_{i-1}-(X_{i-1}\setminus Z)$ when $v_i \not\in Z$. If {\sc DisjointFVS} would return that there exists a FVS $C$ for
+$G_i-(X_i\setminus Z)$ with $|C|<|Z|$, then this $C$ is also a FVS for $G_{i-1}-(X_{i-1}\setminus Z)$, meaning $C \cup
+(X_{i-1}\setminus Z)$ is a FVS for $G_{i-1}$ of size $|C \cup (X_{i-1}\setminus Z)| < |X_{i-1}|$. Since there cannot be
+a FVS for $G_{i-1}$ smaller than $X_{i-1}$, this is a contradiction, hence {\sc DisjointFVS} will return that there is
+no solution when $v_i \not\in Z$. This means we can skip the half of all non-empty subsets of $X_i$ that do not include
+$v_i$, speeding up the algorithm by almost a factor $2$. To be able to apply this strategy, the compression algorithm
+needs to be told which vertex has been added since the last compression.
 
-Note that this strategy can also be applied when we are not applying the compression every iteration, but we would have to consider a set of multiple vertices added since the last compression, instead of only a single one. This means only a very small part of the subsets of $X_i$ (those containing all the vertices added since the last compression) can be skipped.
+Note that this strategy can also be applied when we are not applying the compression every iteration, but we would have
+to consider a set of multiple vertices added since the last compression, instead of only a single one. This means only a
+very small part of the subsets of $X_i$ (those containing all the vertices added since the last compression) can be
+skipped.
 
 \subsubsection{Check for cycles only at the start of the recursion}
-The {\sc DisjointFVS} algorithm is recursive. Before any reduction rules are applied to the graph, the algorithm checks for cycles in the set of prohibited vertices. If there is a cycle, then there cannot be a FVS that does not contain any of the prohibited vertices. This check is only required in the very first layer of the recursion. No cycles will be added when going deeper in the recursion. New vertices can be labelled a `prohibited', but these never introduce cycles. Checking only at the start of the recursion saved some time.
+The {\sc DisjointFVS} algorithm is recursive. Before
+any reduction rules are applied to the graph, the algorithm checks for cycles in the set of prohibited vertices. If
+there is a cycle, then there cannot be a FVS that does not contain any of the prohibited vertices. This check is only
+required in the very first layer of the recursion. No cycles will be added when going deeper in the recursion. New
+vertices can be labelled a `prohibited', but these never introduce cycles. Checking only at the start of the recursion
+saved some time.
 
 \subsubsection{Ordering the vertices}
-Because we can skip the costly compression algorithm when the old solution is still valid in the new graph, the ordering we choose for the vertices makes a large difference. Since the compression algorithm is triggered only when the new vertex introduces a cycle that does not include a vertex in the old solution, we want an order such that the time number of vertices that introduce such a cycle is low. Since the running time of the compression algorithm is exponential in $k$, the number of vertices that introduce such a cycle \emph{after} the intermediate solution grew is more important than before. This can be achieved in two ways:
+Because we can skip the costly compression algorithm when the old solution is
+still valid in the new graph, the ordering we choose for the vertices makes a large difference. Since the compression
+algorithm is triggered only when the new vertex introduces a cycle that does not include a vertex in the old solution,
+we want an order such that the time number of vertices that introduce such a cycle is low. Since the running time of the
+compression algorithm is exponential in $k$, the number of vertices that introduce such a cycle \emph{after} the
+intermediate solution grew is more important than before. This can be achieved in two ways:
 \begin{itemize}
- \item Postpone increasing the size of the solution. Doing $3$ compressions with $k=10$ for example takes less time than a single compression with $k=11$.
- \item Attempt to find a `future proof' solution. With this we mean a solution that is likely to be a FVS for graphs in later iterations. Best would be an order where at each step the intermediate solution is a subset of the final optimal solution, meaning we have only $k$ compression steps.
+	\item Postpone increasing the size of the solution. Doing $3$ compressions with $k=10$ for example takes less time than a
+single compression with $k=11$.
+	\item Attempt to find a `future proof' solution. With this we mean a solution that is
+likely to be a FVS for graphs in later iterations. Best would be an order where at each step the intermediate solution
+is a subset of the final optimal solution, meaning we have only $k$ compression steps. 
 \end{itemize}
-We have experimented with a number of ways to define an order on the vertices, based on their degree in $G$ and their weight given by \todo{THE APPROXIMATION ALGORITHM}. For degree and weight we tried increasing and decreasing order and tried all 8 lexicographic orderings on degree and weight. Out of these 12 ordering, the lexicographic ordering on increasing degree then increasing weight was fastest.
+We have
+experimented with a number of ways to define an order on the vertices, based on their degree in $G$ and their weight
+given by the approximation algorithm described in section~\ref{sec:2approx}. For degree and weight we tried increasing and decreasing order and tried
+all 8 lexicographic orderings on degree and weight. Out of these 12 ordering, the lexicographic ordering on increasing
+degree then increasing weight was fastest.
 
-We also tried to use a 2-approximation solution to skip a large number of vertices. Set set of vertices no in this 2-approximation form a forest by definition, hence we can safely add all these vertices without compression. Now we have at most $2k$ iterations left in which we may need to compress. Ordering these last $2k$ vertices using the same lexicographic ordering on increasing degree then weight resulted in no significant gain in speed. Since this method actually guarantees at most $2k$ compression steps, we chose to leave this in.
+We also tried to use a 2-approximation solution to skip a large number of vertices. Set set of vertices no in this
+2-approximation form a forest by definition, hence we can safely add all these vertices without compression. Now we have
+at most $2k$ iterations left in which we may need to compress. Ordering these last $2k$ vertices using the same
+lexicographic ordering on increasing degree then weight resulted in no significant gain in speed. Since this method
+actually guarantees at most $2k$ compression steps, we chose to leave this in.
 
 \subsection{Future improvements}
+\subsubsection{Implement reduction rule 4}
+The book ``Paramaterized Algorithms'' \cite{ftpbook} describes a faster algorithms solving {\sc DisjointFVS} using a
+fourth reduction rule, resulting in an algorithm for FVS that runs in $O(3.6181^kn^{O(1)})$. Unfortunately, we didn't
+get to implementing this in the time available. Although this algorithm is faster in theory, it may result in worse results on our test sets, as the $O(3.6181^kn^{O(1)})$ time algorithm may have some overhead that is only compensated by a limited recursion depth when $k$ is larger than in our problem instances.
+
 \subsubsection{Reorder vertices on the go}
-Since in theory there is no need to define the complete ordering on vertices on beforehand, it may be good to only determine which vertex is the $i$th vertex when we have completed the first $i-1$ iterations. Findings in these earlier iterations may suggest a new order is more likely to reduce the number of costly compressions. Because one of our initial design decisions prevented us from efficiently redefining the order, so we where unable to try this method.
+Since in theory there is no need to define
+the complete ordering on vertices on beforehand, it may be good to only determine which vertex is the $i$th vertex when
+we have completed the first $i-1$ iterations. Findings in these earlier iterations may suggest a new order is more
+likely to reduce the number of costly compressions. Because one of our initial design decisions prevented us from
+efficiently redefining the order, so we where unable to try this method.
 
 \subsubsection{Use different orderings in parallel}
-When something uncontrollable has a large influence on the running time, one can perform a number of independent runs in parallel and stop when one of the runs terminates, returning a solution. Since we are only allowed one thread, we would need to interleave these parallel runs, this slows down each run, but the variance in running times of the different runs may compensate this, resulting in a faster expected running time. In our case however, the variance of the different orders on the vertices is not large enough. However, it the case of iterative compression, it may be possible to devise some methods to estimate how long a given run is going to take. This method can also take information from the parallel runs into account. With such a method, it may be possible to distinguish between fast and slow runs before they terminate. This means we can kill slow runs sooner, which in turn might mean the variance of the different ordering might outweigh the additional running time caused by interleaving.
+When something uncontrollable has a large influence on the running
+time, one can perform a number of independent runs in parallel and stop when one of the runs terminates, returning a
+solution. Since we are only allowed one thread, we would need to interleave these parallel runs, this slows down each
+run, but the variance in running times of the different runs may compensate this, resulting in a faster expected running
+time. In our case however, the variance of the different orders on the vertices is not large enough. However, it the
+case of iterative compression, it may be possible to devise some methods to estimate how long a given run is going to
+take. This method can also take information from the parallel runs into account. With such a method, it may be possible
+to distinguish between fast and slow runs before they terminate. This means we can kill slow runs sooner, which in turn
+might mean the variance of the different ordering might outweigh the additional running time caused by interleaving.
 
 \subsubsection{Subset iteration}
-In our current implementation, the order in which we iterator over all possible subsets of the to be compressed solution is fixed in such a way that for every next subset, only one vertex is added or removed. Since performing more operations to obtain the next subset will not have a significant impact on the running time, they may be a large advantage in changing the order in which we iterate over the subsets. Since we have access to information from previous compressions, we may be able to estimate which subsets are more likely to be successful. Depending on how good this estimation is, trying these subsets first can speed up the compression by a lot.
-
-\subsubsection{Implement reduction rule 4}
-THE BOOK describes a fourth reduction rule that can be applied within {\sc DisjointFVS}, resulting in an algorithm for FVS that runs in $O(3.6181^kn^{O(1)})$. \todo{IT IS UNCLEAR WHETHER THIS WILL RESULT IN A FAST ALGORITHM FOR THE VALUES OF $k$ THAT WE ENCOUNTER.} Unfortunately, we didn't get to implementing this in the time available.
+In our current implementation, the order in which we iterator over all possible subsets
+of the to be compressed solution is fixed in such a way that for every next subset, only one vertex is added or removed.
+Since performing more operations to obtain the next subset will not have a significant impact on the running time, they
+may be a large advantage in changing the order in which we iterate over the subsets. Since we have access to information
+from previous compressions, we may be able to estimate which subsets are more likely to be successful. Depending on how
+good this estimation is, trying these subsets first can speed up the compression by a lot.

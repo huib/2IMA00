@@ -1,5 +1,63 @@
 \subsection{Making a tree decomposition} \label{sec:treewidth1}
+In order to run an algorithm on a tree decomposition of a graph, one first needs such a tree decomposition. To do so, we implemented the algorithm in the given paper.
+
+The algorithm works recursively. Let a connected graph $G = (V,E)$ and a list $(v_1, ... , v_n)$ of the vertices in $V$ be given. If $|V| = 1$, return a bag $X_{v_1} = \{v_1\}$. Else, let $G' = (V',E')$ be the graph found by eliminating $v_1$, that is, by connecting all pairs of neighbours that were previously unconnected and then deleting $v_1$ itself. Now, let $T'$ be the tree decomposition found on $(G',(v_2,...,v_n))$ by this algorithm. Construct a new bag with $v_1$ and all of its neighbours in $G$. Let $v_i$ be the lowest numbered of these neighbours. Then, connect the new bag to the bag $X_{v_i}$ in $T'$ to form the tree decomposition $T$ of $G$. Finally, return $T$.
+
+So, why is the returned tree decomposition a correct tree decomposition? Note that the returned tree decomposition has $|V|$ bags $X_{v_1},...X_{v_n}$. Let us check all requirements one by one:
+\begin{itemize}
+\item \textbf{Each $v \in V$ is in at least one bag.}\\
+	This holds, since $\forall i: v_i \in X_{v_i}$.
+\item \textbf{For every edge $(v_i, v_j)$ in the graph, there is a bag that contains both $v_i$ and $v_j$}\\
+	Let (w.l.o.g.) $v_i$ be the lowest numbered vertex. Note that eliminating a vertex $v$ from a graph will never delete any edge that does not have $v$ as one of its end points, so the edge $(v_i,v_j)$ in the original graph will not be deleted until $v_i$ is eliminated. Therefore, when $v_i$ is the first vertex in the remaining vertex list, both $v_i$ and $v_j$ are added to the bag $X_{v_i}$. 
+\item \textbf{$\forall v \in V$, the subgraph formed by only taking bags that include $v$ is a tree}\\
+	Let $v_i \in V$. We will do a short proof by induction over the size of $V$.
+	\begin{itemize}
+		\item \textbf{Base case}\\
+		Suppose $V = \{v_i\}$, then the returned tree decomposition is only a single bag, so the statement holds.
+		\item \textbf{Induction step, case 1}\\
+		Suppose $v_i$ is not in the newly created bag $X_{v_1}$, i.e.: it is not $v_1$, nor is it a neighbour of $v_1$. Since the statement holds for $T'$ (induction hypothesis), and $X_{v_1}$ (which does not contain $v_i$) is added as a leaf, the statement still holds for $T$.
+		\item \textbf{Induction step, case 2}\\
+		Suppose $v_i$ is in the newly created bag $X_{v_1}$, but not equal to $v_1$ itself. In other words: it is a neighbour of $v_1$. This bag is then connected to $X_{v_j}$, where $v_j$ was the lowest numbered neighbour of $v_1$. Now, since the statement holds for $T'$ (induction hypothesis), the statement holds iff $X_{v_j}$ contains $v_i$. If $i = j$, then this is clearly true. Else, after the elimination of $v_1$, $v_i$ and $v_j$ are connected. Then, as was proven for the previous tree decomposition requirement, $X_{v_j}$ will contain $v_i$. Therefore, in both cases the statement still holds for $T$.
+		\item \textbf{Induction step, case 3}\\
+		Suppose $v_i$ is $v_1$. Since $v_i$ is scheduled for elimination, the newly created bag will be the only bag containing $v_i$, so the statement holds for $T$.
+	\end{itemize}
+	
+\end{itemize}
+Therefore, the returned tree decomposition is in fact a tree decomposition.
+
+As one might expect, the given order $(v_1,...,v_n)$ has a significant impact on the treewidth of the returned tree decomposition. Luckily, the order of the vertices can also be chosen at runtime. In the paper, multiple ways to chose the order were given. As a test, only the easiest one - choose the vertex with the lowest degree - was implemented.
+
+During the implementation, two small improvements were made. First of all, the algorithm expects a connected graph. One can extend this to all graphs: when $|V| > 1$ and no neighbours are found when creating a new bag $X_{v_i}$, simply add an edge $(v_i,v_j)$ for a random $v_j \in V, v_j \neq v_i$. Of course, by introducing random edges, one might decrease the quality of the returned tree decomposition, so further improvements can probably be made.
+Secondly, the recursive structure of the algorithm can easily cause a stack overflow on larger graphs - the recursion depth is always equal to $|V|$ -, so the structure was slightly changed to make the algorithm non-recursive.
+
+Since the algorithm using the tree decomposition turned out to use an abysmal amount of storage no matter the quality of the tree decomposition (see \ref{sec:treewidth2}), no further improvements were made. 
 
 \subsection{Finding a FVS using a tree decomposition} \label{sec:treewidth2}
 
-\subsection{Comparison treewidths and FVS sizes} \label{sec:treewidth3}
+\subsection{Comparing treewidths and FVS sizes} \label{sec:treewidth3}
+Given a FVS of graph $G$ of size $k$, it is easy to see that the treewidth of $G$ is at most $k+1$ using the `cops and robbers' definition: after placing $k$ cops at the nodes of the FVS, two more cops are needed to chase the robber through the remaining forest. However, a small treewidth does not guarantee a small FVS: a set of $n$ loops has a treewidth of 2, but a FVS of size $n$.
+
+We compare the treewidths $w$ of the found tree decompositions (note that $w$ is only an upper bound on the treewidth of $G$) with the found FVS sizes $k$:
+
+~\\\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Problem} & \textbf{k} & \textbf{w}\\
+\hline
+003 & 10 & 5 \\
+006 & 11 & 10 \\
+020 & 8 & 3 \\
+028 & 8 & 3 \\
+031 & 33 & 4 \\
+042 & 11 & 4 \\
+050 & 7 & 5 \\
+072 & 9 & 10 \\
+083 & 7 & 5 \\
+085 & 51 & 4 \\
+091 & 21 & 6 \\
+095 & 8 & 3 \\
+096 & 6 & 3 \\
+099 & 8 & 4 \\
+\hline
+\end{tabular}\\
+
+For none of the problems, $w > k+1$, so the tree decomposition probably performs adequately. However, with problem 085 being the clearest example, some problems have a $k$ much bigger than $w$.

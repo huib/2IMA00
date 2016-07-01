@@ -1,8 +1,10 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[toc]{appendix}
+\usepackage{graphicx}
 \usepackage{a4wide,amsmath,amssymb}
 \usepackage{color,hyperref}
+\usepackage{placeins}
 
 \newcommand{\todo}[1]{\textcolor{red}{#1}}
 
@@ -15,11 +17,11 @@
 	\and
 	Henk Alkema (0770862)
 	\and
-	Xi ...
+	Xi Junquan
 	\and
 	Leo van Gansewinkel
 	\and
-	Christopher Ankomah
+	Christopher Ankomah (0863973)
 }
 \date{\today}
 
@@ -51,16 +53,33 @@
 \section{Tree decomposition algorithm} \label{sec:treewidth}
 \input{treedecomposition.tex}
 
+\section{Dynamic programming} \label{sec:dynamic program}
+\input{dynamicprogramming.tex}
+
 \section{Comparison} \label{sec:comparison}
 \input{comparison.tex}
 
-\section{Conclusion} \label{sec:conclusion}
+%\section{Conclusion} \label{sec:conclusion}
+
+\begin{thebibliography}{9}
+ \bibitem{ftpbook}
+ Marek Cygan, Fedor V. Fomin, Lukasz Kowalik, Daniel Lokshtanov, Dániel Marx, Marcin Pilipczuk, Michal Pilipczuk and Saket Saurabh. \textit{Parameterized Algorithms}. Springer International Publishing Switzerland 2015
+ \bibitem{pace}
+ The first Parameterized Algorithms and Computational Experiments Challenge. \url{https://pacechallenge.wordpress.com/track-b-feedback-vertex-set/}
+\end{thebibliography}
 
 \clearpage
 \appendix
+
+\FloatBarrier
 \section{Experimental results Iterative Compression} \label{app:itcomp}
 \input{iterativecompression-results.tex}
 
+\FloatBarrier
+\section{Experimental results Dynamic programming} \label{app:dynamicprogram}
+\input{DPresults.tex}
+
+\FloatBarrier
 \section{Task division}
 \input{taskdivision.tex}
 

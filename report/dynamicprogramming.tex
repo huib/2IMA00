@@ -1,0 +1,75 @@
+\subsection{Improving dynamic programming for FVS} \label{sec:dynamic programming}
+Firstly, we decided to follow the option 1 suggested by lecturer for implementing dynamic programming for FVS problem.
+
+\noindent This program is aimed to solve the decision variety of FVS problem:
+
+\noindent [Given an undirected graph $G=(V,E)$ and an integer $k$, whether there exists a set $Y\subset V$ of cardinality $k$ so that $G[V / Y]$ is a forest.]
+
+\noindent In order to make the algorithm working, a nice tree decomposition based on undirected graph $G$ is required, Which will be given by Henk's package.
+
+\noindent We will use the cut\& count to solve the problem based isolation lemma.
+
+\noindent Cut(with integer $A,B,C,W$),$M$ is Marked sets which contains at least one vertice from each loop in $G$ we define like below:
+\newline 1) First is the family candidates of solutions:$R_{W}^{A,B,C}$ is the family of pairs $(X,M)$, where $X\subset V/S$, $|X|=A$,$G[X]$ contains $B$ edges,$M\subset X$,$|M|=C$,and $w(X x \{F\})+w(M x \{M\})=W$
+\newline 2) $S_{W}^{A,B,C}$ is the solutions which belong to $R_{W}^{A,B,C}$ and $G[X]$ is a forest containing at least one marker from the set $M$ in each connected component.
+\newline 3) $C_{W}^{A,B,C}$ is the number of consistent cuts of $X$ for each candidate in $R_{W}^{A,B,C}$.
+
+\noindent Then we construct a function to calculate $C_{W}^{A,B,C}$:$A_x(a,b,c,w,s)$.
+
+\noindent We have $0\leq a \leq |V|$,$0\leq b \leq |V|$,$0\leq c \leq |V|$,$0\leq w \leq  2N|V|$ and s is the status for consistent cut of vertices in Bag $X$.
+
+\noindent With the nice tree decomposition as input,the algorithm works recursively to calculate the function for each bag.
+
+\noindent For each bag, it contains $|B_x|$ vertices, which have $3^|B_x|$ possible status for allocating all vertices into cut 1 or cut 2 or out of $X$,(if in cut 1 is $(v,1)$,if in cut 2 is $(v,2)$, else if not in $X$ is $(v,0)$. And $s(v)$ represents the allocation of $v$.For each possible status, we initial a matrix to store all function value of $A_x(a,b,c,w)$.
+
+\noindent Recursive part based on nice tree decomposition of the whole algorithm($y$ is the child node of $x$):
+
+\noindent Since time limited, follow the suggestion of lecturer, this version of program firstly focus on path decomposition which means there is no join node included.
+\begin{itemize}
+\item[-] Leaf bag:
+Only one possible status for allocating vertices into cuts, $s_x$ only have one element $\emptyset$. And the matrix correlate with $\emptyset$ should be: 
+
+\noindent $A_x(0,0,0,0)=1$,and all other available cell is 0. 
+\item[-] Introduce vertex bag($v$):
+$v$ is the introduced vertex, we need to take all elements of $s_y$, for each element $s_y(i)$, we made 3 copies, for each copy add one possible allocation of $v$ separately($(v,0)$,$(v,1)$,$(v,2)$). Then based on the allocation of $v$, matrix of each new element could me modified as below:
+
+\noindent if $(v,0)$,keep the matrix of $s_y(i)$.$A_x(a,b,c,w)=A_y(a,b,c,w)$
+
+\noindent if $(v,1)$ or $(v,1)$,for all $0\leq a-1 \leq |V|$ and $0\leq w-w((v,F)) \leq  2N|V|$,$A_x(a,b,c,w)=A_y(a-1,b,c,w-w((v,F)))$, the other cells of matrix is 0.
+
+\item[-] Introduce edge bag($uv$):
+Check $s_y$:
+
+\noindent If we have $s(u)=s(v)\neq 0$,for all $0\leq b-1 \leq |V|$ ,$A_x(a,b,c,w)=A_y(a,b-1,c,w)$, the other cells of matrix is 0.
+
+\noindent If we have $s(u)=0$ or $s(v)=0$,keep the matrix of $s_y(i)$.$A_x(a,b,c,w)=A_y(a,b,c,w)$
+
+\noindent else we if not ($s(u)=0$ or $s(v)=0$ or $s(u)=s(v)$), cells in the matrix should be all 0.
+
+\item[-] Forget bag($v$):
+For each element in $s_x$, we can find 3 elements in $s_y$($s_x\cup (v,0)$,$s_x\cup (v,1)$,$s_x\cup (v,2)$.
+
+\noindent Then for matrix of $s_x\cup (v,1)$, we first do a copy called $M1$ and then transform as below:
+For all $0\leq c-1 \leq |V|$ and $0\leq w-w((v,M)) \leq  2N|V|$,$A_x(a,b,c,w)=A_y(a,b,c-1,w-w((v,M)))+A_y(a,b,c,w)$, the other cells will take original value, $A_x(a,b,c,w)=A_y(a,b,c,w)$.
+
+\noindent Then we make copies called $M2$ of matrix of $s_x\cup (v,0)$, $M3$ of matrix of $s_x\cup (v,2)$.
+
+\noindent Finally, matrix of each element of $s_x$ will be $M1+M2+M3$.
+
+\end{itemize}
+Then the whole structure of algorithm will be like:
+\newline 1) Read undirected graph $G$, constructing path decomposition $P$,Initial two tables for each vertices in $G$, store weights value of forest and marker separately.
+\newline 2) Initial a queue $Q$, add root bag of $P$ in $Q$. While $Q$ is not empty, poll a element $x$ and call recursive function based on the type of node.
+\newline 3) If the child node $y$ of $x$ has not been calculated, then add $y$ into $Q$, poll a new element of $Q$, call recursive function again.
+\newline 4) If the child node $y$ has already been handled, then get result of recursive function,storing it into entry tables, add $x$'s parent node into $Q$,poll a new element of $Q$.
+\newline 5) Repeat the above three steps, then root node will be calculated. Check the matrix of root node, if existing cell modulo 2 is 1, then the output of algorithm is yes, otherwise no.
+
+\noindent Running time:
+Since all possible status of $s$ is $3^k$,handling matrix $|A|=n$,$|B|=n$,$|C|=n$,$|w|=8*n^2$,number of nodes will be $O(n)$,the total running time would be $3^k*8*n^6$. So far this algorithm is based on path decomposition, then $k=n$, so final running time is $3^n*8*n^6$.Storage: Also $3^n*8*n^6$.
+
+\noindent Conclusion:
+The dynamic algorithm has been corrected implemented based on path decomposition, while because there is no join node which make $k$ very big, so the actual running time and storage is not quite good. With 8g memory the algorithm could handle a graph with 7 vertices in 35 seconds, if more than 7 vertices ,error called "out of heap memory" will happen.
+
+\noindent I think my old way to realize this algorithm could be improved by re-design. If I can redo this program, I will not maintain same size matrix for all nodes, for example leaf node will only have one cell for matrix $A_x(0,0,0,0)=1$, it may save many wasted storage with a little sacrifice of searching time. And also the join node should be solved ,so that algorithm could work on nice tree decomposition instead of path decomposition.
+
+
