@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{a4wide,amsmath,amssymb}
 \usepackage{color,hyperref}
+\usepackage{placeins}
 
 \newcommand{\todo}[1]{\textcolor{red}{#1}}
 
@@ -16,7 +17,7 @@
 	\and
 	Henk Alkema (0770862)
 	\and
-	Xi ...
+	Xi Junquan
 	\and
 	Leo van Gansewinkel
 	\and
@@ -53,12 +54,12 @@
 \input{treedecomposition.tex}
 
 \section{Dynamic programming} \label{sec:dynamic program}
-\input{Improving dynamic programming for FVS.tex}
+\input{dynamicprogramming.tex}
 
 \section{Comparison} \label{sec:comparison}
 \input{comparison.tex}
 
-\section{Conclusion} \label{sec:conclusion}
+%\section{Conclusion} \label{sec:conclusion}
 
 \begin{thebibliography}{9}
  \bibitem{ftpbook}
@@ -69,12 +70,16 @@
 
 \clearpage
 \appendix
+
+\FloatBarrier
 \section{Experimental results Iterative Compression} \label{app:itcomp}
 \input{iterativecompression-results.tex}
 
+\FloatBarrier
 \section{Experimental results Dynamic programming} \label{app:dynamicprogram}
 \input{DPresults.tex}
 
+\FloatBarrier
 \section{Task division}
 \input{taskdivision.tex}
 
