@@ -450,7 +450,7 @@ public class Approximation {
 
             // Remove zero weight vertices, add to stack and solution
             for (Integer v: new LinkedList<>(vertices)){
-                if(weightMap.get(v) <= 0){
+                if(weightMap.get(v) <= 1E-40){
                     vertices.remove(v);
                     stack.push(v);
                     solution.reducedGraph.removeVertex(v);

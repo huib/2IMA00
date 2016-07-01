@@ -649,6 +649,7 @@ public class Kernelization {
             // (should remove neighbours as well and flag their neighbours??)
             changedVertices.addAll(Graphs.neighborListOf(solution.reducedGraph, v));
             removeVertex(solution, v, true);
+            //System.out.println("Forced removal: " + v);
         }
         return changedVertices;
     }
