@@ -36,3 +36,4 @@ production/
 *.aux
 *.log
 *.pdf
+*.out
