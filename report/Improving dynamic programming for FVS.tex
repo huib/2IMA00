@@ -68,7 +68,7 @@ Then the whole structure of algorithm will be like:
 Since all possible status of $s$ is $3^k$,handling matrix $|A|=n$,$|B|=n$,$|C|=n$,$|w|=8*n^2$,number of nodes will be $O(n)$,the total running time would be $3^k*8*n^6$. So far this algorithm is based on path decomposition, then $k=n$, so final running time is $3^n*8*n^6$.Storage: Also $3^n*8*n^6$.
 
 \noindent Conclusion:
-The dynamic algorithm has been corrected implemented based on path decomposition, while because there is no join node which make $k$ very big, so the actual running time and storage is not quite good. With 8g memory the algorithm could handle a graph with 7 vertices in 8 seconds, if more than 7 vertices ,error called "out of heap memory" will happen.
+The dynamic algorithm has been corrected implemented based on path decomposition, while because there is no join node which make $k$ very big, so the actual running time and storage is not quite good. With 8g memory the algorithm could handle a graph with 7 vertices in 35 seconds, if more than 7 vertices ,error called "out of heap memory" will happen.
 
 \noindent I think my old way to realize this algorithm could be improved by re-design. If I can redo this program, I will not maintain same size matrix for all nodes, for example leaf node will only have one cell for matrix $A_x(0,0,0,0)=1$, it may save many wasted storage with a little sacrifice of searching time. And also the join node should be solved ,so that algorithm could work on nice tree decomposition instead of path decomposition.
 
