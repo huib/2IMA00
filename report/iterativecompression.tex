@@ -17,10 +17,10 @@ In every iteration $i$, the compression algorithm is tasked to find a FVS for a 
 a given FVS $X_i = C_{i-1} \cup \{v_i\}$. It achieves this by iterating over every non-empty subset $Z$ of $X_i$. It
 labels all vertices in $Z$ as `prohibited', meaning we attempt to find a FVS of a small enough size that does not
 include any vertex from $Z$, but does include every other vertex in $X_i$. Since $Z$ is a FVS for $G_i-(X_i\setminus
-Z)$, we can apply the {\sc DisjointFVS} algorithm \todo{FROM THE BOOK} to find such a FVS or conclude that no such FVS
-exists.
+Z)$, we can apply the {\sc DisjointFVS} algorithm from the book ``Paramaterized algorithms'' \cite{ftpbook}, section 4.3.1
+to find such a FVS or conclude that no such FVS exists.
 
-\subsection{Finding the optimal solution without knowing its size} \label{sec:noKi}
+\subsection{Finding the optimal solution without knowing its size} \label{sec:noK}
 Since we don't know the size of the
 optimal solution, we use the compression algorithm every iteration to maintain an optimal solution for the intermediate
 graphs. This way we can guarantee that the final solution is optimal. We know that the size of an optimal FVS for $G_i$
@@ -75,13 +75,17 @@ still valid in the new graph, the ordering we choose for the vertices makes a la
 algorithm is triggered only when the new vertex introduces a cycle that does not include a vertex in the old solution,
 we want an order such that the time number of vertices that introduce such a cycle is low. Since the running time of the
 compression algorithm is exponential in $k$, the number of vertices that introduce such a cycle \emph{after} the
-intermediate solution grew is more important than before. This can be achieved in two ways: \begin{itemize} \item
-Postpone increasing the size of the solution. Doing $3$ compressions with $k=10$ for example takes less time than a
-single compression with $k=11$.  \item Attempt to find a `future proof' solution. With this we mean a solution that is
+intermediate solution grew is more important than before. This can be achieved in two ways:
+\begin{itemize}
+	\item Postpone increasing the size of the solution. Doing $3$ compressions with $k=10$ for example takes less time than a
+single compression with $k=11$.
+	\item Attempt to find a `future proof' solution. With this we mean a solution that is
 likely to be a FVS for graphs in later iterations. Best would be an order where at each step the intermediate solution
-is a subset of the final optimal solution, meaning we have only $k$ compression steps.  \end{itemize} We have
+is a subset of the final optimal solution, meaning we have only $k$ compression steps. 
+\end{itemize}
+We have
 experimented with a number of ways to define an order on the vertices, based on their degree in $G$ and their weight
-given by \todo{THE APPROXIMATION ALGORITHM}. For degree and weight we tried increasing and decreasing order and tried
+given by the approximation algorithm described in section~\ref{sec:2approx}. For degree and weight we tried increasing and decreasing order and tried
 all 8 lexicographic orderings on degree and weight. Out of these 12 ordering, the lexicographic ordering on increasing
 degree then increasing weight was fastest.
 
@@ -91,7 +95,13 @@ at most $2k$ iterations left in which we may need to compress. Ordering these la
 lexicographic ordering on increasing degree then weight resulted in no significant gain in speed. Since this method
 actually guarantees at most $2k$ compression steps, we chose to leave this in.
 
-\subsection{Future improvements} \subsubsection{Reorder vertices on the go}
+\subsection{Future improvements}
+\subsubsection{Implement reduction rule 4}
+The book ``Paramaterized Algorithms'' \cite{ftpbook} describes a faster algorithms solving {\sc DisjointFVS} using a
+fourth reduction rule, resulting in an algorithm for FVS that runs in $O(3.6181^kn^{O(1)})$. Unfortunately, we didn't
+get to implementing this in the time available. Although this algorithm is faster in theory, it may result in worse results on our test sets, as the $O(3.6181^kn^{O(1)})$ time algorithm may have some overhead that is only compensated by a limited recursion depth when $k$ is larger than in our problem instances.
+
+\subsubsection{Reorder vertices on the go}
 Since in theory there is no need to define
 the complete ordering on vertices on beforehand, it may be good to only determine which vertex is the $i$th vertex when
 we have completed the first $i-1$ iterations. Findings in these earlier iterations may suggest a new order is more
@@ -116,9 +126,3 @@ Since performing more operations to obtain the next subset will not have a signi
 may be a large advantage in changing the order in which we iterate over the subsets. Since we have access to information
 from previous compressions, we may be able to estimate which subsets are more likely to be successful. Depending on how
 good this estimation is, trying these subsets first can speed up the compression by a lot.
-
-\subsubsection{Implement reduction rule 4}
-THE BOOK describes a fourth reduction rule that can be applied within {\sc
-DisjointFVS}, resulting in an algorithm for FVS that runs in $O(3.6181^kn^{O(1)})$. \todo{IT IS UNCLEAR WHETHER THIS
-WILL RESULT IN A FAST ALGORITHM FOR THE VALUES OF $k$ THAT WE ENCOUNTER.} Unfortunately, we didn't get to implementing
-this in the time available.

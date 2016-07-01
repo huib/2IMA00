@@ -37,3 +37,4 @@ production/
 *.log
 *.pdf
 *.out
+*.backup
