@@ -1,10 +1,10 @@
 For track B of the first Parameterized Algorithms and Computational Experiments Challenge~\cite{pace}, we implement three
-differentFixed Parameter Tractable (FPT) algorithms to find a smallest Feedback Vertex Set (FVS). The algorithms are a
-randomizedalgorithm (section~\ref{sec:rand}), an algorithm using iterative compression (section~\ref{sec:itcomp}), and an 
-algorithmusing a dynamic programming approach and a tree decomposition (section~\ref{sec:treewidth}). The first two
+different Fixed Parameter Tractable (FPT) algorithms to find a smallest Feedback Vertex Set (FVS). The algorithms are a
+randomized algorithm (section~\ref{sec:rand}), an algorithm using iterative compression (section~\ref{sec:itcomp}), and an 
+algorithm using a dynamic programming approach and a tree decomposition (section~\ref{sec:treewidth}). The first two
 algorithms use the size of the optimal solution as the parameter, and the latter uses the treewidth as parameter. We
-combine thesealgorithm with a number of preprocessing and kernelization methods described in section~\ref{sec:kern} and
+combine these algorithms with a number of preprocessing and kernelization methods described in section~\ref{sec:kern} and 
 \ref{sec:splitsolve}.
 
 To test our algorithm, a random subset of 100 out of the 230 graphs are published on the PACE Challenge
-website~\cite{pace}. These 230 graphs are from various real-world sources, ranging from 30 to 20,000 vertices and from 60 to 90,000 edges, with a median of 300 vertices and 1000 edges. The goal is to solve as many instances as possible using no more than 30 minutes per instance.
+website~\cite{pace}. These 230 graphs are from various real-world sources, ranging from 30 to 20,000 vertices and from 60 to 90,000 edges, with a median of 300 vertices and 1000 edges. The goal is to solve as many instances as possible within no more than 30 minutes per instance.
