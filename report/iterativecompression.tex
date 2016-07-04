@@ -86,8 +86,7 @@ degree then increasing weight was fastest.
 We also tried to use a 2-approximation solution to skip a large number of vertices. Set set of vertices no in this
 2-approximation form a forest by definition, hence we can safely add all these vertices without compression. Now we have
 at most $2k$ iterations left in which we may need to compress. Ordering these last $2k$ vertices using the same
-lexicographic ordering on increasing degree then weight resulted in no significant gain in speed. Since this method
-actually guarantees at most $2k$ compression steps, we chose to leave this in.
+lexicographic ordering on increasing degree then weight resulted in no significant gain in speed, but did reduce the standard deviation of running times, as one would expect with less permutations. Although this method does not significantly improve the speed, it does prevent slow runs, so we chose to leave it in.
 
 \subsection{Future improvements}
 \subsubsection{Implement a faster disjoint algorithm}

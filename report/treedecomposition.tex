@@ -30,9 +30,9 @@ As one might expect, the given order $(v_1,...,v_n)$ has a significant impact on
 During the implementation, two small improvements were made. First of all, the algorithm expects a connected graph. One can extend this to all graphs: when $|V| > 1$ and no neighbours are found when creating a new bag $X_{v_i}$, simply add an edge $(v_i,v_j)$ for a random $v_j \in V, v_j \neq v_i$. Of course, by introducing random edges, one might decrease the quality of the returned tree decomposition, so further improvements can probably be made.
 Secondly, the recursive structure of the algorithm can easily cause a stack overflow on larger graphs - the recursion depth is always equal to $|V|$ -, so the structure was slightly changed to make the algorithm non-recursive.
 
-Since the algorithm using the tree decomposition turned out to use an abysmal amount of storage no matter the quality of the tree decomposition (see \ref{sec:treewidth2}), no further improvements were made. 
+Since the algorithm using the tree decomposition turned out to use an abysmal amount of storage no matter the quality of the tree decomposition (see \ref{sec:dynamic programming}), no further improvements were made. 
 
-\subsection{Finding a FVS using a tree decomposition} \label{sec:treewidth2}
+%\subsection{Finding a FVS using a tree decomposition} \label{sec:treewidth2}
 
 \subsection{Comparing treewidths and FVS sizes} \label{sec:treewidth3}
 Given a FVS of graph $G$ of size $k$, it is easy to see that the treewidth of $G$ is at most $k+1$ using the `cops and robbers' definition: after placing $k$ cops at the nodes of the FVS, two more cops are needed to chase the robber through the remaining forest. However, a small treewidth does not guarantee a small FVS: a set of $n$ loops has a treewidth of 2, but a FVS of size $n$.
