@@ -6,7 +6,7 @@ each subsequent iteration $i>0$ we find a FVS $C_i$ for the intermediate graph $
 \cup \{v_i\}$. When this FVS is larger than some given integer $k$, we apply a compression algorithm on the intermediate
 FVS $C_{i-1} \cup \{v_i\}$ to find a smaller solution, or conclude that no smaller solution is possible. This algorithm
 finds a FVS of size at most $k$, or concludes that no such solution exists. To find an optimal solution, this $k$ should
-be equal to the size of the optimal solution. This problem is solved in section~\ref{sec:noK}.
+be equal to the size of the optimal solution. This is addressed in section~\ref{sec:noK}.
 
 In every iteration $i$, the compression algorithm is executed in order to find a FVS for a graph $G_i$ that is smaller in
 size than a given FVS $X_i = C_{i-1} \cup \{v_i\}$. It achieves this by iterating over every non-empty subset $Z$ of
