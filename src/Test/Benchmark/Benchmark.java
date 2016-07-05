@@ -5,13 +5,11 @@ import Alg.InputReader;
 import Alg.InputWrapper;
 import Alg.Lib.CycleDetector;
 import Alg.SplitSolve;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import org.jgrapht.graph.DefaultEdge;
@@ -282,6 +280,7 @@ public abstract class Benchmark {
             
                 // ------------------------
                 // fast instances (<5 seconds each)
+                new Instance("002.graph", 47),
                 new Instance("003.graph", 10),
                 new Instance("006.graph", 11),
                 new Instance("020.graph", 8),
@@ -300,6 +299,8 @@ public abstract class Benchmark {
                 
                 // slower instances (15s - 5m)
                 new Instance("007.graph", 17), //~20000ms
+                new Instance("015.graph", 18), // 26821ms
+                new Instance("070.graph", 19), // 36962ms
                 new Instance("077.graph", 16), // 32123ms
                 
                 // 5-10 minutes
@@ -311,6 +312,7 @@ public abstract class Benchmark {
                 // takes forever
                 new Instance("059.graph", 18), // 2411895ms
                 //new Instance("092.graph", 16), // 3920522ms             (IterativeCompression)
+                new Instance("065.graph", 21), // 34 mins
 
         };
 

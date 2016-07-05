@@ -33,7 +33,7 @@ public class Main {
         List<Integer> solution = alg.findFeedbackVertexSet(input.reductionSolution);
 
         for (Integer s: solution) {
-            System.out.print(input.nameMapping.get(s) + ", ");
+            System.out.println(input.nameMapping.get(s));
         }
 
 

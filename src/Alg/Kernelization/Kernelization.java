@@ -1,13 +1,10 @@
 package Alg.Kernelization;
 
 import org.jgrapht.Graphs;
-import org.jgrapht.ext.IntegerEdgeNameProvider;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Multigraph;
-import sun.reflect.generics.tree.Tree;
 
 import java.util.*;
-import java.util.regex.Matcher;
 
 /**
  * Created on 5/24/2016.

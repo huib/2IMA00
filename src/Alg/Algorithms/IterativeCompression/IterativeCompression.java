@@ -48,7 +48,7 @@ public class IterativeCompression implements FVSAlgorithmInterface
         
         //*
         List<Integer> vertices = new ArrayList(graph.vertexSet());
-        Collections.shuffle(vertices);
+        //Collections.shuffle(vertices);
         Map<Integer, Integer> weights = Kernelization.getImportanceApprox(graph);
         List<Integer> approxSolution = Approximation.determineFVS2(graph, new Integer[]{}, 1).verticesToRemoved;
         
@@ -245,8 +245,8 @@ public class IterativeCompression implements FVSAlgorithmInterface
             {
                 try
                 {
-//                    if(k>8)
-//                        System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
+                    //if(k>10)
+                    //    System.out.println("Compressing, k="+k+" -- "+nVertices+" vertices to go");
                     solution.compress(graph);
                 }
                 catch (InterruptedException ex)
